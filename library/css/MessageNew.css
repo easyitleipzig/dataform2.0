@@ -1,0 +1,57 @@
+/* CSS for message dialog */
+#mess_box {
+    width: 250px !important;
+}
+.diaMess > div {
+    display: table;
+    height: 100%
+}
+.diaMess > div > div {
+    display: table-cell;
+    /*text-align: justify;*/
+    vertical-align: middle;
+    /*padding-left: 0.5em;    */
+}
+.diaMess > div > div > div{
+    margin-left: 0.2em;
+}
+.diaMess > div > div:first-child {
+    width: 50px;
+    height: 50px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center center;
+}
+.messOkay {
+    background-image: url( icons/mOkay.png);
+}
+.messError {
+    background-image: url( icons/mError.png);
+}
+.messQuestion {
+    background-image: url( icons/mQuestion.png);
+}
+.messInfo {
+    background-image: url( icons/mInfo.png);
+}
+.messWarning {
+    background-image: url( icons/mWarning.png);
+}
+.messAttention {
+    background-image: url( icons/mAttention.png);
+}
+.messFinger {
+    background-image: url( icons/mFinger.png);
+}
+.messKey {
+    background-image: url( icons/mKey.png);
+}
+.messWait {
+    background-image: url( icons/mWait.gif);
+}
+.messNewFolder {
+    background-image: url( icons/cNewFolder.png);
+}
+.messEmpty {
+    display: none !important;
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="author" content="">
+<meta http-equiv="Reply-to" content="@.com">
+<meta name="generator" content="PhpED 8.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="creation-date" content="09/06/2012">
+<meta name="revisit-after" content="15 days">
+<title>Untitled</title>
+<link rel="stylesheet" type="text/css" href="my.css">
+</head>
+<body>
+<div id="df"></div>
+<script src="library/javascript/no_jquery.js"></script>
+<script src="library/javascript/easyit_helper_neu.js"></script>
+<script src="library/javascript/main.js"></script>
+<!--
+<script src="library/javascript/menu_dataform20.js"></script>
+-->
+<script src="library/javascript/Field.js"></script>
+<script>
+const f1 = new Field( { id: "sel", type: "select", index: 0, addClass: "cField cMini", value: "0,2", attributes: "multiple", options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>" } );
+const f2 = new Field( { id: "sel", type: "input_text", index: "new", value: "1", attributes: "multiple disabled", options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>" } );
+nj().els( "#df" ).appendChild( f1.getField());
+</script>
+</body>
+</html>

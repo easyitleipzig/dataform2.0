@@ -1,0 +1,44 @@
+/* partic dialog */
+#dPartic {
+    background-color: #333;
+    color: #E086D3;
+    border-radius: 9px;
+    padding: 5px;
+    width: 200px;
+}
+#dPartic::before {
+  content: " ";
+  width: 0;
+  height: 0;
+  
+  border-style: solid;
+  border-width: 12px 12.5px 0 12.5px;
+  border-color: #333 transparent transparent transparent;
+
+  position: absolute;
+  left: 5px;
+  top: -5px;
+  transform: rotate(180deg);
+}
+#dPartic_box {
+    box-shadow: unset;
+    background-color: transparent;    
+    border: none !important;
+}
+.dParticBox {
+}
+.dParticHL, .dParticMenu {
+    display: none !important;
+}
+#dPartic_headline, #dPartic_menu, #dPartic_footer {
+    display: none !important;
+}
+/* end partic dialog */
+@media screen and (min-width: 300px) {
+    
+}
+@media screen and (min-width: 320px) {
+}
+@media screen and (min-width: 480px) {
+}
+
