@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="Lang" content="en">
-<meta name="author" content="">
-<meta http-equiv="Reply-to" content="@.com">
-<meta name="generator" content="PhpED 8.0">
-<meta name="description" content="">
-<meta name="keywords" content="">
-<meta name="creation-date" content="09/06/2012">
-<meta name="revisit-after" content="15 days">
-<title>Untitled</title>
-<link rel="stylesheet" type="text/css" href="my.css">
+	<meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Cache-Control" content="no-cache">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Lang" content="en">
+	<meta name="author" content="">
+	<meta http-equiv="Reply-to" content="@.com">
+	<meta name="generator" content="PhpED 8.0">
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<meta name="creation-date" content="09/06/2012">
+	<meta name="revisit-after" content="15 days">
+	<title>Untitled</title>
 </head>
 <body>
 <div id="df"></div>
@@ -26,9 +25,144 @@
 -->
 <script src="library/javascript/Field.js"></script>
 <script>
-const f1 = new Field( { id: "sel", type: "select", index: 0, addClass: "cField cMini", value: "0,2", attributes: "multiple", options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>" } );
-const f2 = new Field( { id: "sel", type: "input_text", index: "new", value: "1", attributes: "multiple disabled", options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>" } );
-nj().els( "#df" ).appendChild( f1.getField());
+let tmpFields = [];
+const f1 = new Field( { 
+	id: "sel", 
+	dVar: "f1", 
+	type: "select", 
+	index: 0, 
+	addClass: "cField cMini", 
+	addPraefix: "f1",
+	value: "0,2", 
+	attributes: "multiple", 
+	options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>", 
+	widthLabel: true, 
+	widthDiv: true, 
+	onFocus: function() {
+		console.log( this );	
+	}, 
+	onDblClick: function( args ) {
+		console.log( this );	
+	},
+	onChange: function( args ) {
+		console.log( nj( this ).gSV() );	
+	},
+	valid: ["not 0", "not empty"] 
+} );
+const f2 = new Field( { 
+	id: "txtVal", 
+	dVar: "f2", 
+	type: "input_text", 
+	index: 0, 
+	value: "1", 
+	options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>", 
+	addPraefix: "f2", 
+	widthLabel: true,
+	valid: ["not 0", "not empty"] ,
+	onChange: function() {
+		nj( this ).Dia().checkValidity()
+	},
+} );
+const f3 = new Field( { 
+	id: "fileVal", 
+	dVar: "f3", 
+	type: "input_file", 
+	index: 0, 
+	value: "", 
+	addPraefix: "f3", 
+	widthLabel: true,
+	widthDiv: true,
+} );
+const f4 = new Field( { 
+	id: "dateVal", 
+	dVar: "f4", 
+	type: "input_date", 
+	index: 0, 
+	value: "0000-00-00", 
+	addPraefix: "f4", 
+	widthLabel: true,
+	widthDiv: true,
+} );
+const f5 = new Field( { 
+	id: "chkVal", 
+	dVar: "f5", 
+	type: "checkbox", 
+	index: 0, 
+	value: false, 
+	addPraefix: "f5", 
+	widthLabel: true,
+	widthDiv: true,
+} );
+const f6 = new Field( { 
+	id: "buttonVal", 
+	dVar: "f6", 
+	type: "button", 
+	index: 0, 
+	//value: "test", 
+	value: "<img src='library/css/icons/AppEmpty.png'>", 
+	addPraefix: "f6", 
+	widthLabel: true,
+	widthDiv: true,
+} );
+const f7 = new Field( { 
+	id: "recPointerVal", 
+	dVar: "f7", 
+	type: "button", 
+	index: 0,
+	value: "&nbsp;", 
+	addPraefix: "f7", 
+	widthLabel: true,
+	widthDiv: true,
+	addClass: "cButtonMiddle",
+	onClick: function() {
+		let res = {}
+		if( nj( this ).htm()  === "&nbsp;" ) {
+			nj( this ).htm( "<img src='library/css/icons/cTriangleRightBlack.png'>" );
+			res.active = true;
+		} else {
+			nj( this ).htm( "&nbsp;" ); 
+			res.active = false;
+		}
+		res.id = this.id;
+		nj( this ).Dia().setRecordPointer( res );
+	}
+} );
+const f8 = new Field( { 
+	id: "imgVal", 
+	dVar: "f8", 
+	type: "img", 
+	index: 0,
+	value: "test", 
+	addPraefix: "f8", 
+	widthLabel: true,
+	widthDiv: true,
+	addClass: "cImageMiddle",
+	onClick: function() {
+		let res = {}
+		res.id = this.id;
+		nj( this ).Dia().setRecordPointer( res );
+	}
+} );
+tmpFields.push( f1.getField() );
+tmpFields.push( f2.getField() );
+tmpFields.push( f3.getField() );
+tmpFields.push( f4.getField() );
+tmpFields.push( f5.getField() );
+tmpFields.push( f6.getField() );
+tmpFields.push( f7.getField() );
+tmpFields.push( f8.getField() );
+let l = tmpFields.length;
+
+let i = 0;
+while ( i < l ) {
+	let m = tmpFields[i].length;
+	let j = 0;
+	while ( j < m ) {
+		nj().els( "#df" ).appendChild( tmpFields[i][j] );
+		j += 1;
+	}
+	i += 1;
+}
 </script>
 </body>
 </html>

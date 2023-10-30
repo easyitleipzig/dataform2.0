@@ -70,7 +70,6 @@ Date.prototype.getDaysOfMonth = function(diff) {
     } else {
         monthDiff = dates.firstDay.getMonth();
     }
-    console.log( dates );
     if( dates.firstDay.getMonth() > 12 ) {
         yearDiff = this.getFullYear() + 1;
     } else {

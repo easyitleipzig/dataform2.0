@@ -1,5 +1,4 @@
 //javascript
-/*
 const PATH_TO_INFO = "info/";
 const PATH_TO_HELP = "help/";
 const PATH_TO_ICONS = "../library/icons/";
@@ -22,8 +21,6 @@ var timerCounter = 0;
 var timerCounterMax;
 if( typeof( timeout_time ) != "undefined" ) timerCounterMax = timeout_time / 10000;
 var latitude, longitude;
-*/
-/*
 (function(funcName, baseObj) {
     // The public function name defaults to window.docReady
     // but you can pass in your own object and own function name and those will be used
@@ -96,9 +93,8 @@ var latitude, longitude;
         }
     }
 })("docReady", window);
-*/
+
 /* evaluate tracking */
-/*
 var evaluateTracking = function( data ) {
     console.log( data );
     let jsonobject;
@@ -122,10 +118,9 @@ var evaluateTracking = function( data ) {
         break;
     }
 }
-*/
+
 /* end  evaluate tracking */
 /* register resize/scroll */
-/*
 var registerFunctionsResize = [];
 var registerFunctionsScroll = [];
 window.addEventListener( "resize", function(){
@@ -151,8 +146,6 @@ var registerOnResize = function( args ) {
 var registerOnScroll = function( args ) {
     registerFunctionsScroll.push( args );
 }
-*/
-/*
 var setWindowDocProperties = function( args ) {
     let x, y;
     if( window.innerWidth < window.screen.availWidth ) {
@@ -187,8 +180,6 @@ var setWindowDocProperties = function( args ) {
         document.documentElement.style.setProperty('--scrollbar-height', 0 );    
     }   
 }
-*/
-/*
 var getDocumentHeight = function() {
     let height,
         body = document.body,
@@ -200,8 +191,6 @@ var getDocumentHeight = function() {
     document.documentElement.style.setProperty('--document-height', height );    
 
 }
-*/
-/*
 var getDocumentWidth = function() {
     let width,
     body = document.body,
@@ -212,21 +201,18 @@ var getDocumentWidth = function() {
     if( width < window.innerWidth ) width = window.innerWidth;
     document.documentElement.style.setProperty('--document-width', width );
 }
-*/
-//registerOnResize( getDocumentHeight );
-//registerOnResize( getDocumentWidth );
+registerOnResize( getDocumentHeight );
+registerOnResize( getDocumentWidth );
 
-//registerOnResize( setWindowDocProperties );
+registerOnResize( setWindowDocProperties );
 
-/*
+
 window.addEventListener("load", function() {
     window.dispatchEvent(new Event('resize'));
     window.dispatchEvent(new Event('scroll'));
 })
-*/
 /* end register resize/scroll */
 /* pos nav */
-/*
 var getPosNav = function() {
     let pos = nj( "nav" ).gRe();
     let navBottom = pos.y + pos.height;
@@ -240,10 +226,8 @@ var getPosNav = function() {
     document.documentElement.style.setProperty('--nav-width', pos.width);
 }
 registerOnResize( getPosNav );
-*/
 /* end pos nav */
 /* dim wrapper */
-/*
 var getDimWrapper = function() {
     let wW = +( document.documentElement.style.getPropertyValue('--document-width') ) - ( +( document.documentElement.style.getPropertyValue('--scrollbar-width') ) );
     document.documentElement.style.setProperty('--wrapper-width', wW + "px");
@@ -261,10 +245,8 @@ var getDimWrapper = function() {
     document.documentElement.style.setProperty('--wrapper-height', height + "px");
 }
 registerOnResize( getDimWrapper );
-*/
 /* end pos nav */
 /* on content is full loaded */
-/*
 let eventsOnLoad = [];
 var registerOnLoad = function( cb ) {
     eventsOnLoad.push( cb );    
@@ -297,11 +279,10 @@ addEventListener('DOMContentLoaded', (event) => {
 
     document.documentElement.style.setProperty('--wrapper-height', height + "px");
 
-*/
+
 /* end on content is full loaded */
 
 /* simulate doublecklick for phone */
-/*
 var doubletapDeltaTime_ = 700;
 var doubletap1Function_ = null;
 var doubletap2Function_ = null;
@@ -326,24 +307,21 @@ function doubletapTimeout() {
     doubletap1Function_();
     doubleTapTimer_ = null;
 }
-*/
 /* usage
 tap(singleClickEvent, doubleClickEvent )
 <div id="divID" onclick="tap(tapOnce, tapTwice)" >
 */
 
 /**/
-/*
 var automaticLogout = function() {
     if( ++timerCounter >= timerCounterMax ) {
         location.href = "index.php?c=timeout";   
         } else {
     }
 }
-*/
 /**/
 /* geo coords */
-/*
+
 function getPosition() {
     // Simple wrapper
     return new Promise((res, rej) => {
@@ -382,19 +360,22 @@ async function getGeoPositions() {
 //            result.innerHTML = "Geolocation failed due to unknown error.";
         }
     }
-*/
+
 /* end geo */
-
-
-
+/*
+var automaticLogout = function() {
+    if( ++timerCounter >= timerCounterMax ) {
+        location.href = "index.php?c=timeout";   
+    } else {
+    }
+}
+*/
 /*
 window.onload = function() {
     console.log ("onload");
     if( typeof isExtern === "undefined" ) {
     }
 }
-*/
-/*
 window.onpagehide = function(e) {
     if( typeof isExtern === "undefined" ) {
     }
@@ -402,18 +383,65 @@ window.onpagehide = function(e) {
 */
 /*
 getPosNav();
-*/
-/*
 nj( "#profile" ).sty( "display", "none" );
 /*
 function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 */
+/*
+nj("#disconnect_button, #short_name").on("click", function() {
+    if( nj( "#profile" ).sty( "display" ) == "none" ) {
+        let left = nj("#disconnect_button").gRe().x;
+        nj( "#profile" ).sty( {"display": "block", 
+            "z-index": "4", 
+            "position": "fixed",
+            "left": left - 50 + "px" } );
+    } else {
+        console.log("hier")
+        nj( "#profile" ).sty( "display", "none" );            
+    }
+});
+nj("#disconnect_button_phone").on("click", function() {
+    if( nj( "#profile_phone" ).sty( "display" ) == "none" ) {
+        nj( "#profile_phone" ).sty( "display", "grid" );
+    } else {
+        nj( "#profile_phone" ).sty( "display", "none" );            
+    }
+});
+nj("#profile_phone").on("click", function() {
+    if( nj( "#profile_phone" ).sty( "display" ) == "none" ) {
+        nj( "#profile_phone" ).sty( "display", "grid" );
+    } else {
+        nj( "#profile_phone" ).sty( {"display": "none" } );            
+    }
+});
+nj("#profile").on("click", function() {
+    if( nj( "#profile" ).sty( "display" ) == "none" ) {
+        nj( "#profile" ).sty( "display", "block" );
+    } else {
+        nj( "#profile" ).sty( "display", "none" );
+    }
+});
+nj( "#closeProfile").on("click", function() {
+    nj( "#profile").rPr( "style" );
+});
+
+nj("#profile_show, #profile_show_phone").on("click", function() {
+    location.href = "profile.php";
+});
+nj("#admin_show, #admin_show_phone").on("click", function() {
+    location.href = "admin_portal.php";
+});
+nj("#profile_disconnect, #profile_disconnect_phone").on("click", function() {
+    location.href = "index.php";
+});
+nj("#abstinencard_show, #abstinencecard_show_phone").on("click", function( e ) {
+    location.href = "abstinenzcard.php";
+});
 nj( "input" ).on( "blur", function( e ) {   
     nj().els( this ).value = nj().els( this ).value.replaceAll( '"', "“" );
 });
-
 /* correct safari representation */ 
 /*
 const correctSafariRepresentation = function() {
@@ -427,15 +455,11 @@ const correctSafariRepresentation = function() {
         }
     }
 }
-*/
-/*
 const setDraggableDialogs = function() {
     // body...
     let els = nj().els( "div.dialogBox.draggable" );
     console.log( els );
 }
-*/
-//correctSafariRepresentation();
-//setDraggableDialogs();
-
+correctSafariRepresentation();
+setDraggableDialogs();
 /* end correct safari representation */ 

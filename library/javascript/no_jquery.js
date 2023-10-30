@@ -389,7 +389,6 @@ function nj( p ) {
         return this.e.previousElementSibling;
     }
     _aCh = function( el ){
-        console.log( this.e, el );
         return this.e.appendChild( el );
     }
     _pCh = function( e ){
@@ -674,8 +673,8 @@ fetch(request)
         return false;
     }
     _Dia = function( ds = "dvar" ) {
-        let dia = false, x = 1;
-        console.log( this.e );
+        let dia = false, x = 1;        
+        if( typeof this.e === "object" ) return this.e; 
         while (x == 1 ) {
             if( this.e.dataset[ ds ] ) {
                 x = 0;
