@@ -20,13 +20,15 @@
 <script src="library/javascript/no_jquery.js"></script>
 <script src="library/javascript/easyit_helper_neu.js"></script>
 <script src="library/javascript/main.js"></script>
-<!--
-<script src="library/javascript/menu_dataform20.js"></script>
--->
+
+<script src="library/javascript/menu_calendar.js"></script>
 <script src="library/javascript/Field.js"></script>
+<script src="library/javascript/DropResize.js"></script>
+<script src="library/javascript/DialogDR.js"></script>
+<script src="library/javascript/MessageDR.js"></script>
 <script>
 let tmpFields = [];
-const f1 = new Field( { 
+var f1 = new Field( { 
 	id: "sel", 
 	dVar: "f1", 
 	type: "select", 
@@ -49,7 +51,7 @@ const f1 = new Field( {
 	},
 	valid: ["not 0", "not empty"] 
 } );
-const f2 = new Field( { 
+var f2 = new Field( { 
 	id: "txtVal", 
 	dVar: "f2", 
 	type: "input_text", 
@@ -58,12 +60,13 @@ const f2 = new Field( {
 	options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>", 
 	addPraefix: "f2", 
 	widthLabel: true,
-	valid: ["not 0", "not empty"] ,
-	onChange: function() {
-		nj( this ).Dia().checkValidity()
-	},
+	valid: ["not 0", "not empty"],
+	options: '<option value="Chocolate"></option><option value="Coconut"></option><option value="Mint"></option><option value="Strawberry"></option><option value="Vanilla"></option>', 
+	onBlur: function( e) {
+		nj( e.target ).Dia().checkValidity();	
+	}
 } );
-const f3 = new Field( { 
+var f3 = new Field( { 
 	id: "fileVal", 
 	dVar: "f3", 
 	type: "input_file", 
@@ -72,8 +75,11 @@ const f3 = new Field( {
 	addPraefix: "f3", 
 	widthLabel: true,
 	widthDiv: true,
+	onChange: function() {
+		console.log( this );
+	}
 } );
-const f4 = new Field( { 
+var f4 = new Field( { 
 	id: "dateVal", 
 	dVar: "f4", 
 	type: "input_date", 
@@ -83,7 +89,7 @@ const f4 = new Field( {
 	widthLabel: true,
 	widthDiv: true,
 } );
-const f5 = new Field( { 
+var f5 = new Field( { 
 	id: "chkVal", 
 	dVar: "f5", 
 	type: "checkbox", 
@@ -93,7 +99,7 @@ const f5 = new Field( {
 	widthLabel: true,
 	widthDiv: true,
 } );
-const f6 = new Field( { 
+var f6 = new Field( { 
 	id: "buttonVal", 
 	dVar: "f6", 
 	type: "button", 
@@ -104,7 +110,7 @@ const f6 = new Field( {
 	widthLabel: true,
 	widthDiv: true,
 } );
-const f7 = new Field( { 
+var f7 = new Field( { 
 	id: "recPointerVal", 
 	dVar: "f7", 
 	type: "button", 
@@ -124,10 +130,10 @@ const f7 = new Field( {
 			res.active = false;
 		}
 		res.id = this.id;
-		nj( this ).Dia().setRecordPointer( res );
+		f7.setRecordPointer( res );
 	}
 } );
-const f8 = new Field( { 
+var f8 = new Field( { 
 	id: "imgVal", 
 	dVar: "f8", 
 	type: "img", 

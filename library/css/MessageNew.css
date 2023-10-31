@@ -8,12 +8,11 @@
 }
 .diaMess > div > div {
     display: table-cell;
-    /*text-align: justify;*/
     vertical-align: middle;
-    /*padding-left: 0.5em;    */
 }
 .diaMess > div > div > div{
     margin-left: 0.2em;
+    margin-right: 0.2em;
 }
 .diaMess > div > div:first-child {
     width: 50px;

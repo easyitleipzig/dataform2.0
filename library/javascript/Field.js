@@ -1,4 +1,5 @@
 //javascript
+const DIV_UPLOAD_HTML = '<div id="tmpUploadId" class="divUploadFile"><div id="tmpDivUploadFormErrorText" class="fileUploadErrorText">Datei auswählen und "Öffnen" wählen.</div><label id="tmpLabelUpload" class="fileUploadLabel">Hochladen</label><input type="file" id="tmpFileUploadFile"></div>'
 innerCheckValidity = function( field ) {
     console.log( field );    
 }
@@ -54,7 +55,8 @@ class Field {                    // class for DataForm2.0
                                             <option value="Strawberry"></option>
                                             <option value="Vanilla"></option>
                                         </datalist>
-                                */ 
+                                */
+            uploadDiv:          undefined,
             withLabel:          false,
             withDiv:            false,
             onFocus:            undefined,
@@ -65,16 +67,48 @@ class Field {                    // class for DataForm2.0
         }
         let showOnInit = true,
             boxId = "",
+            tmpId = "",
             tmpClasses = "",
             tmpEl = {}, 
             tmpEls;
         Object.assign( this.opt, param );
+        if( this.opt.type === "img" ) {
+            nj().els( "body" )[0].appendChild( htmlToElement( DIV_UPLOAD_HTML ) );
+            nj( "#tmpUploadId" ).atr( "id", "uploadDiv_" + this.getId() );
+            nj( "#tmpDivUploadFormErrorText" ).atr( "id", "uploadErrorText_" + this.getId() );            
+            nj( "#tmpFileUploadFile" ).atr( "id", "fileUploadFile_" + this.getId() );
+            nj( "#fileUploadFile_" + this.getId() ).on( "change", function() {
+                const [last] = this.value.split("\\").slice(-1);
+                console.log(last);
+            })            
+            nj( "#tmpLabelUpload" ).atr( "id", "labelUpload_" + this.getId() );
+            nj( "#" + "labelUpload_" + this.getId() ).atr( "for", "fileUploadFile_" + this.getId() );
+            this.opt.uploadDiv = new DialogDR( { dVar: this.opt.dVar + ".opt.uploadDiv", id: "#uploadDiv_" + this.getId(), title: "Datei laden", variable: {dia: this.opt.uploadDiv }, buttons: [{ title: "Okay", action: function() {
+                nj( this ).Dia().hide();
+            }}] })           
+        }
         if( this.opt.label === "" ) this.opt.label = this.opt.id;
         if( typeof this.opt.onFocus === "function" ) {
 
         }
     }
-    innerCheckValidity = function( field ) {
+    getId = function( args ) {        
+        if( typeof this.opt.index !== "undefined" ) {
+            if( this.opt.addPraefix === "" ) {
+                this.tmpId = this.opt.id + '_' + this.opt.index;    
+            } else {
+                this.tmpId = this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index;
+            }                    
+        } else {
+            if( this.opt.addPraefix === "" ) {
+                this.tmpId = this.opt.id;    
+            } else {
+                this.tmpId = this.opt.addPraefix + "_" + this.opt.id;
+            }
+        }
+        return this.tmpId;   
+    }
+    innerCheckValidity = function() {
         let tmp;
         if( this.opt.addPraefix === "" ) {
             if( typeof this.opt.index !== "undefined" ) {
@@ -89,18 +123,13 @@ class Field {                    // class for DataForm2.0
                 tmp =  '#' + this.opt.addPraefix + "_" + this.opt.id;
             }
         }
-        if( nj( tmp ).tag() === "SELECT" ) {
-            //console.log( nj( tmp ).gSV() );
-            //console.log( nj(tmp).Dia() );            
-        }
-        let tmpValid = nj(tmp).Dia().opt.valid;
+        let tmpValid = this.opt.valid;
         let l = tmpValid.length;
         let i = 0;
         while ( i < l ) {
             console.log( tmpValid[ i ] );
             switch( tmpValid[ i ] ) {
                 case "not 0":
-//                    console.log( nj( tmp ).tag() );
                     if( nj( tmp ).tag() === "SELECT" ) {
                         if( nj( tmp ).gSV().includes('0') && nj( tmp ).gSV().length === 1 ) {
                             console.log( "is 0" );
@@ -108,6 +137,17 @@ class Field {                    // class for DataForm2.0
                     } else {
                         if( nj( tmp ).v() == "0" ) {
                             console.log( "is 0" );
+                        }
+                    }   
+                break;
+                case "not empty":
+                    if( nj( tmp ).tag() === "SELECT" ) {
+                        if( nj( tmp ).gSV().includes('') && nj( tmp ).gSV().length === 1 ) {
+                            console.log( "is 'empty'" );
+                        }            
+                    } else {
+                        if( nj( tmp ).v() == "" ) {
+                            console.log( "is 'empty'" );
                         }
                     }   
                 break;
@@ -123,10 +163,54 @@ class Field {                    // class for DataForm2.0
         console.log( res );
     }    
     checkValidity = function() {
-        console.log( nj( this ).Dia() );
-
-        //nj( this ).Dia().innerCheckValidity();
-        executeCode( this.dataset.dvar + ".innerCheckValidity(" + this.dataset.dvar + ");" );
+        console.log( this.getValue() );
+        let tmp;
+        if( this.opt.addPraefix === "" ) {
+            if( typeof this.opt.index !== "undefined" ) {
+                tmp = '#' + this.opt.id + '_' + this.opt.index;
+            } else {
+                tmp =  '#' + this.opt.id;
+            }
+        } else {
+            if( typeof this.opt.index !== "undefined" ) {
+                tmp = '#' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index;
+            } else {
+                tmp =  '#' + this.opt.addPraefix + "_" + this.opt.id;
+            }
+        }
+        let tmpValid = this.opt.valid;
+        let l = tmpValid.length;
+        let i = 0;
+        while ( i < l ) {
+            console.log( tmpValid[ i ] );
+            switch( tmpValid[ i ] ) {
+                case "not 0":
+                    if( nj( tmp ).tag() === "SELECT" ) {
+                        if( nj( tmp ).gSV().includes('0') && nj( tmp ).gSV().length === 1 ) {
+                            console.log( this.opt.label, "is 0" );
+                        }            
+                    } else {
+                        if( nj( tmp ).v() == "0" ) {
+                            console.log( this.opt.label, "is 0" );
+                        }
+                    }   
+                break;
+                case "not empty":
+                    if( nj( tmp ).tag() === "SELECT" ) {
+                        if( nj( tmp ).gSV().includes('') && nj( tmp ).gSV().length === 1 ) {
+                            console.log( this.opt.label, "is 'empty'" );
+                        }            
+                    } else {
+                        if( nj( tmp ).v() == "" ) {
+                            console.log( this.opt.label, "is 'empty'", "Das Feld '" + this.opt.label + "' darf nicht leer sein!" );
+                            dMNew.show( { title: "Fehler", type: false, text: "Das Feld '" + this.opt.label + "' darf nicht leer sein!" } );
+                        }
+                    }   
+                break;
+            }
+            i += 1;
+        }
+        
     }
     setActions = function( field ) {
         if( typeof this.opt.onFocus === "function" ) {
@@ -137,7 +221,6 @@ class Field {                    // class for DataForm2.0
         }
         if( typeof this.opt.onChange === "function" ) {
             nj( field ).on( "change", this.opt.onChange );          
-            //nj( field ).on( "change", this.checkValidity() );          
         }
         if( typeof this.opt.onClick === "function" ) {
             nj( field ).on( "click", this.opt.onClick );          
@@ -206,12 +289,11 @@ class Field {                    // class for DataForm2.0
                 } else {
                     return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).v();   
                 }
-                
             }            
         }
     }
     getField = function() {
-        let fieldHTML = "", tmpValueArry = [], el, i, l, fieldElements = [];
+        let fieldHTML = "", tmpValueArry = [], el, tmpId, i, l, fieldElements = [];
         if( this.opt.type.substring( 0, 6 ) === "input_" ) {
             this.opt.type = this.opt.type.split( "_" )[1]
         }
@@ -230,7 +312,6 @@ class Field {                    // class for DataForm2.0
                 fieldElements.push( htmlToElement( '<label class="lab_' + this.opt.dVar + '" for="' + el + '">' + this.opt.label + "</label>" ) );
             }
         }
-        //console.log( this.opt );
         switch ( this.opt.type) {
             case "select":
                 if( typeof this.opt.index !== "undefined" ) {
@@ -260,10 +341,8 @@ class Field {                    // class for DataForm2.0
                         i += 1;
                     }
                 }
-                console.log( this.tmpEl );
                 this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
-                // statements_1
             break;
             case "text":
             case "date":
@@ -274,7 +353,6 @@ class Field {                    // class for DataForm2.0
                     } else {
                         fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
                     }
-                    
                 } else {
                     if( this.opt.addPraefix === "" ) {
                         fieldHTML += '<input id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
@@ -284,9 +362,18 @@ class Field {                    // class for DataForm2.0
                 }
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="' + this.opt.type + '" value="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
-                console.log( this.tmpEl );
+                if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
+                    tmpId = "list_" + this.tmpEl.id;
+                    this.tmpEl.setAttribute("list", tmpId );
+                }
                 this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
+                fieldElements.push( this.tmpEl  );
+                if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
+                    el = nj().cEl( "datalist" );
+                    el.id = "list_" + this.tmpEl.id;
+                    nj( el ).htm( this.opt.options );
+                    fieldElements.push( el  );
+                }
             break;
             case "checkbox":
                 if( typeof this.opt.index !== "undefined" ) {
@@ -325,7 +412,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
-                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="checkbox" checked>' + this.opt.value + '</button>';
+                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '">' + this.opt.value + '</button>';
                 this.tmpEl = htmlToElement( fieldHTML );
                 this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
@@ -368,28 +455,6 @@ class Field {                    // class for DataForm2.0
                 this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
-/*
-            case "file":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
-                    
-                } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
-                }
-                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="' + this.opt.type + '" value="' + this.opt.value + '">';
-                this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
-            break;
-*/
             default:
                 // statements_def
                 break;
