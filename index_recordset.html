@@ -18,6 +18,42 @@
 <body>
 <div id="df"></div>
 <script>
+const DIV_UPLOAD_HTML = '<div id="tmpUploadId" class="divUploadFile"><div id="tmpDivUploadFormErrorText" class="fileUploadErrorText">Datei auswählen und "Öffnen" wählen.</div><label id="tmpLabelUpload" class="fileUploadLabel">Hochladen</label><input type="file" id="tmpFileUploadFile"></div>';
+async function uploadFieldFile( path, el, fileName ) {
+    let formData = new FormData();
+    let d = new Date();
+    formData.append("file", el );
+    await fetch( path , {
+      method: "POST", 
+      body: formData
+    })
+  .then( data => { 
+	  	myDia.hide();
+	  	dLA.hide();
+	  	if( appendixType == "new" ) {
+	  		nj( "#newInnerUrl" ).v( "library/documents/" + tmpFileName );
+			nj( "#newImgFileAppendix" ).atr("src", "library/css/icons/AppOkay.png");
+	  	} else {
+	  		nj( "#editInnerUrl" ).v( "library/documents/" + tmpFileName );
+    		nj( "#editImgFileAppendix" ).atr("src", "library/css/icons/AppOkay.png");
+	  	}
+  } )
+  .catch( data => { 
+  	console.log(data);
+  	})   
+}
+const handleFileUpload = function (evt) {
+    let files = evt.target.files; // FileList object
+    // files is a FileList of File objects. List some properties.
+    for (var i = 0, f; f = files[i]; i++) {
+        if( f.size > MAX_FILESIZE_APENDIX ) {
+        
+        } else {
+            uploadFieldFile( "library/php/upload_calendar_apendix.php", document.getElementById( "loadAppendix" ).files[0], appendixType, nj("#editId").v() );
+        }
+    }
+}
+	
 
 </script>
 <script src="library/javascript/no_jquery.js"></script>
@@ -26,12 +62,10 @@
 
 <script src="library/javascript/menu_calendar.js"></script>
 <script src="library/javascript/Field.js"></script>
-<script src="library/javascript/Recordset.js"></script>
 <script src="library/javascript/DropResize.js"></script>
 <script src="library/javascript/DialogDR.js"></script>
 <script src="library/javascript/MessageDR.js"></script>
 <script>
-	/*
 let tmpFields = [];
 var f1 = new Field( { 
 	id: "sel", 
@@ -175,7 +209,6 @@ while ( i < l ) {
 	i += 1;
 }
 var uploadDiv = new DialogDR( { dVar: "uploadDiv", title: "Datei laden", innerHTML: DIV_UPLOAD_HTML } );           
-*/
 
 </script>
 </body>

@@ -1,5 +1,4 @@
 //javascript
-const DIV_UPLOAD_HTML = '<div id="tmpUploadId" class="divUploadFile"><div id="tmpDivUploadFormErrorText" class="fileUploadErrorText">Datei auswählen und "Öffnen" wählen.</div><label id="tmpLabelUpload" class="fileUploadLabel">Hochladen</label><input type="file" id="tmpFileUploadFile"></div>'
 innerCheckValidity = function( field ) {
     console.log( field );    
 }
@@ -11,6 +10,10 @@ class Field {                    // class for DataForm2.0
             dVar:               undefined, // necessary - var of field object
             index:              undefined,
             value:              undefined, // value of field
+            default:            undefined, // default value of field
+            maxValue:           undefined,
+            minValue:           undefined,
+            maxLength:          undefined,
             label:              "", // label of field - is id if not set
             table:              "", // nessecary - source table for field
             type:               "input_text", /* fieldtype: 
@@ -56,7 +59,6 @@ class Field {                    // class for DataForm2.0
                                             <option value="Vanilla"></option>
                                         </datalist>
                                 */
-            uploadDiv:          undefined,
             withLabel:          false,
             withDiv:            false,
             onFocus:            undefined,
@@ -72,6 +74,9 @@ class Field {                    // class for DataForm2.0
             tmpEl = {}, 
             tmpEls;
         Object.assign( this.opt, param );
+        if( typeof this.opt.default !== "undefined" && typeof this.opt.value === "undefined" ) {
+            this.opt.value = this.opt.default;       
+        }
         if( this.opt.type === "img" ) {
             nj().els( "body" )[0].appendChild( htmlToElement( DIV_UPLOAD_HTML ) );
             nj( "#tmpUploadId" ).atr( "id", "uploadDiv_" + this.getId() );
@@ -83,14 +88,15 @@ class Field {                    // class for DataForm2.0
             })            
             nj( "#tmpLabelUpload" ).atr( "id", "labelUpload_" + this.getId() );
             nj( "#" + "labelUpload_" + this.getId() ).atr( "for", "fileUploadFile_" + this.getId() );
-            this.opt.uploadDiv = new DialogDR( { dVar: this.opt.dVar + ".opt.uploadDiv", id: "#uploadDiv_" + this.getId(), title: "Datei laden", variable: {dia: this.opt.uploadDiv }, buttons: [{ title: "Okay", action: function() {
-                nj( this ).Dia().hide();
-            }}] })           
         }
         if( this.opt.label === "" ) this.opt.label = this.opt.id;
         if( typeof this.opt.onFocus === "function" ) {
 
         }
+    }
+    buildFieldDefs( fieldDef ) {
+        this.opt.id = fieldDef.id;
+        return this;
     }
     getId = function( args ) {        
         if( typeof this.opt.index !== "undefined" ) {

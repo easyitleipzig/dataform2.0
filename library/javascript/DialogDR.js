@@ -125,15 +125,7 @@ class DialogDR {                    // dialog drag and resize
                 b = {};
                 b.title = "Okay";
                 b.action = function( el ){
-                    if( getDVar( this ).indexOf(".opt." ) > 0 ) {
-                        executeCode( getDVar( this ) + ".hide();")                    
-                    } else {
-                        if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                            executeCode( nj( this ).Dia().id + ".hide();")
-                        } else {
-                            nj( this ).Dia().hide();
-                        }
-                    }
+                    nj( this ).Dia().hide();
                 };
                 this.opt.buttons.push( b ); 
             }   

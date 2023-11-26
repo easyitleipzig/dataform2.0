@@ -83,7 +83,8 @@ function getElementSizeAndPosition(e) {
     };
 }
 function getDocumentBodyLimits() {
-    return { left: 0, right: document.body.clientWidth, top: 0, bottom: document.body.clientHeight };
+//    return { left: 0, right: document.body.clientWidth, top: 0, bottom: document.body.clientHeight };
+    return { left: 0, right: document.body.clientWidth, top: 0, bottom: window.innerHeight };
 }
 function trackMouseDragPlusAction(e) {
     let t = event.clientX,
@@ -108,6 +109,8 @@ function dragMouseStop(e) {
 }
 function resizeable(e, position = "both" ) {
     e = nj().els( "#" + e );
+    console.log( getIdAndName( nj().els( e ).id ).name );
+    nj( "#" + getIdAndName( nj().els( e ).id ).name ).sty( "width", "98%" );
     parent = re_getElementSizeAndPosition( nj( e ).p() );
     let correctObj = nj(  e.parentNode );
     e.classList.add("resizeable");
@@ -193,11 +196,17 @@ function re_trackMouseDragPlusAction(e) {
         });
 }
 function re_dragMouseStop(e) {
-    // correct terget position
-    nj().els( e.target.nextElementSibling ).style.top = parseInt( e.target.nextElementSibling.style.top ) - 10 + "px";
-    nj().els( e.target.nextElementSibling ).style.left = parseInt( e.target.nextElementSibling.style.left ) + 10 + "px";
-    // end correct terget position
+    // correct target position
     (document.onmouseup = null), (document.onmousemove = null);
+    if( e.target.nextElementSibling !== null ) {
+        nj().els( e.target.nextElementSibling ).style.top = parseInt( e.target.nextElementSibling.style.top ) - 10 + "px";
+        nj().els( e.target.nextElementSibling ).style.left = parseInt( e.target.nextElementSibling.style.left ) + 10 + "px";
+        nj().els( e.target.parentNode.parentNode ).style.height = parseInt( nj().els( e.target.parentNode.parentNode ).style.height ) + 14 + "px";
+        console.log( e.target.parentNode.children[0] );
+        nj().els( e.target.parentNode.children[0] ).style.position = "relative";
+        nj().els( e.target.parentNode.children[0] ).style.left = "-20px";        
+    }
+    // end correct terget position
 }
 const dialogTouchMove = function ( el ) {
     var touchLocation, posBasis, diffX, diffY, pEl = nj( el ).p();

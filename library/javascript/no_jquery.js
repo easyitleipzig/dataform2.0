@@ -692,6 +692,7 @@ fetch(request)
             let m = tmp.length;
             let j = 1;
             let tmpVar = window[ tmp[0] ];
+            //console.log( tmpVar, tmp[0] );
             while( j < m ) {
                 tmpVar = tmpVar[tmp[j]];
                 j += 1;
