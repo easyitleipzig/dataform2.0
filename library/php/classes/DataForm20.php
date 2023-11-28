@@ -4,6 +4,7 @@ class DataForm {
     private     $pdo;
     public      $fieldDefs;
     private     $table;
+    public      $primaryKey;
     public function __construct( $pdo, $table, $fieldDefs = null) {
         // content
         $this -> pdo = $pdo;
@@ -14,6 +15,10 @@ class DataForm {
             $s = $this -> pdo -> query( $q );
             $r = $s -> fetchAll( PDO::FETCH_ASSOC );
             $this -> fieldDefs = $r;
+            $q = "SHOW KEYS FROM " . $this -> table . " WHERE Key_name = 'PRIMARY'";
+            $s = $this -> pdo -> query( $q );
+            $r = $s -> fetchAll( PDO::FETCH_ASSOC );
+            $this -> primaryKey = $r[0]["Column_name"];
         } else {
             // code...
             $this -> $fieldDefs = $fieldDefs;

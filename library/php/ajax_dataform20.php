@@ -47,6 +47,7 @@ switch( $_POST["command"]) {
     case "getFielddefinitions":
         $return -> dVar = $_POST["dVar"];
         $return -> fieldDefs = $df -> fieldDefs;
+        $return -> primaryKey = $df -> primaryKey;
         print(json_encode( $return ));
     break;
 

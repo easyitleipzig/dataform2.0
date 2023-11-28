@@ -8,38 +8,10 @@ class Recordset {                    // class for DataForm2.0
             values:             [],
             table:              undefined,  // nessacary - tablename for Recordset
             variables:          {},         // optional - additional values for Recordset
-            
-// variables           undefined,  // additional values for Recordset
-
-
         }
-        let showOnInit = true;
+        let showOnInit = true, primaryKey, primaryKeyValue;
         Object.assign( this.opt, param );
     }
-/*
-    evaluateRS = function ( data ) {
-        let l, i, tmp;
-        let jsonobject;
-        if( typeof data === "string" ) {
-            jsonobject = JSON.parse( data );
-        } else {
-            jsonobject = data;
-        }
-        if( !isJ( jsonobject ) ) {
-            throw "kein JSON-Objekt übergeben";
-        }
-        console.log( jsonobject );
-        let fr = window[ jsonobject.dVar ];
-        switch( data.command ) {
-        case: "init":
-
-            break;
-        case: "getFielddefinitions":
-
-            break;
-        }
-    }
-*/
     evaluateRS = function ( data ) {
         let l, i, tmp;
         let jsonobject;

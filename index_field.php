@@ -17,6 +17,10 @@
 </head>
 <body>
 <div id="df"></div>
+<div id="divRadio">
+	<input type="radio" name="divRadio" value="0">
+
+</div>
 <script>
 const DIV_UPLOAD_HTML = '<div id="tmpUploadId" class="divUploadFile"><div id="tmpDivUploadFormErrorText" class="fileUploadErrorText">Datei auswählen und "Öffnen" wählen.</div><label id="tmpLabelUpload" class="fileUploadLabel">Hochladen</label><input type="file" id="tmpFileUploadFile"></div>';
 async function uploadFieldFile( path, el, fileName ) {
