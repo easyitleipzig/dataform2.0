@@ -63,16 +63,14 @@ const handleFileUpload = function (evt) {
 <script src="library/javascript/no_jquery.js"></script>
 <script src="library/javascript/easyit_helper_neu.js"></script>
 <script src="library/javascript/main.js"></script>
-
-<script src="library/javascript/menu_calendar.js"></script>
-<script src="library/javascript/Field.js"></script>
+<script src="library/javascript/Field20.js"></script>
 <script src="library/javascript/DropResize.js"></script>
 <script src="library/javascript/DialogDR.js"></script>
 <script src="library/javascript/MessageDR.js"></script>
 <script>
 let tmpFields = [];
 var f1 = new Field( { 
-	id: "sel", 
+	id: "#sel", 
 	dVar: "f1", 
 	type: "select", 
 	index: 0, 
@@ -95,14 +93,14 @@ var f1 = new Field( {
 	valid: ["not 0", "not empty"] 
 } );
 var f2 = new Field( { 
-	id: "txtVal", 
+	id: "#txtVal", 
 	dVar: "f2", 
-	type: "input_text", 
-	index: 0, 
+	type: "input_text",
+	target: "#df", 
 	value: "1", 
-	options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>", 
 	addPraefix: "f2", 
 	widthLabel: true,
+	widthDiv: false,
 	valid: ["not 0", "not empty"],
 	options: '<option value="Chocolate"></option><option value="Coconut"></option><option value="Mint"></option><option value="Strawberry"></option><option value="Vanilla"></option>', 
 	onBlur: function( e) {
@@ -110,7 +108,7 @@ var f2 = new Field( {
 	}
 } );
 var f3 = new Field( { 
-	id: "fileVal", 
+	id: "#fileVal", 
 	dVar: "f3", 
 	type: "input_file", 
 	index: 0, 
@@ -123,7 +121,7 @@ var f3 = new Field( {
 	}
 } );
 var f4 = new Field( { 
-	id: "dateVal", 
+	id: "#dateVal", 
 	dVar: "f4", 
 	type: "input_date", 
 	index: 0, 
@@ -133,7 +131,7 @@ var f4 = new Field( {
 	widthDiv: true,
 } );
 var f5 = new Field( { 
-	id: "chkVal", 
+	id: "#chkVal", 
 	dVar: "f5", 
 	type: "checkbox", 
 	index: 0, 
@@ -143,7 +141,7 @@ var f5 = new Field( {
 	widthDiv: true,
 } );
 var f6 = new Field( { 
-	id: "buttonVal", 
+	id: "#buttonVal", 
 	dVar: "f6", 
 	type: "button", 
 	index: 0, 
@@ -154,7 +152,7 @@ var f6 = new Field( {
 	widthDiv: true,
 } );
 var f7 = new Field( { 
-	id: "recPointerVal", 
+	id: "#recPointerVal", 
 	dVar: "f7", 
 	type: "button", 
 	index: 0,
@@ -177,7 +175,7 @@ var f7 = new Field( {
 	}
 } );
 var f8 = new Field( { 
-	id: "imgVal", 
+	id: "#imgVal", 
 	dVar: "f8", 
 	type: "img", 
 	index: 0,
@@ -192,6 +190,36 @@ var f8 = new Field( {
 		nj( this ).Dia().setRecordPointer( res );
 	}
 } );
+var f9 = new Field( { 
+	id: "#fRadio", 
+	dVar: "f9", 
+	type: "radio", 
+	target: "#df",
+	value: "test", 
+	addPraefix: "f9", 
+	widthLabel: true,
+	widthDiv: true,
+	addClass: "cImageMiddle",
+	options: "<option value=0></option><option value=1>v1</option><option value=2>v2</option>", 
+	onClick: function() {
+		let res = {}
+		res.id = this.id;
+		nj( this ).Dia().setRecordPointer( res );
+	}
+} );
+var f10 = new Field( { 
+	id: "#fStars", 
+	dVar: "f10", 
+	type: "stars", 
+	target: "#df",
+	value: "0", 
+	addPraefix: "f10", 
+	widthLabel: true,
+	widthDiv: false,
+	addClass: "cField cStars",
+} );
+//f2.appendField();
+/*
 tmpFields.push( f1.getField() );
 tmpFields.push( f2.getField() );
 tmpFields.push( f3.getField() );
@@ -213,7 +241,8 @@ while ( i < l ) {
 	i += 1;
 }
 var uploadDiv = new DialogDR( { dVar: "uploadDiv", title: "Datei laden", innerHTML: DIV_UPLOAD_HTML } );           
-
+*/
+f10.appendField();
 </script>
 </body>
 </html>

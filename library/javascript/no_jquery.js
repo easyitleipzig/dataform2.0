@@ -1,26 +1,25 @@
 //javascript
-var tmpDiaVar;
 function nj( p ) {
     if( p == "" || typeof( p ) == "undefined" ) {
         this.e = null;
         return this;
     } else if ( Node.prototype.isPrototypeOf( p ) || NodeList.prototype.isPrototypeOf( p ) || typeof( p ) == "object" ) {
         this.e = p;
-    } else if( p.substr( 0, 1 ) === "#" && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+    } else if( p.substr( 0, 1 ) == "#" && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) === - 1) {
         this.e = document.getElementById( p.substr( 1, p.length - 1 ) );    
-    } else if( p.substr( 0, 1 ) === "." && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+    } else if( p.substr( 0, 1 ) == "." && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) == - 1) {
         this.e = document.getElementsByClassName( p.substr( 1, p.length - 1 ) );    
     } else {
         this.e = document.querySelectorAll( p );
     }
     _els = function( p ) {
-        if( p === "" || typeof( p ) === "undefined" ) {
+        if( p == "" || typeof( p ) == "undefined" ) {
             return null;
         } else if ( Node.prototype.isPrototypeOf( p ) || NodeList.prototype.isPrototypeOf( p ) ) {
             return p;
-        } else if( p.substr( 0, 1 ) === "#" && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+        } else if( p.substr( 0, 1 ) == "#" && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) == - 1) {
             return document.getElementById( p.substr( 1, p.length - 1 ) );    
-        } else if( p.substr( 0, 1 ) === "." && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+        } else if( p.substr( 0, 1 ) == "." && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) == - 1) {
             return document.getElementsByClassName( p.substr( 1, p.length - 1 ) );    
         } else {
             return document.querySelectorAll( p );
@@ -310,6 +309,7 @@ function nj( p ) {
             let l = this.e.length;
             let i = 0;
             while( i < l ) {
+                //console.log( this.e[i] );
                 this.e[ i ].classList.remove( c );
                 i += 1;    
             }
@@ -439,6 +439,13 @@ function nj( p ) {
     _isE = function(){
         return !!this.e;
     }
+    _toE = function( html ) {
+        var template = document.createElement('template');
+        html = html.trim(); // Never return a text node of whitespace as the result
+        template.innerHTML = html;
+        return template.content.firstChild;
+    }
+
     _gRe = function() {
         try {
             if( this.e.length == 1 ) {
@@ -692,7 +699,6 @@ fetch(request)
             let m = tmp.length;
             let j = 1;
             let tmpVar = window[ tmp[0] ];
-            //console.log( tmpVar, tmp[0] );
             while( j < m ) {
                 tmpVar = tmpVar[tmp[j]];
                 j += 1;
@@ -761,6 +767,7 @@ fetch(request)
     this.hAt = _hAt;
     this.rAt = _rAt;
     this.isE = _isE;
+    this.toE = _toE;
     // events
     this.on = _on;
     this.off = _off;
@@ -791,3 +798,4 @@ fetch(request)
     this.gRO = _gRO;
     return this
 }
+nj( document );

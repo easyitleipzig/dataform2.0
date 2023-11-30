@@ -1,4 +1,6 @@
 //javascript
+const STARS_WIDTH = 100;
+const PATH_TO_STARS = "library/css/icons/star_foreground.png";
 innerCheckValidity = function( field ) {
     console.log( field );    
 }
@@ -6,14 +8,13 @@ innerCheckValidity = function( field ) {
 class Field {                    // class for DataForm2.0
       constructor( param ) {
         this.opt = {
-            dVar:               undefined, // necessary - var of field object
-            id:                 "", // id of field - is dVar if not set
-            recordset:          undefined, // bound recordset variable
+            dVar:               undefined,  // necessary - var of field object
+            id:                 "",         // id of field - is dVar if not set
+            recordset:          undefined,  // bound recordset variable
             target:             undefined,
-            index:              undefined,
-            value:              undefined, // value of field
-            oldValue:           undefined, // value before change
-            default:            undefined, // default value of field
+            value:              undefined,  // value of field
+            oldValue:           undefined,  // value before change
+            default:            undefined,  // default value of field
             maxValue:           undefined,
             minValue:           undefined,
             maxLength:          undefined,
@@ -48,13 +49,12 @@ class Field {                    // class for DataForm2.0
                                                     img
                                                     bckg
                                                 */
-//            addPraefix:         "", // classes for field; e.g. "cUsusal cLabel ..."
-            addPraefix:         "", // classes for field; e.g. "cUsusal cLabel ..."
-            addClass:           "", // classes for field; e.g. "cUsusal cLabel ..."
-            addAttr:            "", // additional attributes for html e.g.: 'target = "_blank" placeholder="[placeholder]"; ...' / combinitions are possible
-            valid:              [], // validity ["not empty", "not 0", "not null", "not undifined", "is email", "is postalcode", "is unique"]; combinitions are possible
-            validOnSave:        false, // checks validity on save
-            options:            undefined, // options for select field, options for input text datalist
+            addPraefix:         "",             // praefix for field; e.g. "field, f_ ..."
+            addClass:           "cField",       // classes for field; e.g. "cUsusal cLabel ..."
+            addAttr:            "",             // additional attributes for html e.g.: 'target = "_blank" placeholder="[placeholder]"; ...' / combinitions are possible
+            valid:              [],             // validity ["not empty", "not 0", "not null", "not undifined", "is email", "is postalcode", "is unique"]; combinitions are possible
+            validOnSave:        false,          // checks validity on save
+            options:            undefined,      // options for select field, options for input text datalist
                                 /* <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
                                         <datalist id="ice-cream-flavors">
                                             <option value="Chocolate"></option>
@@ -64,6 +64,7 @@ class Field {                    // class for DataForm2.0
                                             <option value="Vanilla"></option>
                                         </datalist>
                                 */
+            variables:          {},             // optional - additional values for Field
             withLabel:          false,
             withDiv:            false,
             onFocus:            this.beforeChange,
@@ -74,7 +75,6 @@ class Field {                    // class for DataForm2.0
             onInit:             undefined,
             onChange:           undefined,
             onBeforeChange:     undefined,
-            variables:          {},         // optional - additional values for Field
 
         }
         let showOnInit = true,
@@ -95,25 +95,31 @@ class Field {                    // class for DataForm2.0
         }
         if( this.opt.type === "img" ) {
             nj().els( "body" )[0].appendChild( htmlToElement( DIV_UPLOAD_HTML ) );
-            nj( "#tmpUploadId" ).atr( "id", "uploadDiv_" + this.getId() );
-            nj( "#tmpDivUploadFormErrorText" ).atr( "id", "uploadErrorText_" + this.getId() );            
-            nj( "#tmpFileUploadFile" ).atr( "id", "fileUploadFile_" + this.getId() );
-            nj( "#fileUploadFile_" + this.getId() ).on( "change", function() {
+            nj( "#tmpUploadId" ).atr( "id", "uploadDiv_" + this.getOnlyId() );
+            nj( "#tmpDivUploadFormErrorText" ).atr( "id", "uploadErrorText_" + this.getOnlyId() );            
+            nj( "#tmpFileUploadFile" ).atr( "id", "fileUploadFile_" + this.getOnlyId() );
+            nj( "#fileUploadFile_" + this.getOnlyId() ).on( "change", function() {
                 const [last] = this.value.split("\\").slice(-1);
                 console.log(last);
             })            
-            nj( "#tmpLabelUpload" ).atr( "id", "labelUpload_" + this.getId() );
-            nj( "#" + "labelUpload_" + this.getId() ).atr( "for", "fileUploadFile_" + this.getId() );
+            nj( "#tmpLabelUpload" ).atr( "id", "labelUpload_" + this.getOnlyId() );
+            nj( "#" + "labelUpload_" + this.getOnlyId() ).atr( "for", "fileUploadFile_" + this.getOnlyId() );
         }
         if( this.opt.label === "" ) this.opt.label = this.opt.id;
         if( typeof this.opt.onFocus === "function" ) {
 
         }
     }
+    getOnlyId = function ( args ) {
+        return this.opt.id.substring( 1 );
+    }
     beforeChnage = function() {
         switch( this.opt.type ) {
             case "checkbox":
                 this.opt.oldValue = nj( "#" + this.opt.id ).chk();        
+            break;
+            case "radio":
+                //this.opt.oldValue = nj( "#" + this.opt.id ).chk();        
             break;
             case "img":
                 this.opt.oldValue = nj( "#" + this.opt.id ).atr( "src" );        
@@ -128,51 +134,6 @@ class Field {                    // class for DataForm2.0
                 this.opt.oldValue = nj( "#" + this.opt.id ).v();
             break;
         }
-    }
-    getId = function( args ) {        
-        if( this.opt.addPraefix === "" ) {
-            this.tmpId = this.opt.id;    
-        } else {
-            this.tmpId = this.opt.addPraefix + "_" + this.opt.id;
-        }
-        return this.tmpId;   
-    }
-    innerCheckValidity = function() {
-        let tmpValid = this.opt.valid;
-        let l = tmpValid.length;
-        let i = 0;
-        while ( i < l ) {
-            console.log( tmpValid[ i ] );
-            switch( tmpValid[ i ] ) {
-                case "not 0":
-                    if( nj( this.opt.id ).tag() === "SELECT" ) {
-                        if( nj( this.opt.id ).gSV().includes('0') && nj( this.opt.id ).gSV().length === 1 ) {
-                            console.log( "is 0" );
-                        }            
-                    } else {
-                        if( nj( this.opt.id ).v() == "0" ) {
-                            console.log( "is 0" );
-                        }
-                    }   
-                break;
-                case "not empty":
-                    if( nj( this.opt.id ).tag() === "SELECT" ) {
-                        if( nj( this.opt.id ).gSV().includes('') && nj( this.opt.id ).gSV().length === 1 ) {
-                            console.log( "is 'empty'" );
-                        }            
-                    } else {
-                        if( nj( this.opt.id ).v() == "" ) {
-                            console.log( "is 'empty'" );
-                        }
-                    }   
-                break;
-            }
-            i += 1;
-        }
-        
-    }
-    setRecordPointer = function( res ) {
-        console.log( res );
     }
     setRecordPointer = function( res ) {
         console.log( res );
@@ -233,246 +194,162 @@ class Field {                    // class for DataForm2.0
             nj( this.opt.id ).on( "dblclick", this.opt.onDblClick );          
         }        
     }
-    setValue = function( value ) {
+    setValue = function( v ) {
+        let els;
         switch( this.opt.type ) {
+            case "select":
+                nj( this.opt.id ).sSV( v );
+            break;
             case "img":
-                nj( this.opt.id ).atr( "src", value );
+                nj( this.opt.id ).atr( "src", v );
             break;
             case "bckg":
-                nj( this.opt.id ).sty( "background-image", "url(" + value + ")" );
+                nj( this.opt.id ).sty( "background-image", "url(" + v + ")" );
             break;
             case "radio": 
                 // content
-                nj().els( "div[id=" + this.opt.id)
+                els = nj().els( "input[name=" + this.getOnlyId() + "]" );
+                let l = els.length;
+                let i = 0;
+                while( i < l ) {
+                    if( els[ i ].value == v ) {
+                        els[ i ].checked = true;
+                        //continue;
+                    }
+                    i += 1;
+                }
+            break;
+            case "stars":
+                nj().els( this.opt.id ).children[0].style.clipPath = 'polygon(0px 0px, ' + ( v * 20 ) + '% 0px, ' + ( v * 20 ) + '% 100%, 0% 100%)';
             break;
             default:
-                nj( this.opt.id ).v( value );
+                nj( this.opt.id ).v( v );
             break;
         }
     }
-    getValue = function( value ) {
-        if( typeof this.opt.index !== "undefined" ) {
-            if( this.opt.addPraefix === "" ) {
-                if( this.opt.type === "checkbox" ) {
-                    return nj( "#" + this.opt.id + '_' + this.opt.index ).chk();
-                } else {
-                    return nj( "#" + this.opt.id + '_' + this.opt.index ).v();
-                }                    
-            } else {
-                if( this.opt.type === "checkbox" ) {
-                    return nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).chk();
-                } else {
-                    return nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).v();    
+    getValue = function() {
+        let els, style, tmp;
+        switch( this.opt.type ) {
+            case "select":
+                return nj( this.opt.id ).gSV();
+            break;
+            case "radio":
+                els = nj().els( "input[name=" + this.getOnlyId() + "]" );
+                let l = els.length;
+                let i = 0;
+                while( i < l ) {
+                    if( els[ i ].checked ) {
+                        return els[ i ].value;
+                        //continue;
+                    }
+                    i += 1;
                 }
-            }
-        } else {
-            if( this.opt.addPraefix === "" ) {
-                if( this.opt.type === "checkbox" ) {
-                    return nj( "#" + this.opt.id ).chk();
-                } else {
-                    return nj( "#" + this.opt.id ).v();    
-                }
-            } else {
-                if( this.opt.type === "checkbox" ) {
-                    return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).chk();
-                } else {
-                    return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).v();   
-                }
-            }            
+                break;
+            case "stars":
+                style = nj().els( this.opt.id ).children[0].style.clipPath; // = 'polygon(0px 0px, ' + ( v * 20 ) + '% 0px, ' + ( v * 20 ) + '% 100%, 0% 100%)';
+                tmp = style.split( "," );
+                console.log( parseFloat( tmp[1].split( "%" )[0].trim() ) / 20 );
+                //return nj( this.opt.id ).gSV();
+            break;
+            default:
+                return nj( this.opt.id ).v();
+            break;
         }
     }
     getField = function() {
-        let fieldHTML = "", tmpValueArry = [], el, tmpId, i, l, fieldElements = [];
-        if( this.opt.type.substring( 0, 6 ) === "input_" ) {
-            this.opt.type = this.opt.type.split( "_" )[1]
-        }
+        let tmpHTML = "", el, tmp, els = [], l, i;
+        let type = this.opt.type.replace( "input_", "" );
         if( this.opt.widthLabel ) {
-            if( this.opt.addPraefix !== "" ) {
-                el = this.opt.addPraefix + "_" + this.opt.id;
-            } else {
-                el = this.opt.id;
-            }
-            if( this.opt.index !== "" ) {
-                el += "_" + this.opt.index;
-            }
-            if( this.opt.addPraefix === "" ) {
-                fieldElements.push( htmlToElement( "<label for='" + el + "'>" + this.opt.label + "</label>" ) );
-            } else {
-                fieldElements.push( htmlToElement( '<label class="lab_' + this.opt.dVar + '" for="' + el + '">' + this.opt.label + "</label>" ) );
-            }
+            tmpHTML += '<label for="' + this.getOnlyId() + '">' + this.opt.label + '</label>';
         }
-        switch ( this.opt.type) {
-            case "select":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<select id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<select id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }                    
-                } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<select id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<select id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
+        switch( type ) {
+            case "radio":
+                // content
+                el = nj().cEl( "div" );
+                el.id = this.getOnlyId();
+                nj( el ).sDs( "field", this.opt.dVar )
+                tmp = nj().cEl( "select" );
+                tmp.innerHTML = this.opt.options;
+                l = tmp.children.length;
+                i = 0;
+                tmpHTML = "";
+                while( i < l ) {
+                    tmpHTML += '<input type="radio" value="' + tmp.children[i].value + '" name="' + this.getOnlyId() + '"> ' + tmp.children[i].innerText;
+                    i += 1;
                 }
-                fieldHTML += ' class="cSelect ' + this.opt.addClass + '" ';
-                fieldHTML += this.opt.attributes + '>' + this.opt.options + '</select>';
-                this.tmpEl = htmlToElement( fieldHTML );
-                if( typeof this.opt.value !== "undefined" ) {
-                    this.tmpValueArry = this.opt.value.split( "," );
-                    l = this.tmpEl.children.length;
-                    i = 0;
-                    while (i < l) {
-                         if( this.tmpValueArry.includes(  this.tmpEl.children[i].value ) ) {
-                            nj( this.tmpEl.children[i] ).atr( "selected", "" );
-                        } 
-                        i += 1;
-                    }
-                }
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
-            break;
-            case "text":
-            case "date":
-            case "file":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
-                } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
-                }
-                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="' + this.opt.type + '" value="' + this.opt.value + '">';
-                this.tmpEl = htmlToElement( fieldHTML );
-                if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
-                    tmpId = "list_" + this.tmpEl.id;
-                    this.tmpEl.setAttribute("list", tmpId );
-                }
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  );
-                if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
-                    el = nj().cEl( "datalist" );
-                    el.id = "list_" + this.tmpEl.id;
-                    nj( el ).htm( this.opt.options );
-                    fieldElements.push( el  );
-                }
+                el.innerHTML = tmpHTML;
+                tmpHTML = el.outerHTML;
             break;
             case "checkbox":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }                    
+                // content
+                if( this.opt.value || this.opt.value === "true" ) {
+                    tmpHTML += '<input id="' + this.getOnlyId() + '" type="checkbox" data-dvar="' + this.opt.dVar + '" checked">';
                 } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
+                    tmpHTML += '<input id="' + this.getOnlyId() + '" type="checkbox" data-dvar="' + this.opt.dVar + '">';
                 }
-                if( this.opt.value == true ) {
-                    fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="checkbox" checked>';
-                } else {
-                    fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="checkbox">';
-                }
-                this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
             break;
-            case "button":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }                    
-                } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
+            case "stars":
+                let starHTML = "";
+                el = nj().cEl( "div" );
+                el.id = this.getOnlyId();
+                nj( el ).sDs( "field", this.opt.dVar );
+                nj( el ).sty( "width", STARS_WIDTH + "px" );
+                l = 5;
+                i = 0;
+                while( i < l ) {
+                    starHTML += '<div name="' + this.getOnlyId() + '_' + i + '"  style="width: 20%; position: relative;height: 20px;top: -23px;display: inline-block; cursor: pointer;"></div>';
+                    i += 1;
                 }
-                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '">' + this.opt.value + '</button>';
-                this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
-            break;
-            case "img":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<img id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }                    
-                } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<img id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
-                }
-                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" src="' + this.opt.value + '">';
-                this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
-            break;
-            case "recordPointer":
-                if( typeof this.opt.index !== "undefined" ) {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
-                    }                    
-                } else {
-                    if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
-                    } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
-                    }
-                }
-                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClass + '" type="checkbox" checked>' + this.opt.value + '</button>';
-                this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
-                fieldElements.push( this.tmpEl  )
-            break;
-            case "radio":
-
+                tmpHTML += '<div id="' + this.getOnlyId() + '" data-field="' + this.opt.dVar + '" style="height: 20px;width: ' + STARS_WIDTH + 'px; background-image: url(library/css/icons/star_bar.png); background-size: ' + ( STARS_WIDTH + 5 ) + 'px 20px;"><img src="library/css/icons/5stars.png" style="height: 20px; clip-path: polygon(0 0, ' + parseFloat( this.opt.value ) * 20 + '% 0, ' + parseFloat( this.opt.value ) * 20 + '% 100%, 0% 100%);">' + starHTML + '</div>';
             break;
             default:
-                // statements_def
-                break;
-        }        
+                // content
+                if( typeof this.opt.options === "undefined" ) {
+                    tmpHTML += '<input id="' + this.getOnlyId() + '" type="' + type + '" data-dvar="' + this.opt.dVar + '" value="' + this.opt.value + '">';
+                } else {
+                    tmpHTML += '<input id="' + this.getOnlyId() + '" type="' + type + '" data-dvar="' + this.opt.dVar + '" list="dl_' + this.getOnlyId() + '" value="' + this.opt.value + '">';
+                    tmpHTML += '<datalist id="dl_' + this.getOnlyId() + '">' + this.opt.options + '</datalist>'    
+                }
+            break;
+        }
+        tmp = nj().cEl( "div" );
+        tmp.innerHTML = tmpHTML;
         if( this.opt.widthDiv ) {
-            el = nj().cEl( "div" );
-            if( this.opt.addPraefix === "" ) {
-                el.id = 'div_' + this.opt.id;    
-            } else {
-                el.id = this.opt.addPraefix + '_div_' + this.opt.id;    
-            }
-            nj( el ).aCl( "divField_" + this.opt.id );
-            l = fieldElements.length;
-            i = 0;
-            while ( i < l ) {
-                nj( el ).aCh( fieldElements[i] ); 
+            tmp.id = "div" + this.getOnlyId();
+            els.push( tmp );
+        } else {
+            let l = tmp.children.length;
+            let i = 0;
+            while( i < l ) {
+                els.push( tmp.children[ i ] );
                 i += 1;
             }
-            fieldElements = [];
-            fieldElements.push( el ); 
         }
-        return fieldElements;
+        return els;
     }
     appendField = function () {
         // content
-        if( typeof this.opt.target === "undefined" ) this.opt.target = "body";
-        nj( this.opt.target ).aCh( this.getField() );
+        if( typeof this.opt.target === "undefined" ) this.opt.target = document.body;
+        let field = this.getField();
+        let l = field.length;
+        let i = 0;
+        while( i < l ) {
+            nj( this.opt.target ).aCh( field[ i ] );
+            i += 1;
+        }
+        nj( this.opt.id ).on( "click", function ( e ) {
+            // content
+            switch( nj( this ).Dia( "field" ).opt.type ) {
+                case "stars":
+                    let val = parseInt( getIdAndName( e.target.getAttribute("name") ).Id ) + 1;
+                    e.target.parentNode.children[0].style.clipPath = 'polygon(0px 0px, ' + ( val * 20 ) + '% 0px, ' + ( val * 20 ) + '% 100%, 0% 100%)';
+                    nj( this ).Dia( "field" ).opt.value = val;
+                break;
+                default:
+                    // content
+            
+                break;
+            }
+        })
     }
 }
