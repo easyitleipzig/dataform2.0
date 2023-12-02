@@ -194,6 +194,9 @@ class Field {                    // class for DataForm2.0
             nj( this.opt.id ).on( "dblclick", this.opt.onDblClick );          
         }        
     }
+    setField = function ( param ) {
+        Object.assign( this.opt, param );
+    }
     setValue = function( v ) {
         let els;
         switch( this.opt.type ) {
@@ -228,7 +231,7 @@ class Field {                    // class for DataForm2.0
         }
     }
     getValue = function() {
-        let els, style, tmp;
+        let els;
         switch( this.opt.type ) {
             case "select":
                 return nj( this.opt.id ).gSV();
@@ -246,19 +249,19 @@ class Field {                    // class for DataForm2.0
                 }
                 break;
             case "stars":
-                style = nj().els( this.opt.id ).children[0].style.clipPath; // = 'polygon(0px 0px, ' + ( v * 20 ) + '% 0px, ' + ( v * 20 ) + '% 100%, 0% 100%)';
-                tmp = style.split( "," );
-                console.log( parseFloat( tmp[1].split( "%" )[0].trim() ) / 20 );
-                //return nj( this.opt.id ).gSV();
+                return parseFloat( nj().els( this.opt.id ).children[0].style.clipPath.split( "," )[1].split( "%" )[0].trim() ) / 20;
             break;
             default:
                 return nj( this.opt.id ).v();
             break;
         }
     }
-    getField = function() {
+    getField = function( fieldDef ) {
         let tmpHTML = "", el, tmp, els = [], l, i;
         let type = this.opt.type.replace( "input_", "" );
+        if( typeof fieldDef !== "undefined" ) {
+            Object.assign( this.opt, fieldDef );
+        }
         if( this.opt.widthLabel ) {
             tmpHTML += '<label for="' + this.getOnlyId() + '">' + this.opt.label + '</label>';
         }
@@ -327,8 +330,11 @@ class Field {                    // class for DataForm2.0
         }
         return els;
     }
-    appendField = function () {
+    appendField = function ( fieldDef ) {
         // content
+        if( typeof fieldDef !== "undefined" ) {
+            Object.assign( this.opt, fieldDef );
+        }
         if( typeof this.opt.target === "undefined" ) this.opt.target = document.body;
         let field = this.getField();
         let l = field.length;

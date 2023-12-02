@@ -20,9 +20,9 @@
 <script src="library/javascript/easyit_helper_neu.js"></script>
 <script src="library/javascript/main.js"></script>
 <script src="library/javascript/Field.js"></script>
-<script src="library/javascript/Recordset.js"></script>
+<script src="library/javascript/RecordSet20.js"></script>
 <script>
-var Fr = new Recordset( {dVar: "Fr", table: "testtable"} );
+var Fr = new RecordSet( {dVar: "Fr", table: "user"} );
 (function() {  
     Fr.init();
 })();

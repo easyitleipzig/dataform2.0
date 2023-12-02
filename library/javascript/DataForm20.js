@@ -16,21 +16,21 @@ class DataForm {                    // class for DataForm2.0
             dVar:                               undefined, // necessary - var of field object
             divUpload:                          new DialogDR( { dVar: param.dVar + ".opt.divUpload", title: "Datei laden", innerHTML: DIV_UPLOAD_HTML.replaceAll( "[dVar]", param.dVar ) } ),
             rootPath:                           "library",
-
-            tFUTargetPath:            "../documents/", // tUF means tmpFileUpload
-            tFUTargetFileName:        "",
-            tFUTargetUpdateElementId: false,
-            tFUTargetElementId:       "",
-            tFUTargetElementAttr:     "value",
-            tFUTargetElementLinkText: "Link",
-            tFUTargetElementLinkTarget: "_blank",
-            tFURepalce:               true,
-            tFUOldFileName:           "",
-            tFUWidthTimestamp:        false,
-            tFUUpdateTable:           false,
-            tFUTable:                 "",
-            tFUField:                 "",
-            tFUFieldIndex:            "",
+            recordsets:                         [],
+            tFUTargetPath:                      "../documents/", // tUF means tmpFileUpload
+            tFUTargetFileName:                  "",
+            tFUTargetUpdateElementId:           false,
+            tFUTargetElementId:                 "",
+            tFUTargetElementAttr:               "value",
+            tFUTargetElementLinkText:           "Link",
+            tFUTargetElementLinkTarget:         "_blank",
+            tFURepalce:                         true,
+            tFUOldFileName:                     "",
+            tFUWidthTimestamp:                  false,
+            tFUUpdateTable:                     false,
+            tFUTable:                           "",
+            tFUField:                           "",
+            tFUFieldIndex:                      "",
         }
         let tmpId = "",
             tmpClasses = "",
@@ -41,6 +41,9 @@ class DataForm {                    // class for DataForm2.0
             console.log( nj( this ).gRO() );
             nj( this ).gRO().uploadFile();    
         }  );
+    }
+    evaluateDF = function ( args ) {
+        // content
     }
     resolveFileUpload = async function( targetPath = this.opt.tFUTargetPath, targetFileName = this.opt.tFUTargetFileName, targetElementId = this.opt.tFUTargetElementId, targetElementAttr = this.opt.tFUTargetElementAttr, timeStamp = new Date().getTS(), replace = this.opt.tFUReplace, oldFileName = this.opt.tFUOldFileName, withTimeStamp = this.opt.tFUWidthTimestamp, path = "library/php/upload_dataform20.php", fileObject = nj().els( "#" + this.opt.dVar + "_tFUFile").files[0], cb = this.afterSuccessFileUpload( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp, df = this ) ) {
         let formData = new FormData();
@@ -107,5 +110,11 @@ class DataForm {                    // class for DataForm2.0
         nj( "#" + this.opt.dVar + "_tFUFile" ).atr( "accept", acceptFileTypes );
 
         this.opt.divUpload.show();
+    }
+    getFieldDefinitions = function ( args ) {
+        // content
+    }
+    init = function () {
+        // content
     }
 }
