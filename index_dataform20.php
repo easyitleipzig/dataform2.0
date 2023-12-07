@@ -12,6 +12,7 @@
 </head>
 
 <body>
+    <input type="button" name="" id="showDF" data-dvar="Df">
 <div id="target">
     <div id="targetBasis">&nbsp;</div>
 
@@ -48,11 +49,9 @@ var additionalFields = [
 ];
 
 var Df;
-Df.init();
+Df = new DataForm( { dVar: "Df", table: "test_table", fields: "id,val_varchar", additionalFieldDefs: additionalFieldDefs, /*additionalFields: additionalFields*/ } );
 (function() {
-    Df = new DataForm( { dVar: "Df", table: "test_table", /*additionalFields: additionalFields*/ } );
-    console.log( Df.opt );
-    //Df.opt.recordsets[0].opt.fields[0].opt.dVar = "Df.opt.recordsets.0.opt.fields.0";
+    Df.init();
 })();
 </script>
 </body>

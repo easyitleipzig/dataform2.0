@@ -41,13 +41,19 @@ foreach ( $_POST as &$str) {
     $str = replaceUnwantetChars($str);
 }
 require_once( "classes/DataForm20.php" );
-$df = new \DataForm( $db_pdo, $_POST["table"] );
+$df = new \DataForm( $db_pdo, $_POST["table"], $_POST['fields'], $_POST["fieldDefinitions"] );
 
 switch( $_POST["command"]) {
-    case "getFielddefinitions":
+    case "getFieldDefinitions":
         $return -> dVar = $_POST["dVar"];
         $return -> fieldDefs = $df -> fieldDefs;
         $return -> primaryKey = $df -> primaryKey;
+        print(json_encode( $return ));
+    break;
+    case "getRecords":
+        $return -> dVar = $_POST["dVar"];    
+        if( !isset( $_POST['countPerPage'] ) ) $_POST['countPerPage'] = null;
+        $return -> records = $df -> getRecords( $_POST['fields'], $_POST['orderBy'],  $_POST['whereClausel'],  $_POST['pageNumber'], $_POST['countPerPage'],  $_POST['hasNew'] );
         print(json_encode( $return ));
     break;
 
