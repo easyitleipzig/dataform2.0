@@ -41,11 +41,12 @@ foreach ( $_POST as &$str) {
     $str = replaceUnwantetChars($str);
 }
 require_once( "classes/DataForm20.php" );
-$df = new \DataForm( $db_pdo, $_POST["table"], $_POST['fields'], $_POST["fieldDefinitions"] );
+$df = new \DataForm( $db_pdo, $_POST["table"] );
 
 switch( $_POST["command"]) {
     case "getFieldDefinitions":
         $return -> dVar = $_POST["dVar"];
+        $res = $df -> getFieldDefs( $_POST["fields"] );
         $return -> fieldDefs = $df -> fieldDefs;
         $return -> primaryKey = $df -> primaryKey;
         print(json_encode( $return ));

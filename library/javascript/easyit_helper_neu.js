@@ -23,6 +23,10 @@ Date.prototype.addDays = function(days) {
     date.setDate(date.getDate() + days);
     return date;
 }
+Date.prototype.addHours = function(h) {
+  this.setTime(this.getTime() + (h*60*60*1000));
+  return this;
+}
 Date.prototype.daysDiff = function( date ) {
     var dateFrom = new Date(this.valueOf());
     let tmp = date - dateFrom;

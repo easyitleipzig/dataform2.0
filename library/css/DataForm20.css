@@ -1,0 +1,13 @@
+.cDec, .cNumber {
+    text-align: right;
+}
+.cFieldSave {
+    background-image: url(../css/icons/cSave.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.cButtonMiddle {
+    width: 40px !important;
+    height: 40px;
+}

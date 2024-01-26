@@ -6,15 +6,18 @@ class DataForm {
     private     $table;
     private     $fields;
     public      $primaryKey;
-    public function __construct( $pdo, $table, $fields = "", $fieldDefs = [] ) {
+    public      $countRecords;
+    public function __construct( $pdo, $table ) {
         // content
         $this -> pdo = $pdo;
         $this -> table = $table;
+    }
+    public function getFieldDefs( $fields, $fieldDefs = [] ) {
         if ( count( $fieldDefs ) === 0 ) {
             if( $fields === "" ) {
-                $q = "SHOW FULL COLUMNS FROM " .  $this -> table;
-                
+                $q = "SHOW FULL COLUMNS FROM " .  $this -> table;                
             } else {
+
                 $tmp = explode( ",", $fields );
                 $i = 0;
                 $l = count( $tmp );
@@ -23,6 +26,7 @@ class DataForm {
                     $i += 1;
                 }
                 $fields = implode(",", $tmp );
+
                 $q = "SHOW FULL COLUMNS FROM " .  $this -> table . " where Field in (" . $fields . ")"; 
             }
             $s = $this -> pdo -> query( $q );
@@ -36,25 +40,25 @@ class DataForm {
             // code...
             $this -> $fieldDefs = $fieldDefs;
         }
-        
-    }
-    private function getFieldDefs() {
-        // content
-        $q = "SHOW FULL COLUMNS FROM " .  $this -> table;
-        $s = $this -> pdo -> query( $q );
-        return $s -> fetchAll( PDO::FETCH_ASSOC );
     }
     public function getRecords( $fields, $whereClausel, $orderBy, $pageNumber, $countPerPage, $hasNew ) {
         if( $fields === "" ) {
             $q = "select * from " . $this -> table;
         } else {
             $q = "select $fields from " . $this -> table;
+        }if( $whereClausel !== "" ) {
+            $q .= " $whereClausel"; 
         }
         $s = $this -> pdo -> query( $q );
-        return $s -> fetchAll( PDO::FETCH_CLASS );
-        
-        if( $hasNew === "true" ) {
-            
+        $r = $s -> fetchAll( PDO::FETCH_CLASS );
+        if( $hasNew == "true" ) {
+            if( $fields === "" ) {
+                $q = "SHOW FULL COLUMNS FROM " .  $this -> table;
+            } else {
+                
+            }
+            $s = $this -> pdo -> query( $q );                
         }
+        return $r;        
     }   
 }

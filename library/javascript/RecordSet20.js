@@ -7,7 +7,11 @@ class RecordSet {                    // class for DataForm2.0
             fields:             [],         // necessary - fielddefinitions 
             values:             [],
             table:              undefined,  // nessacary - tablename for Recordset
-            variables:          {},         // optional - additional values for Recordset
+            variables:          {},         // optional - additional variables for Recordset
+            baseClass:          param.addClassesRecordSet,
+            baseClassField:     "",
+            addClasses:         "",
+            classButtonSize:    "",
         }
         let showOnInit = true, primaryKey, primaryKeyValue;
         Object.assign( this.opt, param );
@@ -127,6 +131,40 @@ class RecordSet {                    // class for DataForm2.0
         
             break;
         }
+    }
+    getFields = function () {
+        let els = nj().els( this.opt.id + " ." + this.opt.baseClassField );
+        console.log( els );
+    }
+    prepareRecord = function ( args ) {
+
+    }
+    getRecord = function ( getFields = true ) {
+        let i, j, l, m, elField;
+        let el = nj().cEl( "div" );
+        el.id = this.opt.id.substring( 1 );
+        nj( el ).aCN( this.opt.baseClass + this.opt.addClasses );
+        nj( el ).sDs( "dvar", this.opt.dVar );
+        console.log( this.opt.target );
+        nj( this.opt.target ).aCh( el );
+        if( getFields ) {
+            l = this.opt.fields.length;
+            i = 0;
+            while( i < l ) {
+                elField = this.opt.fields[ i ].getField()
+                let m = elField.length;
+                let j = 0;
+                while( j < m ) {
+                    nj( "#" + el.id ).aCh( elField[j] );
+                    j += 1;
+                }
+                i += 1;
+            }
+        }
+    }
+    getRecordValues = function ( args ) {
+        let els = nj().els( "div[id=" + this.opt.id.substring( 1 ) + "] .cField" );
+        console.log( fields );
     }
     init = function ( fieldDefinitions ) {
         if( typeof fieldDefinitions === "undefined" ) {

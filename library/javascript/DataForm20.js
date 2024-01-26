@@ -15,12 +15,26 @@ class DataForm {                    // class for DataForm2.0
         this.opt = {
             dVar:                               undefined,  // necessary - var of field object
             id:                                 undefined,  // id of field object; if not isset id is dVar
-            target:                             undefined,  // id of target element; if not isset target is body
+            target:                             document.body,  // id of target element; if not isset target is body
             fields:                             undefined,  // field list divided by ","; if not isset all fields
+            title:                              undefined,  // title of dataform dialog
             fieldDefinitions:                   [],         // object array of field definitions
-            additionalFieldDefs:                [],         // object array of additional field definitions
             primaryKey:                         [],         // object array of field definitions
             recordsets:                         [],         // object array of recordsets
+            optionLists:                        [],         // object array of option lists for fields e.g. 
+                                                            /*
+                                                            [
+                                                                {   
+                                                                    field:"[selectfield1]", 
+                                                                    options: '<value="1">[value 1]</option><value="2">[value 2]</option>..'
+                                                                }, 
+                                                                {   
+                                                                    field:"[selectfield2]", 
+                                                                    options: '<value="0">[value 0]</option><value="1">[value 1]</option>..'
+                                                                }, 
+                                                                ...
+                                                            ]
+                                                            */
             currentRecord:                      1,
             orderBy:                            "",
             whereClausel:                       "",
@@ -28,8 +42,22 @@ class DataForm {                    // class for DataForm2.0
             countPerPage:                       undefined,          // if is 0 all records
             hasNew:                             true,
             addPraefix:                         "",
-            addClasses:                         "cRecordset",
-            divUpload:                          new DialogDR( { dVar: param.dVar + ".opt.divUpload", title: "Datei laden", innerHTML: DIV_UPLOAD_HTML.replaceAll( "[dVar]", param.dVar ) } ),
+            widthSave:                          true,
+            widthDelete:                        true,
+            validOnSave:                        false,
+            baseClassRecordSet:                "cRecordset",
+            addRSClasses:                       "",
+            baseClassField:                     "cField",
+            addFieldClasses:                    "",
+            classButtonSize:                    "",
+            autoOpen:                           true,
+            formType:                           "html",
+            divForm:                            undefined,
+            divUpload:                          new DialogDR( { 
+                                                    dVar: param.dVar + ".opt.divUpload", 
+                                                    title: "Datei laden", 
+                                                    innerHTML: DIV_UPLOAD_HTML.replaceAll( "[dVar]", param.dVar ) 
+                                                } ),
             rootPath:                           "library",
             tFUTargetPath:                      "../documents/", // tUF means tmpFileUpload
             tFUTargetFileName:                  "",
@@ -48,9 +76,15 @@ class DataForm {                    // class for DataForm2.0
         }
         let tmpId = "",
             tmpClasses = "",
-            tmpEl = {}, 
+            tmpEl, 
             tmpEls;
         Object.assign( this.opt, param );
+        this.opt.id = "#" + this.opt.addPraefix + this.opt.id.substring( 1 );
+        if( !nj( this.opt.id ).isE() ) {
+            tmpEl = nj().cEl( "div" );
+            tmpEl.id = this.opt.id.substring( 1 );
+            nj( this.opt.target ).aCh( tmpEl );
+        }
         data = {};
         data.command = "getFielddefinitions";
         data.dVar = this.opt.dVar;
@@ -65,7 +99,7 @@ class DataForm {                    // class for DataForm2.0
     }
     evaluateDF = function ( data ) {
         // content
-        let jsonobject, l, i, tmp;
+        let jsonobject, l, i, m, j, tmp, decVal, strVal;
         if( typeof data === "string" ) {
             jsonobject = JSON.parse( data );
         } else {
@@ -79,120 +113,26 @@ class DataForm {                    // class for DataForm2.0
         switch( jsonobject.command ) {
             case "getFieldDefinitions":
                 // content
-                let l = jsonobject.fieldDefs.length;
-                let i = 0;
+                l = df.opt.fieldDefinitions.length;
+                i = 0;
+                let field, options;
                 while( i < l ) {
-                    //console.log( jsonobject.fieldDefs[i] );
-                    //let field = new Field( { id: jsonobject.fieldDefs[i].Field, maxLength: jsonobject.fieldDefs[i].Field } );
-                    let tmpType = jsonobject.fieldDefs[i].Type.split( "(" )[0];
-                    let tmpLength = jsonobject.fieldDefs[i].Type.split( "(" )[1];
-                    //console.log( tmpType, jsonobject.fieldDefs[i].Type.split( "(" ), tmpLength );
-                    let tmpSize = undefined;
-                    let tmpMinVal = undefined;
-                    let tmpMaxVal = undefined;
-                    let tmpUnsigned = false;
-                    if( typeof tmpLength !== "undefined" ) {
-                        switch( tmpType ) {
-                            case "bigint":
-                            case "int":
-                            case "tinyint":
-                            case "boolean":
-                                tmpSize = jsonobject.fieldDefs[i].Type.split( "(" )[1].split( ")" )[0]
-                            break;
-                            case "varchar": 
-                            case "bit": 
-                                tmpLength = jsonobject.fieldDefs[i].Type.split( "(" )[1].split( ")" )[0]
-                            break;
-                            default:
-                                tmpSize = undefined;
-                            break;
-                        }
+                    //console.log( jsonobject.fieldDefs, df.opt.fieldDefinitions[i] );
+                    field = nj().fOA( jsonobject.fieldDefs, "Field", df.opt.fieldDefinitions[ i ].field )[0];
+                    if( typeof field !== "undefined" ) {
+                        Object.assign( df.opt.fieldDefinitions[ i ], df.buildLengthProps( field ) );
                     }
-                    if( jsonobject.fieldDefs[i].Type.split( "(" ).length === 2 ) {
-                        let tmp = jsonobject.fieldDefs[i].Type.split( "(" )[1].split( ")" );
-                        if( tmp[1].indexOf( "unsigned" ) > -1 ) tmpUnsigned = true;
+                    options = nj().fOA( df.opt.optionLists, "field", df.opt.fieldDefinitions[ i ].field )[0];
+                    if( typeof options !== "undefined" ) {
+                        df.opt.fieldDefinitions[ i ].options = options.options;
                     }
-                    console.log( tmpType, tmpUnsigned );
-                    switch( tmpType ) {
-                        case "tinyint":
-                            if( tmpUnsigned ) {
-                                tmpMaxVal = 511;
-                                tmpMinVal = 0;
-                                tmpLength = 3;
-                            } else {
-                                tmpMaxVal = 255;
-                                tmpMinVal = -256;
-                                tmpLength = 4;
-                            }
-                        break;
-                        case "int":
-                            if( tmpUnsigned ) {
-                                tmpMaxVal = 24294967295;
-                                tmpMinVal = 0;
-                                tmpLength = 10;
-                            } else {
-                                tmpMaxVal = 2147483647;
-                                tmpMinVal = -2147483648;
-                                tmpLength = 11;
-                            }
-                        break; 
-                        case "bigint": 
-                            if( tmpUnsigned ) {
-                                tmpMaxVal = 18446744073709551615
-                                tmpMinVal = 0;
-                                tmpLength = ( "" + tmpMaxVal ).length;
-                            } else {
-                                tmpMaxVal = 9223372036854775807 ;
-                                tmpMinVal = -9223372036854775808;
-                                tmpLength = ( "" + tmpMinVal ).length;
-                            }     
-                        break;
-                        case "decimal":
-                            tmpLength = 19;
-                        break;
-                        case "float":
-                            if( tmpUnsigned ) {
-                                tmpMaxVal = 3.402823466e38
-                                tmpMinVal = 1.175494351e-38 ;
-                                tmpLength = ( "" + tmpMaxVal ).length;
-                            } else {
-                                tmpMaxVal = 3.402823466e+38;
-                                tmpMinVal = -1.175494351e-38;
-                                tmpLength = ( "" + tmpMinVal ).length;
-                            }     
-                        break;
-                        case "date":
-                        case "datetime":
-                            tmpLength = 19;
-                        break;
-                        case "time":
-                            tmpLength = 8;
-                        break;
-                        case "text":
-                        case "blob":
-                            tmpLength = 655354;
-                        break;
-                        case "json":
-                        case "longtext":
-                            tmpLength = 294967295
-                        break;
-                        case "varchar": 
-                        case "bit": 
-                                // content
-                              //console.log(tmpLength) ; 
-                        break;
-                        default:
-                            tmpLength = tmpLength.substring(0, tmpLength.length - 1 );                    
-                        break;
-                    }
-                    df.opt.fieldDefinitions.push( { field: jsonobject.fieldDefs[i].Field, maxLength: tmpLength, maxValue: tmpMaxVal, minValue: tmpMinVal } );
                     i += 1;
                 }
                 df.opt.primaryKey = jsonobject.primaryKey;
                 df.getRecords();
             break;
             case "getRecords":
-                console.log( df, jsonobject );
+                //console.log( df, jsonobject );
                 df.prepareRecords( jsonobject );
             break;
             default:
@@ -201,6 +141,156 @@ class DataForm {                    // class for DataForm2.0
             break;
         }
     }
+    buildLengthProps = function ( fieldProps ) {
+        // content
+        let field = {}, decVal, strVal, i, l;
+        //console.log( fieldProps );
+        field.title = fieldProps.Comment;
+        field.default = fieldProps.Default;
+        fieldProps.Null === "NO" ? field.canBeNull = false: field.canBeNull = true;
+        fieldProps.Key === "Uni" || fieldProps.Key === "Pri" ? field.isUnique = false: field.isUnique = true;
+        fieldProps.Extra.indexOf( "auto_increment" ) > - 1 ? field.isAutoInc = true: field.isAutoInc = false;
+        field.maxValue = "";
+        field.minValue = "";
+        let tmpType = fieldProps.Type.split( "(" )[0];
+        let tmpLength = fieldProps.Type.split( "(" )[1];
+        let tmpSize = undefined;
+        let tmpMinVal = undefined;
+        let tmpMaxVal = undefined;
+        let tmpUnsigned = false;
+        if( fieldProps.Type.split( "(" ).length === 2 ) {
+            let tmp = fieldProps.Type.split( "(" )[1].split( ")" );
+            tmp[1].indexOf( "unsigned" ) > -1 ? tmpUnsigned = true:  tmpUnsigned = false;
+        }
+        switch( tmpType ) {
+            case "tinyint":
+                if( tmpUnsigned ) {
+                    field.maxValue = 511;
+                    field.minValue = 0;
+                    field.maxLength = 3;
+                } else {
+                    field.maxValue = 255;
+                    field.minValue = -256;
+                    field.maxLength = 4;
+                }            
+            break;
+            case "mediumint":
+                field.maxLength = 8;
+                if( tmpUnsigned ) {
+                    field.maxValue = 16777215;
+                    field.minValue = 0;
+                 } else {
+                    field.maxValue = 8388607;
+                    field.minValue = -8388608;
+                }            
+            break;
+            case "int":
+                field.maxLength = 11;
+                if( tmpUnsigned ) {
+                    field.maxValue = 24294967295;
+                    field.minValue = 0;
+                } else {
+                    field.maxValue = 2147483647;
+                    field.minValue = -2147483648;
+                }
+            break;
+            case "bigint":
+                field.maxLength = 20;
+                if( tmpUnsigned ) {
+                    field.maxValue = 18446744073709551615
+                    field.minValue = 0;
+                } else {
+                    field.maxValue = 9223372036854775807;
+                    field.minValue = -9223372036854775808;
+                }           
+            break;
+            case "decimal":
+                let decVal = tmpLength.substring(0, tmpLength.length - 1 ).split( "," );
+                l = parseInt( decVal[0] );
+                i = 0;
+                let strVal = "";
+                while( i < l ) {
+                    strVal += "9";
+                    i += 1;
+                }
+                strVal += ".";
+                l = parseInt( decVal[1] );
+                i = 0;
+                while( i < l ) {
+                    strVal += "9";
+                    i += 1;
+                }
+                if( tmpUnsigned ) {
+                    field.maxValue = parseFloat( strVal );
+                    field.minValue = 0;
+                    field.maxLength = parseInt( decVal[0]) + parseInt( decVal[1]) + 1;
+                } else {
+                    field.maxValue = parseFloat( strVal );
+                    field.minValue = field.maxValue * - 1;
+                    field.maxLength = parseInt( decVal[0]) + parseInt( decVal[1]) + 2;
+                }
+            break;
+            case "float":
+                if( tmpUnsigned ) {
+                    field.maxValue = 3.402823466e38;
+                    field.minValue = 1.175494351e-38 ;
+                    field.maxLength = ( "" + tmpMaxVal ).length;
+                } else {
+                    field.maxValue = 3.402823466e+38;
+                    field.maxValue = -1.175494351e-38;
+                    field.maxValue = ( "" + tmpMinVal ).length;
+                }     
+            break;
+            case "double":
+                if( tmpUnsigned ) {
+                    field.maxValue = Infinity;
+                    field.minValue = 0;
+                    field.maxLength = 16;
+                } else {
+                    field.maxValue = Infinity;
+                    field.minValue = -Infinity;
+                    field.maxLength = 17;
+                }     
+            break;
+            case "date":
+                field.maxLength = 10;
+            break;
+            case "datetime":
+                field.maxLength = 19;
+            break;
+            case "time":
+                field.maxLength = 8;
+            break;
+            case "tinytext":
+                field.maxLength = 255;
+            break;
+            case "text":
+            case "blob":
+                field.maxLength = 655354;
+            break;
+            case "mediumtext":
+            case "mediumblob":
+                field.maxLength = 16777215;
+            break;
+            case "longtext":
+            case "longblob":
+                field.maxLength = 4294967295;
+            break;
+            case "json":
+            case "longtext":
+                field.maxLength = 294967295
+            break;
+            case "varchar":
+            case "bit":
+                field.maxLength = parseInt( tmpLength );
+            break;
+            default:
+            
+            break;
+        }
+        return field;
+
+    }   
     resolveFileUpload = async function( targetPath = this.opt.tFUTargetPath, targetFileName = this.opt.tFUTargetFileName, targetElementId = this.opt.tFUTargetElementId, targetElementAttr = this.opt.tFUTargetElementAttr, timeStamp = new Date().getTS(), replace = this.opt.tFUReplace, oldFileName = this.opt.tFUOldFileName, withTimeStamp = this.opt.tFUWidthTimestamp, path = "library/php/upload_dataform20.php", fileObject = nj().els( "#" + this.opt.dVar + "_tFUFile").files[0], cb = this.afterSuccessFileUpload( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp, df = this ) ) {
         let formData = new FormData();
         console.log( timeStamp );
@@ -264,7 +354,6 @@ class DataForm {                    // class for DataForm2.0
             this.opt.tFUTargetFileName = tFUTargetFileName;
         }
         nj( "#" + this.opt.dVar + "_tFUFile" ).atr( "accept", acceptFileTypes );
-
         this.opt.divUpload.show();
     }
     getFieldDefinitions = function ( args ) {
@@ -294,34 +383,90 @@ class DataForm {                    // class for DataForm2.0
     }
     prepareRecords = function ( data ) {
         // content
-        let i, j, l, m, recordIndex, recordsets = [], records = [], field, tmp = [];
+        let i, j, l, m, field, tmpField = {}, primaryKeyValue, tmpFieldType;
         l = data.records.length;
+        this.opt.countRecords = l;
         i = 0;
-        recordIndex = "";
         while( i < l ) {
-            m = Object.keys( data.records[i] ).length;
+            this.opt.recordsets.push( new RecordSet( {
+                dVar: this.opt.dVar + ".opt.recordsets." + i, 
+                id: "#" + this.opt.addPraefix + this.opt.id.substring( 1 ) + "RS" + "_" + data.records[ i ][ this.opt.primaryKey ], 
+                target: this.opt.id, 
+                table: this.opt.table,
+                baseClass: this.opt.baseClassRecordSet,
+                addClasses: this.opt.addRSClasses,
+                baseClassField: this.opt.baseClassField,
+                classButtonSize: this.opt.classButtonSize,
+            } ) );
+            m = this.opt.fieldDefinitions.length;
             j = 0;
-            records = [];
-            this.opt.recordsets.push( new RecordSet( {dVar: this.opt.dVar + ".opt.recordsets." + i } ) );
             while( j < m ) {
-                field = this.opt.fieldDefinitions.filter(character => {
-                    return character.field === this.opt.fieldDefinitions[j].field;
-                })[0];
-                field.fieldDVar = ".opt.fields." + j;
-                field.value = data.records[i][this.opt.fieldDefinitions[j].field]; 
-                field.tabIndex = j;
-                field.recordsetDVar = this.opt.recordsets[i].opt.dVar;
-                field.dVar = this.opt.recordsets[i].opt.dVar + ".opt.fields." + j;
-                if( typeof this.opt.additionalFieldDefs[j] !== "undefined" ) {
-                    Object.assign( field, this.opt.additionalFieldDefs[j] );
+                field = this.opt.fieldDefinitions[j];
+                console.log( field );
+                field.id = "#" + this.opt.addPraefix + field.field + "_" + data.records[ i ][ this.opt.primaryKey ];
+                console.log( data.records[i][this.opt.fieldDefinitions[j].field] );
+                if( typeof data.records[i][this.opt.fieldDefinitions[j].field] !== "undefined" ) {
+                    field.value = data.records[i][this.opt.fieldDefinitions[j].field];
                 }
+                field.tabIndex = j;
+                field.table = this.opt.table;
+                field.target = this.opt.recordsets[i].opt.id;
+                field.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
+                field.validOnSave = this.opt.validOnSave;
+                field.classButtonSize = this.opt.classButtonSize;
                 this.opt.recordsets[i].opt.fields.push( new Field( field ) );
                 j += 1;
             }
-            recordsets.push( records );
+            if( this.opt.widthSave ) {
+                tmpField.id = this.opt.addPraefix + "RS_save_" + data.records[ i ][ this.opt.primaryKey ];
+                tmpField.value = 0;
+                tmpField.label = "Datensatz speichern";
+                tmpField.baseClass = "";
+                tmpField.addClasses = "cFieldSave";
+                tmpField.classButtonSize = this.opt.classButtonSize;
+                tmpField.onClick = function ( args ) {
+                    // content
+                    console.log( this );
+                }
+                tmpField.tabIndex = j;
+                tmpFieldType = { type: "button" }
+                //console.log( tmpField );
+                tmpField.table = this.opt.table;
+                tmpField.target = this.opt.recordsets[i].opt.id;
+                tmpField.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
+                tmpField.value = "&nbsp;";
+                tmpField.title = "Datensatz speichern"
+                Object.assign( tmpField, tmpFieldType );
+                this.opt.recordsets[i].opt.fields.push( new Field( tmpField ) );
+            }
             i += 1;
         }
+        if( this.opt.widthDelete ) {
+            
+        }
+        if( this.opt.hasNew ) {
+            this.builNewRecord();    
+        }
         console.log( this.opt.recordsets );
+        if( this.opt.autoOpen ) {
+            this.showRecordSets();
+        }
+    }
+    builNewRecord = function () {
+        let l = this.opt.fieldDefinitions.length;
+        let i = 0;
+        while( i < l ) {
+            console.log(  this.opt.fieldDefinitions[ i ] );
+            i += 1;
+        }
+    }
+    showRecordSets = function () {
+        let l = this.opt.recordsets.length;
+        let i = 0;
+        while( i < l ) {
+            this.opt.recordsets[i].getRecord();
+            i += 1;
+        }
     }
     init = function () {
         // content

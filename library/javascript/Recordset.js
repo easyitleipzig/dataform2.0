@@ -7,7 +7,7 @@ class Recordset {                    // class for DataForm2.0
             fields:             [],         // necessary - fielddefinitions 
             values:             [],
             table:              undefined,  // nessacary - tablename for Recordset
-            variables:          {},         // optional - additional values for Recordset
+            variables:          {},         // optional - additional variables for Recordset
         }
         let showOnInit = true, primaryKey, primaryKeyValue;
         Object.assign( this.opt, param );

@@ -329,6 +329,34 @@ function nj( p ) {
         }
         return this.e.classList;            
     }
+    _aCN = function ( v ) {
+        if( this.e == null ) return false;
+        if( Node.prototype.isPrototypeOf( this.e ) ) {
+            this.e.classList = this.e.classList + " " + v;
+        } else {
+            let l = this.e.length;
+            let i = 0;
+            while( i < l ) {
+                this.e[ i ].classList = this.e[ i ].classList + " " + v;
+                i += 1;    
+            }
+        }
+        return this.e.classList;            
+    }
+    _rCN = function ( v ) {
+        if( this.e == null ) return false;
+        if( Node.prototype.isPrototypeOf( this.e ) ) {
+            this.e.classList = this.e.classList.replace( v, "");
+        } else {
+            let l = this.e.length;
+            let i = 0;
+            while( i < l ) {
+                this.e[ i ].classList = this.e[ i ].classList.replace( v, "");
+                i += 1;    
+            }
+        }
+        return this.e.classList;            
+    }
     _clL = function() {
         if( this.e == null ) return false;
         return this.e.classList;            
@@ -627,6 +655,13 @@ fetch(request)
         }
         return a;
     }
+    // filter object arra
+    _fOA = function ( arr, field, value ) {
+        // content
+        return arr.filter(fieldValue => {
+                        return fieldValue[field] === value;
+                    });
+    }
     // JSON
     _isJ = function (item) {
         item = typeof item !== "string"
@@ -682,7 +717,7 @@ fetch(request)
         }
         return false;
     }
-    _Dia = function( ds = "dvar" ) {
+    _Dia = function( ds = "dvar", deep ) {
         let dia = false, x = 1;
         while (x == 1 ) {
             if( this.e.dataset[ ds ] ) {
@@ -695,8 +730,10 @@ fetch(request)
         if( !dia ) {
             return false;    
         } else {
+            console.log( deep );
             let tmp = dia.split( "." );
             let m = tmp.length;
+            if( typeof deep !== "undefined" ) m = deep;
             let j = 1;
             let tmpVar = window[ tmp[0] ];
             while( j < m ) {
@@ -750,6 +787,7 @@ fetch(request)
     this.hCl = _hCl;
     this.rCl = _rCl;
     this.tCl = _tCl;
+    this.aCN = _aCN;
     this.clL = _clL;
     this.sty = _sty;
     this.sRP = _sRP;
@@ -787,6 +825,7 @@ fetch(request)
     this.exC = _exC; 
     // objects
     this.oEx = _oEx;
+    this.fOA = _fOA;
     this.isJ = _isJ;
     // arrays
     this.rAE = _rAE;
