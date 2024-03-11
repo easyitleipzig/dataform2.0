@@ -58,6 +58,17 @@
         $i += 1;
     }
     print_r( "var list_salutation = '" . $option . "';\n" );
+    echo "let optRole = '";                        
+    $query = "SELECT * FROM role";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["role"] . "</option>";
+        $i += 1;
+    }
+    echo ";'\n";
     //var_dump($option);
    ?>
 let additionalFieldDefs = [
@@ -108,6 +119,21 @@ let fields = [
             addClasses: "cVal_val_int",
         },
         {
+            field: "val_select",
+            label: "val_select",
+            type: "select",
+            addClasses: "cVal_val_select",
+            options: optRole,
+        },
+        {
+            field: "val_select_multi",
+            label: "val_select_multi",
+            type: "select",
+            addClasses: "cVal_val_select_multi",
+            addAttr: "multiple",
+            options: optRole,
+        },
+        {
             field: "button_addKey",
             type: "button",
             baseClass: "cAddButton",
@@ -137,7 +163,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int", 
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi", 
     validOnSave: true, 
     additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
