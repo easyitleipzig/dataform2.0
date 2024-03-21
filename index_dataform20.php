@@ -87,6 +87,11 @@ let listOptions = [
     ]
 let fields = [
         {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer"
+        },
+        {
             field: "id",
             label: "Id",
             type: "input_text",
@@ -134,6 +139,18 @@ let fields = [
             options: optRole,
         },
         {
+            field: "val_img",
+            label: "val_img",
+            type: "img",
+            addClasses: "cVal_img",
+        },
+        {
+            field: "val_checkbox",
+            label: "val_checkbox",
+            type: "checkbox",
+            addClasses: "cVal_checkbox",
+        },
+        {
             field: "button_addKey",
             type: "button",
             baseClass: "cAddButton",
@@ -163,12 +180,14 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi", 
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox",
+    addPraefix: "df1_", 
     validOnSave: true, 
     additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
     optionLists: listOptions,
+    orderArray: ["val_varchar", "val_int"],
     /*additionalFields: additionalFields, */
 } );
 (function() {

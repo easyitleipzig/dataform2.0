@@ -40,10 +40,14 @@ class DataForm {                    // class for DataForm2.0
             whereClausel:                       "",
             pageNumber:                         0,
             countPerPage:                       undefined,          // if is 0 all records
+            orderArray:                         [],
+            filter:                             "",
+            searchArray:                        [],
             hasNew:                             true,
             addPraefix:                         "",
             widthSave:                          true,
             widthDelete:                        true,
+            dfHasLabel:                         true,
             validOnSave:                        false,
             baseClassRecordSet:                "cRecordset",
             addRSClasses:                       "",
@@ -80,18 +84,25 @@ class DataForm {                    // class for DataForm2.0
             tmpEls;
         Object.assign( this.opt, param );
         this.opt.id = "#" + this.opt.addPraefix + this.opt.id.substring( 1 );
-        if( !nj( this.opt.id ).isE() ) {
-            tmpEl = nj().cEl( "div" );
-            tmpEl.id = this.opt.id.substring( 1 );
-            nj( this.opt.target ).aCh( tmpEl );
+        if( this.opt.formType === "html") {            
+            if( !nj( this.opt.id ).isE() ) {
+                tmpEl = nj().cEl( "div" );
+                tmpEl.id = this.opt.id.substring( 1 );
+                nj( this.opt.target ).aCh( tmpEl );
+            }
         }
+        tmpEl = nj().cEl( "div" );
+        tmpEl.id = this.opt.id.substring( 1 ) + "_headline";
+        nj( this.opt.id ).aCh( tmpEl );
+        tmpEl = nj().cEl( "div" );
+        tmpEl.id = this.opt.id.substring( 1 ) + "_data";
+        nj( this.opt.id ).aCh( tmpEl );
+        this.showDfHeadline();
         data = {};
         data.command = "getFielddefinitions";
         data.dVar = this.opt.dVar;
         data.table = this.opt.table;
         data.fields = this.opt.fields;
-        //nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF)        
-        //nj().post("library/php/ajax_dataform20.php", data, this.evaluateDF)        
         nj( "#" + this.opt.dVar + "_tFUFile" ).on( "change", function( args ) {
             console.log( nj( this ).gRO() );
             nj( this ).gRO().uploadFile();    
@@ -132,7 +143,6 @@ class DataForm {                    // class for DataForm2.0
                 df.getRecords();
             break;
             case "getRecords":
-                //console.log( df, jsonobject );
                 df.prepareRecords( jsonobject );
             break;
             default:
@@ -302,9 +312,6 @@ class DataForm {                    // class for DataForm2.0
         formData.append("withTimeStamp", withTimeStamp )
         formData.append("UpdateTargetElement", this.opt.tFUTargetUpdateElementId );
         formData.append("targetElementAttr", targetElementAttr );
-        formData.append("targetElementAttr", targetElementAttr );
-        formData.append("targetElementAttr", targetElementAttr );
-        formData.append("targetElementAttr", targetElementAttr );
         if( targetFileName === "" ) {
             this.opt.tFUTargetFileName = fileObject.name
         }
@@ -356,6 +363,56 @@ class DataForm {                    // class for DataForm2.0
         nj( "#" + this.opt.dVar + "_tFUFile" ).atr( "accept", acceptFileTypes );
         this.opt.divUpload.show();
     }
+    showDfHeadline = function( args ) {
+        if( this.opt.dfHasLabel ) {
+            let el;
+            let l = this.opt.fieldDefinitions.length;
+            let i = 0;
+            while ( i < l ) {
+                el = nj().cEl( "div" );
+                el.id = this.opt.addPraefix + "hl_" + this.opt.fieldDefinitions[i].field;
+                if( typeof this.opt.fieldDefinitions[i].label === "undefined" || this.opt.fieldDefinitions[i].label === "" ) {
+                    nj( el ).htm( "&nbsp;" );
+                } else {
+                    if( this.opt.orderArray.indexOf( this.opt.fieldDefinitions[i].field ) > -1) {
+                        nj( el ).htm( this.opt.fieldDefinitions[i].label + "&nbsp;♦" );
+                    } else {
+                        nj( el ).htm( this.opt.fieldDefinitions[i].label );    
+                    }                    
+                }
+
+                nj( el ).sDs( "field", this.opt.fieldDefinitions[i].field );
+                nj( el ).sDs( "dvar", this.opt.dVar );
+                nj( this.opt.id + "_headline" ).aCh( el );
+                if( this.opt.orderArray.indexOf( this.opt.fieldDefinitions[i].field ) > -1) {
+                nj( "#" + el.id ).on( "click", function( args ) {
+                    console.log( nj(this).htm(), this );
+                    if( nj(this).htm().slice( - 1 ) == "▼" ) {
+                        nj("#" + this.id ).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "▲" );
+                        console.log( nj( this ).gRO().opt.orderBy );
+                        nj( this ).gRO().opt.orderBy = nj( this ).gRO().opt.orderBy.replace( " " + nj(this).ds("field") + " ASC,", "" );
+                        nj( this ).gRO().opt.orderBy += " " + nj(this).ds("field") + " DESC,"
+                        nj( this ).gRO().getRecords();
+                        return;
+                    }
+                    if( nj(this).htm().slice( - 1 ) == "▲" ) {        
+                        nj(this).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "♦" );
+                        nj( this ).gRO().opt.orderBy = nj( this ).gRO().opt.orderBy.replace( " " + nj(this).ds("field") + " DESC,", "" );
+                        nj( this ).gRO().getRecords();
+                        nj( this ).gRO().getRecords();
+                    }
+                    if( nj(this).htm().slice( - 1 ) == "♦" ) {        
+                        nj(this).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "▼" );
+                        console.log( " " + nj(this).ds("field") + ' ASC,' );
+                        nj( this ).gRO().opt.orderBy += " " + nj(this).ds("field") + (" ASC,");
+                        nj( this ).gRO().getRecords();
+                    }
+                });
+                }                   
+                i += 1;
+            }
+        }        
+    }
     getFieldDefinitions = function ( args ) {
         // content
         data = {};
@@ -368,21 +425,27 @@ class DataForm {                    // class for DataForm2.0
     }
     getRecords = function ( args ) {
         // content
+        let orderBy = "";
         data.command = "getRecords";
         data.dVar = this.opt.dVar;
         data.table = this.opt.table;
         data.primaryKey = this.opt.primaryKey;
         data.fields = this.opt.fields;
         data.fieldDefinitions = [];
-        data.orderBy = this.opt.orderBy;
+        if( this.opt.orderBy !== "" ) {
+            orderBy = this.opt.orderBy.substring( 0, this.opt.orderBy.length - 1 );    
+        }
+        data.orderBy = orderBy;
         data.whereClausel = this.opt.whereClausel;
         data.pageNumber = this.opt.pageNumber;
         data.countPerPage = this.opt.countPerPage;
         data.hasNew = this.opt.hasNew;
+        data.primaryKey = this.opt.primaryKey;
         nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF);
     }
     prepareRecords = function ( data ) {
         // content
+        this.opt.recordsets = [];
         let i, j, l, m, field, tmpField = {}, primaryKeyValue, tmpFieldType;
         l = data.records.length;
         this.opt.countRecords = l;
@@ -391,7 +454,7 @@ class DataForm {                    // class for DataForm2.0
             this.opt.recordsets.push( new RecordSet( {
                 dVar: this.opt.dVar + ".opt.recordsets." + i, 
                 id: "#" + this.opt.addPraefix + this.opt.id.substring( 1 ) + "RS" + "_" + data.records[ i ][ this.opt.primaryKey ], 
-                target: this.opt.id, 
+                target: this.opt.id + "_data", 
                 table: this.opt.table,
                 baseClass: this.opt.baseClassRecordSet,
                 addClasses: this.opt.addRSClasses,
@@ -402,9 +465,7 @@ class DataForm {                    // class for DataForm2.0
             j = 0;
             while( j < m ) {
                 field = this.opt.fieldDefinitions[j];
-                console.log( field );
-                field.id = "#" + this.opt.addPraefix + field.field + "_" + data.records[ i ][ this.opt.primaryKey ];
-                console.log( data.records[i][this.opt.fieldDefinitions[j].field] );
+                field.id = "#" + this.opt.addPraefix + field.field + "_" + data.records[ i ].primaryKey;
                 if( typeof data.records[i][this.opt.fieldDefinitions[j].field] !== "undefined" ) {
                     field.value = data.records[i][this.opt.fieldDefinitions[j].field];
                 }
@@ -425,8 +486,7 @@ class DataForm {                    // class for DataForm2.0
                 tmpField.addClasses = "cFieldSave";
                 tmpField.classButtonSize = this.opt.classButtonSize;
                 tmpField.onClick = function ( args ) {
-                    // content
-                    console.log( this );
+                    nj( this ).Dia( "dvar", 4 ).saveRecordset( nj( this ).gRO(), nj( this ).Dia( "dvar", 5 ), this.id.split("_")[this.id.split("_").length - 1] );
                 }
                 tmpField.tabIndex = j;
                 tmpFieldType = { type: "button" }
@@ -439,28 +499,99 @@ class DataForm {                    // class for DataForm2.0
                 Object.assign( tmpField, tmpFieldType );
                 this.opt.recordsets[i].opt.fields.push( new Field( tmpField ) );
             }
+            if( this.opt.widthDelete ) {
+                tmpField.id = this.opt.addPraefix + "RS_delete_" + data.records[ i ][ this.opt.primaryKey ];
+                tmpField.value = 0;
+                tmpField.label = "Datensatz löschen";
+                tmpField.baseClass = "";
+                tmpField.addClasses = "cFieldDelete";
+                tmpField.classButtonSize = this.opt.classButtonSize;
+                tmpField.onClick = function ( args ) {
+                    nj( this ).Dia( "dvar", 4 ).deleteRecordset( nj( this ).gRO(), nj( this ).Dia( "dvar", 5 ), this.id.split("_")[this.id.split("_").length - 1] );
+                }
+                tmpField.tabIndex = j;
+                tmpFieldType = { type: "button" }
+                //console.log( tmpField );
+                tmpField.table = this.opt.table;
+                tmpField.target = this.opt.recordsets[i].opt.id;
+                tmpField.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + ( j + 1 );
+                tmpField.value = "&nbsp;";
+                tmpField.title = "Datensatz löschen"
+                Object.assign( tmpField, tmpFieldType );
+                this.opt.recordsets[i].opt.fields.push( new Field( tmpField ) );
+            }
             i += 1;
         }
-        if( this.opt.widthDelete ) {
-            
-        }
+        
+
         if( this.opt.hasNew ) {
-            this.builNewRecord();    
+            this.opt.recordsets.push( new RecordSet( {
+                dVar: this.opt.dVar + ".opt.recordsets." + i, 
+                id: "#" + this.opt.addPraefix + this.opt.id.substring( 1 ) + "RS" + "_new", 
+                target: this.opt.id + "_data", 
+                table: this.opt.table,
+                baseClass: this.opt.baseClassRecordSet,
+                addClasses: this.opt.addRSClasses,
+                baseClassField: this.opt.baseClassField,
+                classButtonSize: this.opt.classButtonSize,
+            } ) );
+            m = this.opt.fieldDefinitions.length;
+            j = 0;
+            while ( j < m ) {
+                field = this.opt.fieldDefinitions[j];
+                field.id = "#" + this.opt.addPraefix + field.field + "_new";
+                if( typeof this.opt.fieldDefinitions[j].default !== "undefined" && this.opt.fieldDefinitions[j].default != null ) {
+                    field.value = this.opt.fieldDefinitions[j].default;
+                } else {
+                    field.value = "";
+                }
+
+                field.tabIndex = j;
+                field.table = this.opt.table;
+                field.target = this.opt.recordsets[i].opt.id;
+                field.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
+                field.validOnSave = this.opt.validOnSave;
+                field.classButtonSize = this.opt.classButtonSize;
+                this.opt.recordsets[i].opt.fields.push( new Field( field ) );
+                j += 1;
+            }
+            if( this.opt.widthSave ) {
+                tmpField.id = this.opt.addPraefix + "RS_save_new";
+                tmpField.value = 0;
+                tmpField.label = "Datensatz speichern";
+                tmpField.baseClass = "";
+                tmpField.addClasses = "cFieldSave";
+                tmpField.classButtonSize = this.opt.classButtonSize;
+                tmpField.onClick = function ( args ) {
+                    nj( this ).Dia( "dvar", 4 ).saveRecordset( nj( this ).gRO(), nj( this ).Dia( "dvar", 5 ), this.id.split("_")[this.id.split("_").length - 1] );
+                }
+                tmpField.tabIndex = j;
+                tmpFieldType = { type: "button" }
+                //console.log( tmpField );
+                tmpField.table = this.opt.table;
+                tmpField.target = this.opt.recordsets[i].opt.id;
+                tmpField.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
+                tmpField.value = "&nbsp;";
+                tmpField.title = "Datensatz speichern"
+                Object.assign( tmpField, tmpFieldType );
+                this.opt.recordsets[i].opt.fields.push( new Field( tmpField ) );
+            }
+            this.buildNewRecord();    
         }
-        console.log( this.opt.recordsets );
         if( this.opt.autoOpen ) {
             this.showRecordSets();
         }
     }
-    builNewRecord = function () {
+    buildNewRecord = function () {
         let l = this.opt.fieldDefinitions.length;
         let i = 0;
         while( i < l ) {
-            console.log(  this.opt.fieldDefinitions[ i ] );
+//            console.log(  this.opt.fieldDefinitions[ i ] );
             i += 1;
         }
     }
     showRecordSets = function () {
+        nj( this.opt.id + "_data" ).htm( "" );
         let l = this.opt.recordsets.length;
         let i = 0;
         while( i < l ) {

@@ -145,7 +145,6 @@ class RecordSet {                    // class for DataForm2.0
         el.id = this.opt.id.substring( 1 );
         nj( el ).aCN( this.opt.baseClass + this.opt.addClasses );
         nj( el ).sDs( "dvar", this.opt.dVar );
-        console.log( this.opt.target );
         nj( this.opt.target ).aCh( el );
         if( getFields ) {
             l = this.opt.fields.length;
@@ -165,6 +164,27 @@ class RecordSet {                    // class for DataForm2.0
     getRecordValues = function ( args ) {
         let els = nj().els( "div[id=" + this.opt.id.substring( 1 ) + "] .cField" );
         console.log( fields );
+    }
+    saveRecordset = function( df, rs, primaryKey ) {
+        console.log( df, rs, primaryKey );
+        let tabFields = df.opt.fields.split( "," );
+        let l = tabFields.length;
+        let i = 0;
+        while ( i < l ) {
+            tabFields[i].trim()
+            i += 1;
+        }
+        l = rs.fields.length;
+        i = 0;
+        let field = {}
+        while ( i < l ) {
+            if( tabFields.indexOf( rs.fields[i].opt.field ) > -1 ) {
+                field.field = rs.fields[i].opt.field;
+                field.value = rs.fields[i].getValue()                
+                console.log( field );
+            }
+            i += 1;
+        }    
     }
     init = function ( fieldDefinitions ) {
         if( typeof fieldDefinitions === "undefined" ) {

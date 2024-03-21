@@ -41,13 +41,17 @@ class DataForm {
             $this -> $fieldDefs = $fieldDefs;
         }
     }
-    public function getRecords( $fields, $whereClausel, $orderBy, $pageNumber, $countPerPage, $hasNew ) {
+    public function getRecords( $fields, $whereClausel, $orderBy, $pageNumber, $countPerPage, $hasNew, $primaryKey = "" ) {
         if( $fields === "" ) {
             $q = "select * from " . $this -> table;
         } else {
-            $q = "select $fields from " . $this -> table;
-        }if( $whereClausel !== "" ) {
+            $q = "select $fields, $primaryKey as primaryKey from " . $this -> table;
+        }
+        if( $whereClausel !== "" ) {
             $q .= " $whereClausel"; 
+        }
+        if( $orderBy !== "") {
+            $q .= " ORDER BY $orderBy";
         }
         $s = $this -> pdo -> query( $q );
         $r = $s -> fetchAll( PDO::FETCH_CLASS );

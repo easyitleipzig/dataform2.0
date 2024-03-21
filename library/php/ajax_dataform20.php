@@ -53,8 +53,9 @@ switch( $_POST["command"]) {
     break;
     case "getRecords":
         $return -> dVar = $_POST["dVar"];    
+        $return -> primaryKey = $_POST["primaryKey"];    
         if( !isset( $_POST['countPerPage'] ) ) $_POST['countPerPage'] = null;
-        $return -> records = $df -> getRecords( $_POST['fields'], $_POST['orderBy'],  $_POST['whereClausel'],  $_POST['pageNumber'], $_POST['countPerPage'],  $_POST['hasNew'] );
+        $return -> records = $df -> getRecords( $_POST['fields'], $_POST['whereClausel'], $_POST['orderBy'], $_POST['pageNumber'], $_POST['countPerPage'],  $_POST['hasNew'], $_POST["primaryKey"] );
         print(json_encode( $return ));
     break;
 

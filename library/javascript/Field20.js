@@ -82,24 +82,25 @@ class Field {                    // class for DataForm2.0
         if( typeof this.opt.default !== "undefined" && typeof this.opt.value === "undefined" ) {
             this.opt.value = this.opt.default;       
         }
-        console.log( this.opt.addClasses );
         if( this.opt.type === "button" || this.opt.type === "input_button" ) {
             this.opt.addClasses = this.opt.baseClass + " " + this.opt.classButtonSize + " " + this.opt.addClasses;
         } else {
             this.opt.addClasses = this.opt.baseClass + " " + this.opt.addClasses;
         }
-        if( this.opt.type === "img" || this.opt.type === "img"  ) {
-            nj().els( "body" )[0].appendChild( htmlToElement( DIV_UPLOAD_HTML ) );
-            nj( "#tmpUploadId" ).atr( "id", "uploadDiv_" + this.getId() );
-            nj( "#tmpDivUploadFormErrorText" ).atr( "id", "uploadErrorText_" + this.getId() );            
-            nj( "#tmpFileUploadFile" ).atr( "id", "fileUploadFile_" + this.getId() );
-            nj( "#fileUploadFile_" + this.getId() ).on( "change", function() {
+/*
+        if( this.opt.type === "img"  ) {
+            nj().els( "body" )[0].appendChild( htmlToElement( DIV_UPLOAD_HTML.replaceAll( "[dVar]", this.opt.dVar ) ) );
+            nj( "#" + this.opt.dVar + "_tmpUploadId" ).atr( "id", "uploadDiv_" + this.getId() );
+            nj( "#" + this.opt.dVar + "_tmpDivUploadFormErrorText" ).atr( "id", "uploadErrorText_" + this.getId() );            
+            nj( "#" + this.opt.dVar + "_tmpFileUploadFile" ).atr( "id", "#" + this.opt.dVar + "_fileUploadFile_" + this.getId() );
+            nj( "#" + this.opt.dVar + "_fileUploadFile_" + this.getId() ).on( "change", function() {
                 const [last] = this.value.split("\\").slice(-1);
                 console.log(last);
             })            
             nj( "#tmpLabelUpload" ).atr( "id", "labelUpload_" + this.getId() );
             nj( "#" + "labelUpload_" + this.getId() ).atr( "for", "fileUploadFile_" + this.getId() );
         }
+*/
         if( this.opt.label === "" ) this.opt.label = this.opt.id;
         if( typeof this.opt.onFocus === "function" ) {
 
@@ -247,6 +248,7 @@ class Field {                    // class for DataForm2.0
         }        
     }
     setValue = function( value ) {
+        console.log( this, value );
         if( typeof this.opt.index !== "undefined" ) {
             if( this.opt.addPraefix === "" ) {
                 switch( this.opt.type ) {
@@ -255,6 +257,9 @@ class Field {                    // class for DataForm2.0
                     break;
                 case "select":
                     nj( "#" + this.opt.id ).sSV( value );
+                    break;
+                case "img":
+                    nj( "#" + this.opt.id ).atr( "src", value );
                     break;
                 default:
                     nj( "#" + this.opt.id + '_' + this.opt.index ).v( value );
@@ -267,6 +272,9 @@ class Field {                    // class for DataForm2.0
                     break;
                 case "select":
                     nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).sSV( value );
+                    break;
+                case "img":
+                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).atr("src", value );
                     break;
                 default:
                     nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).v( value );
@@ -282,6 +290,9 @@ class Field {                    // class for DataForm2.0
                 case "select":
                     nj( "#" + this.opt.id ).sSV( value );
                     break;
+                case "img":
+                    nj( "#" + this.opt.id ).atr("src", value );
+                    break;
                 default:
                     nj( "#" + this.opt.id ).v( value );
                     break;
@@ -293,6 +304,9 @@ class Field {                    // class for DataForm2.0
                     break;
                 case "select":
                     nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).sSV( value );
+                    break;
+                case "img":
+                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).atr("src", value );
                     break;
                 default:
                     nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).v( value );
@@ -320,13 +334,16 @@ class Field {                    // class for DataForm2.0
             if( this.opt.addPraefix === "" ) {
                 switch( this.opt.type ) {
                 case "checkbox":
-                    return nj( "#" + this.opt.id ).chk();
+                    return nj( this.opt.id ).chk();
                     break;
                 case "select":
-                    return nj( "#" + this.opt.id ).gSV().join();
+                    return nj( this.opt.id ).gSV().join();
+                    break;
+                case "img":
+                    return nj( this.opt.id ).atr( "src" );
                     break;
                 default:
-                    return nj( "#" + this.opt.id ).v();    
+                    return nj( this.opt.id ).v();    
                     break;
                 }
             } else {
@@ -382,7 +399,7 @@ class Field {                    // class for DataForm2.0
                 fieldHTML += ' class="cSelect ' + this.opt.addClasses + '" ';
                 fieldHTML += this.opt.addAttr + '>' + this.opt.options + '</select>';
                 this.tmpEl = htmlToElement( fieldHTML );
-                if( typeof this.opt.value !== "undefined" ) {
+                if( typeof this.opt.value !== "undefined" && this.opt.value != null ) {
                     this.tmpValueArry = this.opt.value.split( "," );
                     l = this.tmpEl.children.length;
                     i = 0;
@@ -463,15 +480,15 @@ class Field {                    // class for DataForm2.0
             case "checkbox":
                 if( typeof this.opt.index !== "undefined" ) {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
+                        fieldHTML += '<input id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
                     } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
+                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
                     }                    
                 } else {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<input id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
+                        fieldHTML += '<input id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';    
                     } else {
-                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
+                        fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
                 if( this.opt.value == true ) {
@@ -486,15 +503,15 @@ class Field {                    // class for DataForm2.0
             case "button":
                 if( typeof this.opt.index !== "undefined" ) {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';    
+                        fieldHTML += '<button id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';    
                     } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';
+                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';
                     }                    
                 } else {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';    
+                        fieldHTML += '<button id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';    
                     } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';
+                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';
                     }
                 }
                 if( typeof this.opt.value === "undefined" ) this.opt.value = "";
@@ -506,15 +523,15 @@ class Field {                    // class for DataForm2.0
             case "img":
                 if( typeof this.opt.index !== "undefined" ) {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<img id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
+                        fieldHTML += '<img id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
                     } else {
-                        fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
+                        fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
                     }                    
                 } else {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<img id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
+                        fieldHTML += '<img id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';    
                     } else {
-                        fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
+                        fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';
@@ -525,15 +542,15 @@ class Field {                    // class for DataForm2.0
             case "recordPointer":
                 if( typeof this.opt.index !== "undefined" ) {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
+                        fieldHTML += '<button id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';    
                     } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
+                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" ';
                     }                    
                 } else {
                     if( this.opt.addPraefix === "" ) {
-                        fieldHTML += '<button id="' + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';    
+                        fieldHTML += '<button id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';    
                     } else {
-                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id + '" data-dvar="' + this.opt.dVar + '" ';
+                        fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</button>';
