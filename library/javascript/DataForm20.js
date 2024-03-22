@@ -6,10 +6,6 @@ const DIV_UPLOAD_HTML = `<div id="[dVar]_tmpUploadId" class="divUploadFile">
     </div
     <input type="file" id="[dVar]_tFUFile">
 </div>`;
-innerCheckValidity = function( field ) {
-    console.log( field );    
-}
-
 class DataForm {                    // class for DataForm2.0
       constructor( param ) {
         this.opt = {
@@ -81,7 +77,9 @@ class DataForm {                    // class for DataForm2.0
         let tmpId = "",
             tmpClasses = "",
             tmpEl, 
-            tmpEls;
+            tmpEls,
+            tmpSearchString = "",
+            searchWasGreaterThanTwo;
         Object.assign( this.opt, param );
         this.opt.id = "#" + this.opt.addPraefix + this.opt.id.substring( 1 );
         if( this.opt.formType === "html") {            
@@ -98,6 +96,9 @@ class DataForm {                    // class for DataForm2.0
         tmpEl.id = this.opt.id.substring( 1 ) + "_data";
         nj( this.opt.id ).aCh( tmpEl );
         this.showDfHeadline();
+        if( this.opt.searchArray.length > 0 ) {
+            this.showSearchHeadline();
+        }
         data = {};
         data.command = "getFielddefinitions";
         data.dVar = this.opt.dVar;
@@ -128,7 +129,6 @@ class DataForm {                    // class for DataForm2.0
                 i = 0;
                 let field, options;
                 while( i < l ) {
-                    //console.log( jsonobject.fieldDefs, df.opt.fieldDefinitions[i] );
                     field = nj().fOA( jsonobject.fieldDefs, "Field", df.opt.fieldDefinitions[ i ].field )[0];
                     if( typeof field !== "undefined" ) {
                         Object.assign( df.opt.fieldDefinitions[ i ], df.buildLengthProps( field ) );
@@ -144,6 +144,9 @@ class DataForm {                    // class for DataForm2.0
             break;
             case "getRecords":
                 df.prepareRecords( jsonobject );
+            break;
+            case "saveRecordset":
+
             break;
             default:
                 // content
@@ -363,11 +366,15 @@ class DataForm {                    // class for DataForm2.0
         nj( "#" + this.opt.dVar + "_tFUFile" ).atr( "accept", acceptFileTypes );
         this.opt.divUpload.show();
     }
-    showDfHeadline = function( args ) {
+    showDfHeadline = function() {
         if( this.opt.dfHasLabel ) {
             let el;
             let l = this.opt.fieldDefinitions.length;
             let i = 0;
+            el = nj().cEl( "div" );
+            nj( el ).sDs( "dvar", this.opt.dVar );
+            el.id = this.opt.id.substring( 1 ) + "_orderline"
+            nj( this.opt.id + "_headline" ).aCh( el );
             while ( i < l ) {
                 el = nj().cEl( "div" );
                 el.id = this.opt.addPraefix + "hl_" + this.opt.fieldDefinitions[i].field;
@@ -382,9 +389,8 @@ class DataForm {                    // class for DataForm2.0
                 }
 
                 nj( el ).sDs( "field", this.opt.fieldDefinitions[i].field );
-                nj( el ).sDs( "dvar", this.opt.dVar );
-                nj( this.opt.id + "_headline" ).aCh( el );
-                if( this.opt.orderArray.indexOf( this.opt.fieldDefinitions[i].field ) > -1) {
+                nj( this.opt.id + "_orderline" ).aCh( el );
+                if( this.opt.orderArray.indexOf( this.opt.fieldDefinitions[i].field ) > -1 ) {
                 nj( "#" + el.id ).on( "click", function( args ) {
                     console.log( nj(this).htm(), this );
                     if( nj(this).htm().slice( - 1 ) == "▼" ) {
@@ -399,7 +405,6 @@ class DataForm {                    // class for DataForm2.0
                         nj(this).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "♦" );
                         nj( this ).gRO().opt.orderBy = nj( this ).gRO().opt.orderBy.replace( " " + nj(this).ds("field") + " DESC,", "" );
                         nj( this ).gRO().getRecords();
-                        nj( this ).gRO().getRecords();
                     }
                     if( nj(this).htm().slice( - 1 ) == "♦" ) {        
                         nj(this).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "▼" );
@@ -412,6 +417,79 @@ class DataForm {                    // class for DataForm2.0
                 i += 1;
             }
         }        
+    }
+    showSearchHeadline = function() {
+        let el, field;
+        el = nj().cEl( "div" );
+        el.id = this.opt.id.substring( 1 ) + "_searchline";
+        nj( el ).sDs( "dvar", this.opt.dVar );
+        nj( this.opt.id + "_headline" ).aCh( el );
+        let l = this.opt.searchArray.length;
+        let i = 0;
+        while( i < l ) {
+            field = new Field( {
+                id: "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field,
+                type: this.opt.searchArray[i].type,
+                addAttr: this.opt.searchArray[i].addAttr + " data-field='" + this.opt.searchArray[i].field + "'",
+                options: this.opt.searchArray[i].options,
+                dVar: this.opt.dVar,    
+            } );
+            nj( this.opt.id + "_searchline" ).aCh( field.getField()[0] );
+            nj( field.opt.id ).v( this.opt.searchArray[i].value );
+            if( this.opt.searchArray[i].type === "select" ) {
+                nj( field.opt.id ).on( "change", function( args ) {
+                    console.log( nj( this ).gSV() );
+                    nj( this ).Dia().getSearchString();   
+                } );    
+            }
+            if( this.opt.searchArray[i].type === "input_text" ) {
+                nj( field.opt.id ).on( "keyup", function() {
+                    if( nj( this ).v().length < 3 && this.searchWasGreaterThanTwo ) {
+                        nj( this ).v("");
+                        this.searchWasGreaterThanTwo = false;    
+                        nj( this ).Dia().getSearchString();
+                    } else {
+                        if( nj( this ).v().length > 2 ) {
+                            this.searchWasGreaterThanTwo = true;
+                            nj( this ).Dia().getSearchString();
+                        }
+                    }
+
+                } );    
+            }
+            i += 1;
+        }
+    }
+    getSearchString = function( args ) {
+        let l = this.opt.searchArray.length;
+        let i = 0;
+        let searchString = "where ";
+        if( this.opt.filter !== "" ) {
+            searchString += this.opt.filter + " AND ";
+        }
+        while ( i < l ) {
+            if( this.opt.searchArray[i].type === "input_text" ) {
+                if( nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).v().length > 1 ) {
+                    searchString += this.opt.searchArray[i].field + " like '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).v() + "%' AND ";    
+                } else {
+                    searchString += "";
+                }
+            }
+            if( this.opt.searchArray[i].type === "select" ) {
+                if( nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) !== ">-1" ) {
+                    searchString += this.opt.searchArray[i].field + " = '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";    
+                } else {
+                    searchString += "";
+                }
+                
+            }
+            i += 1;
+        }
+        this.opt.whereClausel = searchString.substring( 0, searchString.length - 5 );
+        this.getRecords();
+    }
+    checkValidity = function( fieldId ) {
+
     }
     getFieldDefinitions = function ( args ) {
         // content
@@ -475,6 +553,9 @@ class DataForm {                    // class for DataForm2.0
                 field.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
                 field.validOnSave = this.opt.validOnSave;
                 field.classButtonSize = this.opt.classButtonSize;
+                field.onBlur = function( args ) {
+                    console.log( nj( this ).Dia() );    
+                }
                 this.opt.recordsets[i].opt.fields.push( new Field( field ) );
                 j += 1;
             }
@@ -601,6 +682,10 @@ class DataForm {                    // class for DataForm2.0
     }
     init = function () {
         // content
+        if( this.opt.filter !== "" ) {
+            this.opt.whereClausel = " where " + this.opt.filter;
+        }
+
         this.getFieldDefinitions();
     }
 }

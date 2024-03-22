@@ -58,5 +58,19 @@ switch( $_POST["command"]) {
         $return -> records = $df -> getRecords( $_POST['fields'], $_POST['whereClausel'], $_POST['orderBy'], $_POST['pageNumber'], $_POST['countPerPage'],  $_POST['hasNew'], $_POST["primaryKey"] );
         print(json_encode( $return ));
     break;
-
+    case "saveRecordset":
+        $return -> dVar = $_POST["dVar"];
+        $res = $df -> saveRecordset( $_POST["primaryKey"], $_POST["primaryKeyValue"], json_decode( $_POST["fields"] ) );
+        $return -> success = $res -> success;
+        $return -> message = $res -> message;
+        print(json_encode( $return ));
+    break;
+    case "deleteRecordset":
+        $return -> dVar = $_POST["dVar"];
+        $q = "delete from " . $_POST["table"] . " where " . $_POST["primaryKey"] . " = '" . $_POST["primaryKeyValue"] . "'";
+        $db_pdo -> query( $q ); 
+        $return -> success = $res -> success;
+        $return -> message = $res -> message;
+        print(json_encode( $return ));
+    break;
 }

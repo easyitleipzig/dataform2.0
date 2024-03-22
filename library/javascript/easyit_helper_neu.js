@@ -154,6 +154,39 @@ Date.prototype.getWeekDayName = function() {
 Date.prototype.getTS = function() {
     return + new Date();
 }
+const getCurrentWeek = function() {
+    let retsult = {};
+    retsult.from = getMysqlDate( addDaysToDate(new Date(), 1 - new Date().getDay() ) );
+    retsult.to = getMysqlDate( addDaysToDate(new Date(), ( 1 - new Date().getDay() ) + 6 ) );
+    return retsult;
+}
+const getNextWeek = function() {
+    let retsult = {};
+    retsult.from = getMysqlDate( addDaysToDate(new Date(), 1 - new Date().getDay() + 7 ) );
+    retsult.to = getMysqlDate( addDaysToDate(new Date(), ( 1 - new Date().getDay() ) + 13 ) );
+    return retsult;
+}
+const getLastMonth = function() {
+    let result = {};
+    let tmp = getCurrentMonth();
+    result.from = getMysqlDate( new Date( tmp.from ).addMonths( -1 ) );
+    result.to = getMysqlDate( new Date( tmp.to ).addMonths( -1 ) );
+    return result;
+}
+const getCurrentMonth = function() {
+    let result = {};
+    result.from = new Date().getMonth();
+    result.from = new Date().getFullYear() + "-" + (result.from + 1) + "-01";
+    result.to = getMysqlDate( new Date( result.from ).addMonths(1).addDays( -1 ) );
+    return result;
+}
+const getNextMonth = function() {
+    let result = {};
+    let tmp = getCurrentMonth();
+    result.from = getMysqlDate( new Date( tmp.from ).addMonths( 1 ) );
+    result.to = getMysqlDate( new Date( tmp.to ).addMonths( 1 ) );
+    return result;
+}
 Array.prototype.sortNCSensitive = function() {
     //arr.sort((a,b) => (a.Value.toLocaleLowerCase() > b.Value.toLocaleLowerCase()) ? 1 : ((b.Value.toLocaleLowerCase() > a.Value.toLocaleLowerCase()) ? -1 : 0)); 
     this.sort(function(x,y){

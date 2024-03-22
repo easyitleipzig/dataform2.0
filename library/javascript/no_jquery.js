@@ -730,7 +730,6 @@ fetch(request)
         if( !dia ) {
             return false;    
         } else {
-            console.log( deep );
             let tmp = dia.split( "." );
             let m = tmp.length;
             if( typeof deep !== "undefined" ) m = deep;

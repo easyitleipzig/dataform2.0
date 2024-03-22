@@ -53,6 +53,7 @@ class DataForm {
         if( $orderBy !== "") {
             $q .= " ORDER BY $orderBy";
         }
+        $q = str_replace( "\\", "", $q );
         $s = $this -> pdo -> query( $q );
         $r = $s -> fetchAll( PDO::FETCH_CLASS );
         if( $hasNew == "true" ) {
@@ -64,5 +65,28 @@ class DataForm {
             $s = $this -> pdo -> query( $q );                
         }
         return $r;        
-    }   
+    }
+    public function saveRecordset( $primaryKey, $primaryKeyValue, $fields ) {
+        $return = new \stdClass();
+        try {
+            $l = count( $fields );
+            $i = 0;
+            $q = "";
+            while( $i < $l ) {
+                if( $fields[$i] -> value === FALSE ) $fields[$i] -> value = 0;
+                $q .= $fields[$i] -> field . " = '" . $fields[$i] -> value . "', ";
+                $i += 1;
+            }
+            $q = "update " . $this -> table . " set " . $q;
+            $q = substr( $q, 0, strlen( $q ) - 2 ) . " where $primaryKey = '$primaryKeyValue'";
+            $this -> pdo -> query( $q );
+            $return -> success = true;
+            $return -> message = "Der Datensatz wurde erfolgreich gespeichert.";
+            
+        } catch (Exception $e ) {
+            $return -> success = false;
+            $return -> message = "Beim Speichern des Datensatzes ist folgender Fehler aufgetreten: " . $e -> getMessage();            
+        }
+        return $return;
+    }       
 }

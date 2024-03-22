@@ -68,7 +68,7 @@
         echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["role"] . "</option>";
         $i += 1;
     }
-    echo ";'\n";
+    echo "'\n";
     //var_dump($option);
    ?>
 let additionalFieldDefs = [
@@ -187,7 +187,35 @@ var Df = new DataForm( {
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
     optionLists: listOptions,
+    //filter: "id = '1'",
     orderArray: ["val_varchar", "val_int"],
+    searchArray: [
+            {
+                field: "val_varchar",
+                type: "input_text",
+                value: "",
+            },
+            {
+                field: "val_select",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                value: ">-1",
+            },
+            {
+                field: "val_select_multi",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                addAttr: "multiple",
+                value: ">-1",
+            },
+            {
+                field: "val_checkbox",
+                type: "select",
+                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
+                value: ">-1",
+            },
+
+        ]
     /*additionalFields: additionalFields, */
 } );
 (function() {

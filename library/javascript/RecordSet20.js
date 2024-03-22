@@ -126,6 +126,8 @@ class RecordSet {                    // class for DataForm2.0
                     i += 1;
                 }
             break;
+        case "saveRecordset":
+            break;
             default:
                 // content
         
@@ -177,14 +179,37 @@ class RecordSet {                    // class for DataForm2.0
         l = rs.fields.length;
         i = 0;
         let field = {}
+        let fieldArray = "[";
         while ( i < l ) {
             if( tabFields.indexOf( rs.fields[i].opt.field ) > -1 ) {
                 field.field = rs.fields[i].opt.field;
-                field.value = rs.fields[i].getValue()                
-                console.log( field );
+                field.value = rs.fields[i].getValue();
+                fieldArray += JSON.stringify( field ) + ", ";                                
             }
             i += 1;
-        }    
+        }
+        fieldArray = fieldArray.substring( 0, fieldArray.length - 2 )
+        fieldArray += "]";
+        data = {};
+        data.dVar = df.opt.dVar;
+        data.command = "saveRecordset";
+        data.table = df.opt.table;
+        data.primaryKey = df.opt.primaryKey;
+        data.primaryKeyValue = primaryKey;
+        data.fields = fieldArray;
+        console.log( data );
+        nj().fetchPostNew("library/php/ajax_dataform20.php", data, df.evaluateDF)        
+    }
+    deleteRecordset = function( df, rs, primaryKey ) {
+        console.log( df, rs, primaryKey );
+        data = {};
+        data.dVar = this.dVar;
+        data.command = "deleteRecordset";
+        data.table = df.opt.table;
+        data.primaryKey = df.opt.primaryKey;
+        data.primaryKeyValue = primaryKey;
+        console.log( data );
+        nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateRS)        
     }
     init = function ( fieldDefinitions ) {
         if( typeof fieldDefinitions === "undefined" ) {
