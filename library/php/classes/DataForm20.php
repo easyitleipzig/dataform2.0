@@ -41,7 +41,8 @@ class DataForm {
             $this -> $fieldDefs = $fieldDefs;
         }
     }
-    public function getRecords( $fields, $whereClausel, $orderBy, $pageNumber, $countPerPage, $hasNew, $primaryKey = "" ) {
+    public function getRecords( $fields, $whereClausel, $orderBy, $limit, $hasNew, $primaryKey = "" ) {
+        $return = new \stdClass();
         if( $fields === "" ) {
             $q = "select * from " . $this -> table;
         } else {
@@ -53,7 +54,13 @@ class DataForm {
         if( $orderBy !== "") {
             $q .= " ORDER BY $orderBy";
         }
+        $c = "select count( $primaryKey ) as cRecords from " . $this -> table . " $whereClausel";
+        $c = str_replace( "\\", "", $c );
+        $s = $this -> pdo -> query( $c );
+        $r = $s -> fetchAll( PDO::FETCH_ASSOC );
+        $return -> countRecords = $r[0]["cRecords"];
         $q = str_replace( "\\", "", $q );
+        $q .= $limit;
         $s = $this -> pdo -> query( $q );
         $r = $s -> fetchAll( PDO::FETCH_CLASS );
         if( $hasNew == "true" ) {
@@ -64,7 +71,8 @@ class DataForm {
             }
             $s = $this -> pdo -> query( $q );                
         }
-        return $r;        
+        $return -> records = $r;
+        return $return;        
     }
     public function saveRecordset( $primaryKey, $primaryKeyValue, $fields ) {
         $return = new \stdClass();
@@ -86,6 +94,41 @@ class DataForm {
         } catch (Exception $e ) {
             $return -> success = false;
             $return -> message = "Beim Speichern des Datensatzes ist folgender Fehler aufgetreten: " . $e -> getMessage();            
+        }
+        return $return;
+    }       
+    public function newRecordset( $primaryKey, $primaryKeyValue, $fields ) {
+        $return = new \stdClass();
+        try {
+            $q = "SHOW FULL COLUMNS FROM " .  $this -> table . " where Field in ('" . $primaryKey . "')";
+            $s = $this -> pdo -> query( $q );
+            $r = $s -> fetchAll( PDO::FETCH_ASSOC );
+            $isAuto = false;
+            if( str_contains( $r[0]["Extra"], "auto_increment" ) ) $isAuto = true;
+            $l = count( $fields );
+            $i = 0;
+            $tabFields = "";
+            $values = "";
+            while( $i < $l ) {
+                if( $fields[$i]->field === $primaryKey && $isAuto ) {
+                    
+                } else {
+                    $tabFields .= $fields[$i]->field . ",";
+                    $values .= "'" . $fields[$i]->value . "',";
+                }
+                $i += 1;
+            }
+            
+            $return -> success = true;
+            $return -> message = "Der Datensatz wurde erfolgreich angelegt.";
+            
+        } catch (Exception $e ) {
+            $return -> success = false;
+            if( $e -> code === 23000 ) {
+                $return -> message = "Der Datensatzes kann so nicht angelegt werden, da eine Schlüsselverletzung vorliegt.";
+            } else {
+                $return -> message = "Beim Anlegen des Datensatzes ist folgender Fehler aufgetreten: " . $e -> getMessage();                
+            }
         }
         return $return;
     }       

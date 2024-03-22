@@ -187,6 +187,9 @@ var Df = new DataForm( {
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
     optionLists: listOptions,
+    countPerPage: 2,
+    currentPage: 1,
+    countRecords: undefined,
     //filter: "id = '1'",
     orderArray: ["val_varchar", "val_int"],
     searchArray: [
@@ -194,12 +197,14 @@ var Df = new DataForm( {
                 field: "val_varchar",
                 type: "input_text",
                 value: "",
+                sel: "value",
             },
             {
                 field: "val_select",
                 type: "select",
                 options: "<option value='>-1'>alle</option>" + optRole,
                 value: ">-1",
+                sel: "value",
             },
             {
                 field: "val_select_multi",
@@ -207,12 +212,14 @@ var Df = new DataForm( {
                 options: "<option value='>-1'>alle</option>" + optRole,
                 addAttr: "multiple",
                 value: ">-1",
+                sel: "value",
             },
             {
                 field: "val_checkbox",
                 type: "select",
                 options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
                 value: ">-1",
+                sel: "value",
             },
 
         ]

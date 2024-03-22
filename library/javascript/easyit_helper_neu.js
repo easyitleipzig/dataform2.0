@@ -166,6 +166,13 @@ const getNextWeek = function() {
     retsult.to = getMysqlDate( addDaysToDate(new Date(), ( 1 - new Date().getDay() ) + 13 ) );
     return retsult;
 }
+const getLastWeek = function() {
+    let retsult = {};
+    let tmp = getCurrentWeek(); 
+    retsult.from = getMysqlDate( addDaysToDate(new Date( tmp.from ), -7 ) );
+    retsult.to = getMysqlDate( addDaysToDate(new Date( tmp.to ), -7 ) );
+    return retsult;
+}
 const getLastMonth = function() {
     let result = {};
     let tmp = getCurrentMonth();

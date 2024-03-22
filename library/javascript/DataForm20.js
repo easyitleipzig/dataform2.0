@@ -6,6 +6,7 @@ const DIV_UPLOAD_HTML = `<div id="[dVar]_tmpUploadId" class="divUploadFile">
     </div
     <input type="file" id="[dVar]_tFUFile">
 </div>`;
+const optDate = '<option value="[field]>=\'' + getLastWeek().from + '\' and [field]<=\'' + getLastWeek().to + '\'">letzteWoche</option><option value="[field]>=\'' + getCurrentWeek().from + '\' and [field]<=\'' + getCurrentWeek().to + '\'">aktuelle Woche</option><option value="[field]>=\'' + getNextWeek().from + '\' and [field]<=\'' + getNextWeek().to + '\'">nächste Woche</option><option value="[field]>=\'' + getLastMonth().from + '\' and [field]<=\'' + getLastMonth().to + '\'">letzter Monat</option><option value="[field]>=\'' + getCurrentMonth().from + '\' and [field]<=\'' + getCurrentMonth().to + '\'">aktueller Monat</option><option value="[field]>=\'' + getNextMonth().from + '\' and [field]<=\'' + getNextMonth().to + '\'">nächster Monat</option>';
 class DataForm {                    // class for DataForm2.0
       constructor( param ) {
         this.opt = {
@@ -34,8 +35,8 @@ class DataForm {                    // class for DataForm2.0
             currentRecord:                      1,
             orderBy:                            "",
             whereClausel:                       "",
-            pageNumber:                         0,
-            countPerPage:                       undefined,          // if is 0 all records
+            currentPage:                        0,
+            countPerPage:                       0,          // if is 0 all records
             orderArray:                         [],
             filter:                             "",
             searchArray:                        [],
@@ -143,6 +144,7 @@ class DataForm {                    // class for DataForm2.0
                 df.getRecords();
             break;
             case "getRecords":
+                df.opt.countRecords = jsonobject.countRecords;
                 df.prepareRecords( jsonobject );
             break;
             case "saveRecordset":
@@ -477,7 +479,12 @@ class DataForm {                    // class for DataForm2.0
             }
             if( this.opt.searchArray[i].type === "select" ) {
                 if( nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) !== ">-1" ) {
-                    searchString += this.opt.searchArray[i].field + " = '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";    
+                    if( this.opt.searchArray[i].sel === "value" ) {
+                        searchString += this.opt.searchArray[i].field + " = '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";
+                    } else {
+                        // is area for e.g. date areas (date >= value and date <= [value])
+                        searchString += nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";    
+                    }
                 } else {
                     searchString += "";
                 }
@@ -515,8 +522,11 @@ class DataForm {                    // class for DataForm2.0
         }
         data.orderBy = orderBy;
         data.whereClausel = this.opt.whereClausel;
-        data.pageNumber = this.opt.pageNumber;
-        data.countPerPage = this.opt.countPerPage;
+        if( this.opt.countPerPage !== 0 ) {
+            data.limit = " LIMIT " + this.opt.currentPage * this.opt.countPerPage + ", " + this.opt.countPerPage;
+        } else {
+            data.limit = "";
+        }
         data.hasNew = this.opt.hasNew;
         data.primaryKey = this.opt.primaryKey;
         nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF);
@@ -605,7 +615,7 @@ class DataForm {                    // class for DataForm2.0
         }
         
 
-        if( this.opt.hasNew ) {
+        if( this.opt.hasNew && ( this.opt.recordsets.length < this.opt.countPerPage || this.opt.countPerPage === 0 ) ) {
             this.opt.recordsets.push( new RecordSet( {
                 dVar: this.opt.dVar + ".opt.recordsets." + i, 
                 id: "#" + this.opt.addPraefix + this.opt.id.substring( 1 ) + "RS" + "_new", 

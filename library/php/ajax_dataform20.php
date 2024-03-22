@@ -55,12 +55,19 @@ switch( $_POST["command"]) {
         $return -> dVar = $_POST["dVar"];    
         $return -> primaryKey = $_POST["primaryKey"];    
         if( !isset( $_POST['countPerPage'] ) ) $_POST['countPerPage'] = null;
-        $return -> records = $df -> getRecords( $_POST['fields'], $_POST['whereClausel'], $_POST['orderBy'], $_POST['pageNumber'], $_POST['countPerPage'],  $_POST['hasNew'], $_POST["primaryKey"] );
+        $res = $df -> getRecords( $_POST['fields'], $_POST['whereClausel'], $_POST['orderBy'], $_POST['limit'], $_POST['hasNew'], $_POST["primaryKey"] );
+        $return -> records = $res -> records;
+        $return -> countRecords = $res -> countRecords;
+        
         print(json_encode( $return ));
     break;
     case "saveRecordset":
         $return -> dVar = $_POST["dVar"];
-        $res = $df -> saveRecordset( $_POST["primaryKey"], $_POST["primaryKeyValue"], json_decode( $_POST["fields"] ) );
+        if( $_POST["primaryKeyValue"] === "new" ) {
+            $res = $df -> newRecordset( $_POST["primaryKey"], $_POST["primaryKeyValue"], json_decode( $_POST["fields"] ) );
+        } else {
+            $res = $df -> saveRecordset( $_POST["primaryKey"], $_POST["primaryKeyValue"], json_decode( $_POST["fields"] ) );
+        }
         $return -> success = $res -> success;
         $return -> message = $res -> message;
         print(json_encode( $return ));
