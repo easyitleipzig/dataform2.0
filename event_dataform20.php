@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>Dataform-Test</title>
+    <title>Event-Test</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -46,31 +46,20 @@
         die;
     }
 
-    $q = "SELECT id as value, salutation as text from salutation order by id asc";
-    $s = $db_pdo -> query( $q );
-    $r = $s -> fetchAll( PDO::FETCH_CLASS );
-    $l = count( $r );
-    $i = 0;
-    $option = "";
-    while ($i < $l ) {
-        // code...
-        $option .= '<option value="' . $r[$i]->value . '">' . $r[$i]->text . '</option>';
-        $i += 1;
-    }
-    print_r( "var list_salutation = '" . $option . "';\n" );
-    echo "let optRole = '";                        
-    $query = "SELECT * FROM role";
+    echo "let optCategory = '";                        
+    $query = "SELECT * FROM event_format";
     $stm = $db_pdo -> query( $query );
     $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
     $l = count( $result );
     $i = 0;
     while( $i < $l ) {
-        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["role"] . "</option>";
+        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["name"] . "</option>";
         $i += 1;
     }
     echo "'\n";
     //var_dump($option);
    ?>
+/*
 let additionalFieldDefs = [
     {
         label: "test",
@@ -85,6 +74,7 @@ let listOptions = [
             options: list_salutation,
         }
     ]
+*/
 let fields = [
         {
             type: "recordPointer",
@@ -98,7 +88,7 @@ let fields = [
             type: "input_text",
 
         },
-        {
+/*        {
             field: "dummy",
             label: "dummy",
             value: new Date().addHours(1).toISOString().replace("T", " ").replace("Z", "").split(" ")[0], // current date without hours
@@ -176,24 +166,28 @@ let fields = [
                 console.log( nj( this ).Dia().tmpEl );
             }
         },
+        */
     ];
 // Df;
 var Df = new DataForm( { 
     dVar: "Df", 
     id: "#Df", 
-    table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox",
+    table: "event", 
+    fields: "id",
     addPraefix: "df1_", 
     validOnSave: true, 
-    additionalFieldDefs: additionalFieldDefs,
+    //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
-    optionLists: listOptions,
-    countPerPage: 2,
+    //optionLists: listOptions,
+    countPerPage: 5,
     currentPage: 0,
-    hasPagination: true,
     countRecords: undefined,
-    //filter: "id = '1'",
+    hasPagination: true,
+    filter: "",
+    boundForm: ["Df_part"],
+    boundFields: [ { from: "id", to: "event_id" } ],
+/*
     orderArray: ["val_varchar", "val_int"],
     searchArray: [
             {
@@ -224,19 +218,97 @@ var Df = new DataForm( {
                 value: ">-1",
                 sel: "value",
             },
-/*            {
+            {
                 field: "val_test",
                 type: "select",
                 options: optDate.replaceAll( "[field]", "val_test" ),
                 value: ">-1",
                 sel: "area",
             },
-*/
+
+        ]
+    /*additionalFields: additionalFields, */
+} );
+var Df_part = new DataForm( { 
+    dVar: "Df_part", 
+    id: "#Df_part", 
+    table: "event_participate", 
+    fields: "id,event_id",
+    addPraefix: "df2_", 
+    validOnSave: true, 
+    //additionalFieldDefs: additionalFieldDefs,
+    classButtonSize: "cButtonMiddle",
+    fieldDefinitions:  [
+        {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
+        },
+        {
+            field: "id",
+            label: "Id",
+            type: "input_text",
+
+        },
+        {
+            field: "event_id",
+            label: "EventId",
+            type: "input_text",
+
+        },
+        ],
+    //optionLists: listOptions,
+    countPerPage: 0,
+    currentPage: 0,
+    countRecords: undefined,
+    hasPagination: false,
+    filter: undefined,
+/*
+    orderArray: ["val_varchar", "val_int"],
+    searchArray: [
+            {
+                field: "val_varchar",
+                type: "input_text",
+                value: "",
+                sel: "value",
+            },
+            {
+                field: "val_select",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_select_multi",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                addAttr: "multiple",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_checkbox",
+                type: "select",
+                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_test",
+                type: "select",
+                options: optDate.replaceAll( "[field]", "val_test" ),
+                value: ">-1",
+                sel: "area",
+            },
+
         ]
     /*additionalFields: additionalFields, */
 } );
 (function() {
     Df.init();
+    Df_part.init();
 })();
 </script>
 </body>

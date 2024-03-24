@@ -75,7 +75,16 @@ switch( $_POST["command"]) {
     case "deleteRecordset":
         $return -> dVar = $_POST["dVar"];
         $q = "delete from " . $_POST["table"] . " where " . $_POST["primaryKey"] . " = '" . $_POST["primaryKeyValue"] . "'";
-        $db_pdo -> query( $q ); 
+        $db_pdo -> query( $q );
+        $orphans = json_decode( $_POST["orphans"] );
+        $l = count( $orphans );
+        $i = 0;
+        while( $i < $l ) {
+            $q = "delte from " . $orphans[i] -> table . " where " . $orphans[i] -> field . " = '" . $orphans[i] -> value . "'";
+            $db_pdo -> query( $q );
+            $i += 1;
+        }
+         
         $return -> success = $res -> success;
         $return -> message = $res -> message;
         print(json_encode( $return ));

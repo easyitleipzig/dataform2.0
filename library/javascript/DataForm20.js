@@ -6,7 +6,8 @@ const DIV_UPLOAD_HTML = `<div id="[dVar]_tmpUploadId" class="divUploadFile">
     </div
     <input type="file" id="[dVar]_tFUFile">
 </div>`;
-const optDate = '<option value="[field]>=\'' + getLastWeek().from + '\' and [field]<=\'' + getLastWeek().to + '\'">letzteWoche</option><option value="[field]>=\'' + getCurrentWeek().from + '\' and [field]<=\'' + getCurrentWeek().to + '\'">aktuelle Woche</option><option value="[field]>=\'' + getNextWeek().from + '\' and [field]<=\'' + getNextWeek().to + '\'">nächste Woche</option><option value="[field]>=\'' + getLastMonth().from + '\' and [field]<=\'' + getLastMonth().to + '\'">letzter Monat</option><option value="[field]>=\'' + getCurrentMonth().from + '\' and [field]<=\'' + getCurrentMonth().to + '\'">aktueller Monat</option><option value="[field]>=\'' + getNextMonth().from + '\' and [field]<=\'' + getNextMonth().to + '\'">nächster Monat</option>';
+const optDate = '<option value="[field]>-1">alle</option><option value="[field]>=\'' + getLastWeek().from + '\' and [field]<=\'' + getLastWeek().to + '\'">letzteWoche</option><option value="[field]>=\'' + getCurrentWeek().from + '\' and [field]<=\'' + getCurrentWeek().to + '\'">aktuelle Woche</option><option value="[field]>=\'' + getNextWeek().from + '\' and [field]<=\'' + getNextWeek().to + '\'">nächste Woche</option><option value="[field]>=\'' + getLastMonth().from + '\' and [field]<=\'' + getLastMonth().to + '\'">letzter Monat</option><option value="[field]>=\'' + getCurrentMonth().from + '\' and [field]<=\'' + getCurrentMonth().to + '\'">aktueller Monat</option><option value="[field]>=\'' + getNextMonth().from + '\' and [field]<=\'' + getNextMonth().to + '\'">nächster Monat</option>';
+const DIFF_PAGINATION = 2;
 class DataForm {                    // class for DataForm2.0
       constructor( param ) {
         this.opt = {
@@ -37,10 +38,13 @@ class DataForm {                    // class for DataForm2.0
             whereClausel:                       "",
             currentPage:                        0,
             countPerPage:                       0,          // if is 0 all records
+            hasPagination:                      false,
             orderArray:                         [],
             filter:                             "",
             searchArray:                        [],
             hasNew:                             true,
+            boundForm:                          [],
+            boundFields:                        [],
             addPraefix:                         "",
             widthSave:                          true,
             widthDelete:                        true,
@@ -82,7 +86,7 @@ class DataForm {                    // class for DataForm2.0
             tmpSearchString = "",
             searchWasGreaterThanTwo;
         Object.assign( this.opt, param );
-        this.opt.id = "#" + this.opt.addPraefix + this.opt.id.substring( 1 );
+        //this.opt.id = "#" + this.opt.addPraefix + this.opt.id.substring( 1 );
         if( this.opt.formType === "html") {            
             if( !nj( this.opt.id ).isE() ) {
                 tmpEl = nj().cEl( "div" );
@@ -92,10 +96,20 @@ class DataForm {                    // class for DataForm2.0
         }
         tmpEl = nj().cEl( "div" );
         tmpEl.id = this.opt.id.substring( 1 ) + "_headline";
+        nj( tmpEl ).aCl( "dataformHead" );
         nj( this.opt.id ).aCh( tmpEl );
         tmpEl = nj().cEl( "div" );
         tmpEl.id = this.opt.id.substring( 1 ) + "_data";
+        nj( tmpEl ).aCl( "dataformData" );
         nj( this.opt.id ).aCh( tmpEl );
+        if( this.opt.hasPagination ) {
+            tmpEl = nj().cEl( "div" );
+            tmpEl.id = this.opt.id.substring( 1 ) + "_pag";
+            nj( tmpEl ).aCl( "dataformPagination" );
+            nj( tmpEl ).sDs( "dvar", this.opt.dVar );
+
+            nj( this.opt.id ).aCh( tmpEl );            
+        }
         this.showDfHeadline();
         if( this.opt.searchArray.length > 0 ) {
             this.showSearchHeadline();
@@ -141,11 +155,14 @@ class DataForm {                    // class for DataForm2.0
                     i += 1;
                 }
                 df.opt.primaryKey = jsonobject.primaryKey;
-                df.getRecords();
+                df.getSearchString();
             break;
             case "getRecords":
                 df.opt.countRecords = jsonobject.countRecords;
                 df.prepareRecords( jsonobject );
+                if( df.opt.hasPagination ) df.initPagination();
+                console.log( df.opt.filter );
+                df.initRecordPointer();
             break;
             case "saveRecordset":
 
@@ -462,7 +479,11 @@ class DataForm {                    // class for DataForm2.0
             i += 1;
         }
     }
-    getSearchString = function( args ) {
+    getSearchString = function() {
+        if( typeof this.opt.filter === "undefined" ) {
+            nj( this.opt.id + "_pag" ).htm( "" );
+            return;   
+        }
         let l = this.opt.searchArray.length;
         let i = 0;
         let searchString = "where ";
@@ -483,16 +504,16 @@ class DataForm {                    // class for DataForm2.0
                         searchString += this.opt.searchArray[i].field + " = '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";
                     } else {
                         // is area for e.g. date areas (date >= value and date <= [value])
-                        searchString += nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";    
+                        searchString += nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + " AND ";    
                     }
                 } else {
                     searchString += "";
                 }
-                
-            }
+             }
             i += 1;
         }
         this.opt.whereClausel = searchString.substring( 0, searchString.length - 5 );
+        this.opt.currentPage = 0;
         this.getRecords();
     }
     checkValidity = function( fieldId ) {
@@ -536,7 +557,7 @@ class DataForm {                    // class for DataForm2.0
         this.opt.recordsets = [];
         let i, j, l, m, field, tmpField = {}, primaryKeyValue, tmpFieldType;
         l = data.records.length;
-        this.opt.countRecords = l;
+        //this.opt.countRecords = l;
         i = 0;
         while( i < l ) {
             this.opt.recordsets.push( new RecordSet( {
@@ -563,9 +584,11 @@ class DataForm {                    // class for DataForm2.0
                 field.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
                 field.validOnSave = this.opt.validOnSave;
                 field.classButtonSize = this.opt.classButtonSize;
+                /*
                 field.onBlur = function( args ) {
                     console.log( nj( this ).Dia() );    
                 }
+                */
                 this.opt.recordsets[i].opt.fields.push( new Field( field ) );
                 j += 1;
             }
@@ -574,7 +597,7 @@ class DataForm {                    // class for DataForm2.0
                 tmpField.value = 0;
                 tmpField.label = "Datensatz speichern";
                 tmpField.baseClass = "";
-                tmpField.addClasses = "cFieldSave";
+                tmpField.addClasses = "cSave";
                 tmpField.classButtonSize = this.opt.classButtonSize;
                 tmpField.onClick = function ( args ) {
                     nj( this ).Dia( "dvar", 4 ).saveRecordset( nj( this ).gRO(), nj( this ).Dia( "dvar", 5 ), this.id.split("_")[this.id.split("_").length - 1] );
@@ -595,9 +618,10 @@ class DataForm {                    // class for DataForm2.0
                 tmpField.value = 0;
                 tmpField.label = "Datensatz löschen";
                 tmpField.baseClass = "";
-                tmpField.addClasses = "cFieldDelete";
+                tmpField.addClasses = "cDelete";
                 tmpField.classButtonSize = this.opt.classButtonSize;
                 tmpField.onClick = function ( args ) {
+                    console.log( this );
                     nj( this ).Dia( "dvar", 4 ).deleteRecordset( nj( this ).gRO(), nj( this ).Dia( "dvar", 5 ), this.id.split("_")[this.id.split("_").length - 1] );
                 }
                 tmpField.tabIndex = j;
@@ -651,7 +675,7 @@ class DataForm {                    // class for DataForm2.0
                 tmpField.value = 0;
                 tmpField.label = "Datensatz speichern";
                 tmpField.baseClass = "";
-                tmpField.addClasses = "cFieldSave";
+                tmpField.addClasses = "cSave";
                 tmpField.classButtonSize = this.opt.classButtonSize;
                 tmpField.onClick = function ( args ) {
                     nj( this ).Dia( "dvar", 4 ).saveRecordset( nj( this ).gRO(), nj( this ).Dia( "dvar", 5 ), this.id.split("_")[this.id.split("_").length - 1] );
@@ -689,6 +713,119 @@ class DataForm {                    // class for DataForm2.0
             this.opt.recordsets[i].getRecord();
             i += 1;
         }
+    }
+    initPagination = function() {
+        if( this.opt.hasNew ) this.opt.countRecords += 1;
+        let countPages;
+        if( Number.isInteger( this.opt.countRecords / this.opt.countPerPage ) ) {
+            countPages = this.opt.countRecords / this.opt.countPerPage;
+        } else {
+            countPages = parseInt( this.opt.countRecords / this.opt.countPerPage ) + 1;
+        }
+        let cPag = DIFF_PAGINATION * 2 + 1, htm = "<a href='#'  id='" + this.opt.addPraefix + "_pag_firstPage'>«</a><a href='#'  id='" + this.opt.addPraefix + "_pag_prevPage'>‹</a><span>...</span>";
+        if( countPages < cPag ) {
+            let l = countPages;
+            let i = 0;
+            while ( i < l ) {
+                if( this.opt.currentPage == i ) {
+                    htm += '<a href="#" id="' + this.opt.addPraefix + 'pag_' + i + '" class="' + this.opt.addPraefix + '_activePage">' + ( i + 1 ) + '</a>';
+                } else {
+                    htm += '<a href="#" id="' + this.opt.addPraefix + 'pag_' + i + '">' + ( i + 1 ) + '</a>';                    
+                }
+                i += 1;
+            }
+        } else {
+            let l = cPag;
+            let i = this.opt.currentPage - DIFF_PAGINATION;
+            if( this.opt.currentPage + DIFF_PAGINATION < countPages ) {
+                i = this.opt.currentPage - DIFF_PAGINATION;
+                l = i + cPag;
+                if( i < 0 ) {
+                    i = 0;
+                    l = cPag;    
+                }
+            } else {
+                i = countPages - cPag;
+                l = countPages;
+            }
+            while ( i < l ) {
+                if( i >= countPages ) break;
+                if( this.opt.currentPage == i ) {
+                    htm += '<a href="#" id="' + this.opt.addPraefix + '_pag_' + i + '" class="' + this.opt.classPraefix + '_activePage">' + ( i + 1 ) + '</a>';
+                } else {
+                    htm += '<a href="#" id="' + this.opt.addPraefix + '_pag_' + i + '">' + ( i + 1 ) + '</a>';                    
+                }
+                i += 1;
+            }
+
+    }
+        htm += '<span>...</span><a href="#"  id="' + this.opt.addPraefix + '_pag_nextPage">›</a><a href="#"  id="' + this.opt.addPraefix + '_pag_lastPage">»</a>';
+        nj( this.opt.id + "_pag" ).htm( htm );
+        let els = document.querySelectorAll( this.opt.id + "_pag>a" );
+        let l = els.length;
+        let i = 0;
+        let id, df;
+        while ( i < l ) {
+            id = getIdAndName( els[i].id ).Id;
+            switch( id ) {
+                case "firstPage":
+                    nj( els[i] ).on( "click", function() {
+                        nj(this).Dia().opt.currentPage = 0;
+                        nj(this).Dia().getRecords()
+                    });
+                break;
+                case "prevPage":
+                    nj( els[i] ).on( "click", function() {
+                        nj(this).Dia().opt.currentPage = parseInt( nj(this).Dia().opt.currentPage ) -1;
+                        if( nj(this).Dia().opt.currentPage < 0 ) {
+                            nj(this).Dia().opt.currentPage = 0;
+                        }
+                        nj(this).Dia().getRecords()
+                    });
+                break;
+                case "nextPage":
+                    nj( els[i] ).on( "click", function() {
+                        nj(this).Dia().opt.currentPage = parseInt( nj(this).Dia().opt.currentPage ) + 1;
+                        //console.log( df.opt.countPages, df.opt.currentPage );
+                        if( nj(this).Dia().opt.currentPage == countPages ) {
+                            nj(this).Dia().opt.currentPage = countPages - 1;
+                        }
+                        nj(this).Dia().getRecords();
+                    });
+                break;
+                case "lastPage":
+                    nj( els[i] ).on( "click", function() {
+                        nj(this).Dia().opt.currentPage = countPages - 1;
+                        nj(this).Dia().getRecords()
+                    });
+                break;
+                default:
+                    nj( els[i] ).on( "click", function( e ) {
+                        nj(this).Dia().opt.currentPage = parseInt( getIdAndName( e.target.id ).Id );;
+                        nj(this).Dia().getRecords()
+                    });
+                break;
+
+            }
+            i += 1;
+        }
+    }
+    initRecordPointer = function() {
+        nj( "button[id^='" + this.opt.addPraefix + "recordPointer_']").on( "click", function( e ) {
+            e.stopImmediatePropagation();
+            let df = nj(this).Dia("dvar", 1 );
+            let cRec = getIdAndName( this.id ).Id;
+            let l = df.opt.boundForm.length;
+            let i = 0;
+            let field;
+            while ( i < l ) {
+                field = nj().fOA( window[df.opt.boundForm[i]].opt.fieldDefinitions, "field", df.opt.boundFields[i].to)[0];
+                field.default = nj( "#" + df.opt.addPraefix + df.opt.boundFields[i].from + "_" + cRec ).v();
+                window[df.opt.boundForm[i]].opt.filter = df.opt.boundFields[i].to + " = " + nj( "#" + df.opt.addPraefix + df.opt.boundFields[i].from + "_" + cRec ).v();
+                window[df.opt.boundForm[i]].getSearchString();
+                i += 1;
+            }
+        })    
     }
     init = function () {
         // content

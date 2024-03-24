@@ -64,8 +64,8 @@ class Field {                    // class for DataForm2.0
                                             <option value="Vanilla"></option>
                                         </datalist>
                                 */
-            withLabel:          false,
-            withDiv:            false,
+            widthLabel:          false,
+            widthDiv:            false,
             onFocus:            undefined,
             onBlur:             undefined,
             onChange:           undefined,
@@ -173,9 +173,6 @@ class Field {                    // class for DataForm2.0
             i += 1;
         }
         
-    }
-    setRecordPointer = function( res ) {
-        console.log( res );
     }
     setRecordPointer = function( res ) {
         console.log( res );
@@ -534,6 +531,19 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                let img = new Image(), w, h;
+                img.src = this.opt.value;
+                img.onload = function( e ) {
+                    let c = this.width;    
+                }
+                if( img.width / img.height >= 1 ) {
+                    w = "width=100";
+                    h = "height=auto";
+                } else {
+                    w = "width=auto";
+                    h = "height=100";
+                }
+                fieldHTML += " " + w + " " + h + " ";
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
                 this.setActions( this.tmpEl );
@@ -565,11 +575,11 @@ class Field {                    // class for DataForm2.0
         if( this.opt.widthDiv ) {
             el = nj().cEl( "div" );
             if( this.opt.addPraefix === "" ) {
-                el.id = 'div_' + this.opt.id;    
+                el.id = 'div_' + this.opt.id.substring( 1 );    
             } else {
-                el.id = this.opt.addPraefix + '_div_' + this.opt.id;    
+                el.id = this.opt.addPraefix + '_div_' + this.opt.id.substring( 1 );    
             }
-            nj( el ).aCl( "divField_" + this.opt.id );
+            nj( el ).aCl( "divField_" + this.opt.id.substring( 1 ) );
             l = fieldElements.length;
             i = 0;
             while ( i < l ) {

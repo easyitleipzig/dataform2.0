@@ -197,19 +197,29 @@ class RecordSet {                    // class for DataForm2.0
         data.primaryKey = df.opt.primaryKey;
         data.primaryKeyValue = primaryKey;
         data.fields = fieldArray;
-        console.log( data );
         nj().fetchPostNew("library/php/ajax_dataform20.php", data, df.evaluateDF)        
     }
     deleteRecordset = function( df, rs, primaryKey ) {
         console.log( df, rs, primaryKey );
+        let orphans = [], oValues = {};
+        let l = df.opt.boundForm.length;
+        let i = 0;
+        while ( i < l ) {
+            oValues.table = window[ df.opt.boundForm[i] ].opt.table;
+            oValues.field = df.opt.boundFields[i].to;            
+            oValues.value = nj( "#" + df.opt.addPraefix + df.opt.boundFields[i].from + "_" + primaryKey ).v();
+            orphans.push( oValues );
+            i += 1;
+        }
         data = {};
-        data.dVar = this.dVar;
+        data.dVar = df.opt.dVar;
         data.command = "deleteRecordset";
         data.table = df.opt.table;
         data.primaryKey = df.opt.primaryKey;
         data.primaryKeyValue = primaryKey;
+        data.orphans = JSON.stringify( orphans );
         console.log( data );
-        nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateRS)        
+        //nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateRS)        
     }
     init = function ( fieldDefinitions ) {
         if( typeof fieldDefinitions === "undefined" ) {

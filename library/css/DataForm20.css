@@ -1,12 +1,25 @@
 .cDec, .cNumber {
     text-align: right;
 }
-.cFieldSave {
+.cSave {
     background-image: url(../css/icons/cSave.png);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }
+.cDelete {
+    background-image: url(../css/icons/cDelete.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.cRecPointerSelected {
+    background-image: url(../css/icons/cTriangleRightBlack.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
 .cButtonMiddle {
     width: 40px !important;
     height: 40px;
