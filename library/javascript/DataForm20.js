@@ -56,7 +56,7 @@ class DataForm {                    // class for DataForm2.0
             addFieldClasses:                    "",
             classButtonSize:                    "",
             autoOpen:                           true,
-            formType:                           "html",
+            formType:                           "list",
             divForm:                            undefined,
             divUpload:                          new DialogDR( { 
                                                     dVar: param.dVar + ".opt.divUpload", 
@@ -93,9 +93,12 @@ class DataForm {                    // class for DataForm2.0
                 tmpEl.id = this.opt.id.substring( 1 );
                 nj( this.opt.target ).aCh( tmpEl );
             }
+            
+        } else {
+            this.dDF = new DialogDR( {dVar: this.opt.dVar + ".dDF", id: this.opt.id } );
         }
         tmpEl = nj().cEl( "div" );
-        tmpEl.id = this.opt.id.substring( 1 ) + "_headline";
+        tmpEl.id = this.opt.id.substring( 1 ) + "_head";
         nj( tmpEl ).aCl( "dataformHead" );
         nj( this.opt.id ).aCh( tmpEl );
         tmpEl = nj().cEl( "div" );
@@ -166,6 +169,11 @@ class DataForm {                    // class for DataForm2.0
             break;
             case "saveRecordset":
 
+            break;
+            case "deleteRecordset":
+                if( typeof df.opt.afterDelete === "function" ) {
+                    df.opt.afterDelete( df, jsonobject );
+                }
             break;
             default:
                 // content
@@ -390,10 +398,12 @@ class DataForm {                    // class for DataForm2.0
             let el;
             let l = this.opt.fieldDefinitions.length;
             let i = 0;
+            /*
             el = nj().cEl( "div" );
             nj( el ).sDs( "dvar", this.opt.dVar );
             el.id = this.opt.id.substring( 1 ) + "_orderline"
             nj( this.opt.id + "_headline" ).aCh( el );
+            */
             while ( i < l ) {
                 el = nj().cEl( "div" );
                 el.id = this.opt.addPraefix + "hl_" + this.opt.fieldDefinitions[i].field;
@@ -408,7 +418,7 @@ class DataForm {                    // class for DataForm2.0
                 }
 
                 nj( el ).sDs( "field", this.opt.fieldDefinitions[i].field );
-                nj( this.opt.id + "_orderline" ).aCh( el );
+                nj( this.opt.id + "_head" ).aCh( el );
                 if( this.opt.orderArray.indexOf( this.opt.fieldDefinitions[i].field ) > -1 ) {
                 nj( "#" + el.id ).on( "click", function( args ) {
                     console.log( nj(this).htm(), this );
@@ -813,6 +823,8 @@ class DataForm {                    // class for DataForm2.0
     initRecordPointer = function() {
         nj( "button[id^='" + this.opt.addPraefix + "recordPointer_']").on( "click", function( e ) {
             e.stopImmediatePropagation();
+            nj( ".cRecordPointer" ).rCl( "cRecPointerSelected" );
+            nj( this ).aCl( "cRecPointerSelected" );
             let df = nj(this).Dia("dvar", 1 );
             let cRec = getIdAndName( this.id ).Id;
             let l = df.opt.boundForm.length;

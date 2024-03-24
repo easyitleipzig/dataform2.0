@@ -29,6 +29,7 @@ class RecordSet {                    // class for DataForm2.0
         //console.log( jsonobject );
         var fr = window[ jsonobject.dVar ];
         switch( jsonobject.command ) {
+            /*
             case "getFielddefinitions":
                 // content
                 let l = jsonobject.fieldDefs.length;
@@ -126,6 +127,7 @@ class RecordSet {                    // class for DataForm2.0
                     i += 1;
                 }
             break;
+            */
         case "saveRecordset":
             break;
             default:
@@ -219,7 +221,7 @@ class RecordSet {                    // class for DataForm2.0
         data.primaryKeyValue = primaryKey;
         data.orphans = JSON.stringify( orphans );
         console.log( data );
-        //nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateRS)        
+        nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF )        
     }
     init = function ( fieldDefinitions ) {
         if( typeof fieldDefinitions === "undefined" ) {
