@@ -27,6 +27,7 @@
 <script src="library/javascript/Field20.js"></script>
 <script src="library/javascript/RecordSet20.js"></script>
 <script src="library/javascript/Dataform20.js"></script>
+<script src="library/javascript/MessageDR.js"></script>
 <script>
     <?php
     $settings = parse_ini_file('ini/settings.ini', TRUE);
@@ -117,6 +118,7 @@ let fields = [
             label: "val_varchar",
             type: "input_text",
             addClasses: "cVal_varchar",
+            valid: ["not empty", "not 0"],
         },
         {
             field: "val_int",

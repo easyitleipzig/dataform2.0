@@ -90,7 +90,7 @@ class DataForm {
             $this -> pdo -> query( $q );
             $return -> success = true;
             $return -> message = "Der Datensatz wurde erfolgreich gespeichert.";
-            
+            $return -> newId = $primaryKeyValue;
         } catch (Exception $e ) {
             $return -> success = false;
             $return -> message = "Beim Speichern des Datensatzes ist folgender Fehler aufgetreten: " . $e -> getMessage();            
@@ -118,7 +118,11 @@ class DataForm {
                 }
                 $i += 1;
             }
-            
+            $tabFields = " (" . substr( $tabFields, 0, strlen( $tabFields ) - 1 ) . ") values "; 
+            $values = "(" . substr( $values, 0, strlen( $values ) - 1 ) . ")";
+            $q = "insert into " . $this -> table . "$tabFields$values";
+            $this -> pdo -> query( $q );
+            $return -> newId = $this -> pdo -> lastInsertId(); 
             $return -> success = true;
             $return -> message = "Der Datensatz wurde erfolgreich angelegt.";
             

@@ -26,7 +26,7 @@ class RecordSet {                    // class for DataForm2.0
         if( !nj().isJ( jsonobject ) ) {
             throw "kein JSON-Objekt übergeben";
         }
-        //console.log( jsonobject );
+        console.log( jsonobject );
         var fr = window[ jsonobject.dVar ];
         switch( jsonobject.command ) {
             /*
@@ -171,6 +171,19 @@ class RecordSet {                    // class for DataForm2.0
     }
     saveRecordset = function( df, rs, primaryKey ) {
         console.log( df, rs, primaryKey );
+        if( df.opt.validOnSave ) {
+            let l = rs.fields.length;
+            let i = 0;
+            let res = {};
+            while ( i < l ) {
+                res = rs.fields[i].checkValidity();
+                if( !res.success ) {
+                    dMNew.show( {title: "Fehler", type: false, text: res.message } );
+                    return;
+                }
+                i += 1;
+            }
+        }
         let tabFields = df.opt.fields.split( "," );
         let l = tabFields.length;
         let i = 0;
@@ -221,7 +234,7 @@ class RecordSet {                    // class for DataForm2.0
         data.primaryKeyValue = primaryKey;
         data.orphans = JSON.stringify( orphans );
         console.log( data );
-        nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF )        
+        nj().fetchPostNew("library/php/ajax_dataform20.php", data, df.evaluateDF )        
     }
     init = function ( fieldDefinitions ) {
         if( typeof fieldDefinitions === "undefined" ) {

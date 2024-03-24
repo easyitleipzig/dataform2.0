@@ -63,17 +63,22 @@ switch( $_POST["command"]) {
     break;
     case "saveRecordset":
         $return -> dVar = $_POST["dVar"];
+        $return -> oldId = $_POST["primaryKeyValue"];
         if( $_POST["primaryKeyValue"] === "new" ) {
             $res = $df -> newRecordset( $_POST["primaryKey"], $_POST["primaryKeyValue"], json_decode( $_POST["fields"] ) );
         } else {
             $res = $df -> saveRecordset( $_POST["primaryKey"], $_POST["primaryKeyValue"], json_decode( $_POST["fields"] ) );
         }
+        $return -> newId = $res -> newId;
         $return -> success = $res -> success;
         $return -> message = $res -> message;
         print(json_encode( $return ));
     break;
     case "deleteRecordset":
         $return -> dVar = $_POST["dVar"];
+        $q = "select * from " . $_POST["table"] . " where " . $_POST["primaryKey"] . " = '" . $_POST["primaryKeyValue"] . "'";
+        $s = $db_pdo -> query( $q );
+        $return -> oldData = $s -> fetchAll( PDO::FETCH_ASSOC );
         $q = "delete from " . $_POST["table"] . " where " . $_POST["primaryKey"] . " = '" . $_POST["primaryKeyValue"] . "'";
         $db_pdo -> query( $q );
         $orphans = json_decode( $_POST["orphans"] );
@@ -85,8 +90,8 @@ switch( $_POST["command"]) {
             $i += 1;
         }
          
-        $return -> success = $res -> success;
-        $return -> message = $res -> message;
+        //$return -> success = $res -> success;
+        //$return -> message = $res -> message;
         print(json_encode( $return ));
     break;
 }

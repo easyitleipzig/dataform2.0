@@ -27,6 +27,8 @@
 <script src="library/javascript/Field20.js"></script>
 <script src="library/javascript/RecordSet20.js"></script>
 <script src="library/javascript/Dataform20.js"></script>
+<script src="library/javascript/MessageDR.js"></script>
+<script src="library/javascript/init_admin_event.js"></script>
 <script>
     <?php
     $settings = parse_ini_file('ini/settings.ini', TRUE);
@@ -175,7 +177,7 @@ var Df = new DataForm( {
     table: "event", 
     fields: "id",
     addPraefix: "df1_", 
-    formType: "list", 
+    formType: "html", 
     validOnSave: true, 
     //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
@@ -266,6 +268,7 @@ var Df_part = new DataForm( {
     countRecords: undefined,
     hasPagination: false,
     filter: undefined,
+    afterDelete: afterDelete,
 /*
     orderArray: ["val_varchar", "val_int"],
     searchArray: [

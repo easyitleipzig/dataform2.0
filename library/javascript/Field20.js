@@ -178,21 +178,8 @@ class Field {                    // class for DataForm2.0
         console.log( res );
     }    
     checkValidity = function() {
-        console.log( this.getValue() );
-        let tmp;
-        if( this.opt.addPraefix === "" ) {
-            if( typeof this.opt.index !== "undefined" ) {
-                tmp = '#' + this.opt.id + '_' + this.opt.index;
-            } else {
-                tmp =  '#' + this.opt.id;
-            }
-        } else {
-            if( typeof this.opt.index !== "undefined" ) {
-                tmp = '#' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index;
-            } else {
-                tmp =  '#' + this.opt.addPraefix + "_" + this.opt.id;
-            }
-        }
+        let result = {success: true};
+        //console.log( this.getValue(), this.opt.type );
         let tmpValid = this.opt.valid;
         let l = tmpValid.length;
         let i = 0;
@@ -200,32 +187,21 @@ class Field {                    // class for DataForm2.0
             console.log( tmpValid[ i ] );
             switch( tmpValid[ i ] ) {
                 case "not 0":
-                    if( nj( tmp ).tag() === "SELECT" ) {
-                        if( nj( tmp ).gSV().includes('0') && nj( tmp ).gSV().length === 1 ) {
-                            console.log( this.opt.label, "is 0" );
-                        }            
-                    } else {
-                        if( nj( tmp ).v() == "0" ) {
-                            console.log( this.opt.label, "is 0" );
-                        }
-                    }   
+                    if( this.getValue() == 0 ) {
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' darf nicht 0 sein."    
+                    }
                 break;
                 case "not empty":
-                    if( nj( tmp ).tag() === "SELECT" ) {
-                        if( nj( tmp ).gSV().includes('') && nj( tmp ).gSV().length === 1 ) {
-                            console.log( this.opt.label, "is 'empty'" );
-                        }            
-                    } else {
-                        if( nj( tmp ).v() == "" ) {
-                            console.log( this.opt.label, "is 'empty'", "Das Feld '" + this.opt.label + "' darf nicht leer sein!" );
-                            dMNew.show( { title: "Fehler", type: false, text: "Das Feld '" + this.opt.label + "' darf nicht leer sein!" } );
-                        }
-                    }   
+                    if( this.getValue() === "" ) {
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' darf nicht leer sein."    
+                    }
                 break;
             }
             i += 1;
         }
-        
+        return result;
     }
     setActions = function( field ) {
         if( typeof this.opt.onFocus === "function" ) {

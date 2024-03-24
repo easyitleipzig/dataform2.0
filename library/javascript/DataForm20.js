@@ -78,6 +78,8 @@ class DataForm {                    // class for DataForm2.0
             tFUTable:                           "",
             tFUField:                           "",
             tFUFieldIndex:                      "",
+            afterDelete:                        undefined,
+            afterNew:                           undefined,
         }
         let tmpId = "",
             tmpClasses = "",
@@ -168,7 +170,13 @@ class DataForm {                    // class for DataForm2.0
                 df.initRecordPointer();
             break;
             case "saveRecordset":
-
+                if( jsonobject.success ) {
+                    if( jsonobject.oldId === "new" && typeof this.opt.afterNew === "function" ) {
+                        this.opt.afterNew( df, jsonobject );
+                    }
+                } else {
+                    dMNew.show( {title: "Fehler", type: false, text: jsonobject.message } );
+                }
             break;
             case "deleteRecordset":
                 if( typeof df.opt.afterDelete === "function" ) {
@@ -452,7 +460,7 @@ class DataForm {                    // class for DataForm2.0
         el = nj().cEl( "div" );
         el.id = this.opt.id.substring( 1 ) + "_searchline";
         nj( el ).sDs( "dvar", this.opt.dVar );
-        nj( this.opt.id + "_headline" ).aCh( el );
+        nj( this.opt.id + "_head" ).aCh( el );
         let l = this.opt.searchArray.length;
         let i = 0;
         while( i < l ) {
