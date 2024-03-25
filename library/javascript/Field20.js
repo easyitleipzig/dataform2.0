@@ -198,6 +198,12 @@ class Field {                    // class for DataForm2.0
                         result.message = "Das Feld '" + this.opt.label + "' darf nicht leer sein."    
                     }
                 break;
+                case "is email":
+                    if( !validateEmail( this.getValue() ) ) {
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' muss eine E-Mail-Adresse sein."    
+                    }
+                break;
             }
             i += 1;
         }
@@ -373,7 +379,7 @@ class Field {                    // class for DataForm2.0
                 fieldHTML += this.opt.addAttr + '>' + this.opt.options + '</select>';
                 this.tmpEl = htmlToElement( fieldHTML );
                 if( typeof this.opt.value !== "undefined" && this.opt.value != null ) {
-                    this.tmpValueArry = this.opt.value.split( "," );
+                    this.tmpValueArry = ( "" + this.opt.value ).split( "," );
                     l = this.tmpEl.children.length;
                     i = 0;
                     while (i < l) {
@@ -388,6 +394,7 @@ class Field {                    // class for DataForm2.0
             break;
             case "text":
             case "date":
+            case "time":
             case "file":
             case "number":
             case "datetime-local":

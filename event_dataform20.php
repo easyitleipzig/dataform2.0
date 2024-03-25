@@ -14,11 +14,30 @@
 </head>
 
 <body>
-    <input type="button" name="" id="showDF" data-dvar="Df">
-<div id="target">
-    <div id="targetBasis">&nbsp;</div>
-
-</div>
+<article>
+    <div><h1>Allgemeines</h1></div>
+    <div>&nbsp;</div>
+    <p>Über dieses Formular kannst du die Einstellungen für den Kalender des Onlineangebots verwalten</p>
+    <p>Über dieser <a href="#" id="showPattern">Link</a> verwaltest du die Terminvorlagen.
+    </p><div id="divPattern"></div><p> Hier kannst Du die <a href="#" id="showFormat">Terminformate</a> verwalten.</p><div id="divFormat"></div>
+    <p>Über dieser <a href="#" id="showPlace">Link</a> verwaltest du die Terminorte. <a href="#" id="showRoles">Hier</a> können die Gruppen und Ihre Nutzer bearbeitet werden.</p><div id="divPlace"></div><div id="divRoles"> 
+    
+    </div>
+</article>
+<article>
+    <div><h1>Termine</h1></div>
+    <div>&nbsp;</div>
+    <div id="Df">
+    </div>
+</article>
+<article>
+    <div><h1>Teilnehmer</h1></div>
+    <div>&nbsp;</div>
+    <div id="Df_part">
+    </div>
+</article>
+    
+</article>
 <script src="library/javascript/no_jquery.js"></script>
 <script src="library/javascript/easyit_helper_neu.js"></script>
 <script src="library/javascript/main.js"></script>
@@ -49,13 +68,24 @@
     }
 
     echo "let optCategory = '";                        
-    $query = "SELECT * FROM event_format";
+    $query = "SELECT id, name FROM event_format";
     $stm = $db_pdo -> query( $query );
     $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
     $l = count( $result );
     $i = 0;
     while( $i < $l ) {
-        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["name"] . "</option>";
+        echo '<option value="' . $result[$i]["id"] . '">' . str_replace("'", "\'", $result[$i]["name"]) . '</option>';
+        $i += 1;
+    }
+    echo "'\n";
+    echo "let optUser = '";                        
+    $query = "SELECT id, concat( lastname, ', ', firstname ) as name FROM user ORDER BY lastname";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . str_replace("'", "\'", $result[$i]["name"]) . '</option>';
         $i += 1;
     }
     echo "'\n";
@@ -90,7 +120,45 @@ let fields = [
             type: "input_text",
 
         },
-/*        {
+        {
+            field: "category",
+            label: "Kategorie",
+            type: "select",
+            options: optCategory,
+
+        },
+        {
+            field: "title",
+            label: "Titel",
+            type: "input_text",
+
+        },
+        {
+            field: "start_date",
+            label: "Startd.",
+            type: "input_date",
+
+        },
+        {
+            field: "start_time",
+            label: "Startz.",
+            type: "input_time",
+
+        },
+        {
+            field: "end_date",
+            label: "Endd.",
+            type: "input_date",
+
+        },
+        {
+            field: "end_time",
+            label: "Endz.",
+            type: "input_time",
+
+        },
+/*
+        {
             field: "dummy",
             label: "dummy",
             value: new Date().addHours(1).toISOString().replace("T", " ").replace("Z", "").split(" ")[0], // current date without hours
@@ -175,7 +243,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "event", 
-    fields: "id",
+    fields: "id,category,title,start_date,start_time,end_date,end_time",
     addPraefix: "df1_", 
     formType: "html", 
     validOnSave: true, 
@@ -190,8 +258,8 @@ var Df = new DataForm( {
     filter: "",
     boundForm: ["Df_part"],
     boundFields: [ { from: "id", to: "event_id" } ],
+    orderArray: ["title", "start_date"],
 /*
-    orderArray: ["val_varchar", "val_int"],
     searchArray: [
             {
                 field: "val_varchar",
@@ -236,7 +304,7 @@ var Df_part = new DataForm( {
     dVar: "Df_part", 
     id: "#Df_part", 
     table: "event_participate", 
-    fields: "id,event_id",
+    fields: "id,event_id,user_id,remind_me,count_part",
     formType: "html", 
     addPraefix: "df2_", 
     validOnSave: true, 
@@ -260,6 +328,23 @@ var Df_part = new DataForm( {
             label: "EventId",
             type: "input_text",
 
+        },
+        {
+            field: "user_id",
+            label: "Nutzer",
+            type: "select",
+            options: optUser,
+
+        },
+        {
+            field: "remind_me",
+            label: "r",
+            type: "checkbox",
+        },
+        {
+            field: "count_part",
+            label: "TN",
+            type: "input_number",
         },
         ],
     //optionLists: listOptions,

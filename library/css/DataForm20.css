@@ -24,3 +24,22 @@
     width: 40px !important;
     height: 40px;
 }
+.dataformHead>div {
+    display: inline-block;
+}
+.dataformPagination>a {
+    display: inline-block;
+    text-decoration: none;
+    color: black;
+    padding: 0.5em;
+    border: 1px black solid;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    vertical-align: middle;
+}
+.dataformPagination>a[class*='activePage'] {
+    width: 35px;
+    height: 35px;
+    padding-top: 1em;    
+}

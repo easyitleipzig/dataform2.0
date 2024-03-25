@@ -154,24 +154,31 @@ Date.prototype.getWeekDayName = function() {
 Date.prototype.getTS = function() {
     return + new Date();
 }
-const getCurrentWeek = function() {
-    let retsult = {};
-    retsult.from = getMysqlDate( addDaysToDate(new Date(), 1 - new Date().getDay() ) );
-    retsult.to = getMysqlDate( addDaysToDate(new Date(), ( 1 - new Date().getDay() ) + 6 ) );
-    return retsult;
+const getCurrentWeek = function( date = new Date() ) {
+    let result = {};
+    if( date.getDay() === 0 ) {
+        result.from = getMysqlDate( addDaysToDate(date, -6 ) );
+        result.to = getMysqlDate( addDaysToDate(date, 0 ) );
+    } else {
+        result.from = getMysqlDate( addDaysToDate(date, 1 - date.getDay() ) );
+        result.to = getMysqlDate( addDaysToDate(date, ( 1 - date.getDay() ) + 6 ) );
+
+    }
+    return result;
 }
 const getNextWeek = function() {
-    let retsult = {};
-    retsult.from = getMysqlDate( addDaysToDate(new Date(), 1 - new Date().getDay() + 7 ) );
-    retsult.to = getMysqlDate( addDaysToDate(new Date(), ( 1 - new Date().getDay() ) + 13 ) );
-    return retsult;
+    let result = {};
+    let tmp = getCurrentWeek(); 
+    result.from = getMysqlDate( addDaysToDate(new Date( tmp.from ), 7 ) );
+    result.to = getMysqlDate( addDaysToDate(new Date( tmp.to ), 7 ) );
+    return result;
 }
 const getLastWeek = function() {
-    let retsult = {};
+    let result = {};
     let tmp = getCurrentWeek(); 
-    retsult.from = getMysqlDate( addDaysToDate(new Date( tmp.from ), -7 ) );
-    retsult.to = getMysqlDate( addDaysToDate(new Date( tmp.to ), -7 ) );
-    return retsult;
+    result.from = getMysqlDate( addDaysToDate(new Date( tmp.from ), -7 ) );
+    result.to = getMysqlDate( addDaysToDate(new Date( tmp.to ), -7 ) );
+    return result;
 }
 const getLastMonth = function() {
     let result = {};
@@ -650,12 +657,44 @@ var validateEmail = function( email ) {
     }
 }
 var validatePhone = function( phone ) {
-    var phoneformat = /^-?\d+$/;
+    let phoneformat = /^-?\d+$/;
     return phone.match( phoneformat );
 }
 function validateTime( inputField ) {
-    var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(inputField.value);
-    return isValid;
+    let timeFormat = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/;
+    if( inputField.match( timeFormat ) === null ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+function validateDate( date ) {
+    let tmp = date.split( "." );
+    if( tmp.length > 1 ) {
+        date = tmp[2] + "-" + tmp[1] + "-" + tmp[0];
+    }
+    console.log( date );
+    if( new Date( date ) == "Invalid Date" ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+function validatePostalCode( plc ) {
+    var plcformat = /^[0-9]{5}?$/;
+    if( plc.match( plcformat ) === null ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+function validateURL( url ) {
+    try {
+        const fccUrl = new URL( url );
+        return true;        
+    } catch {
+        return false;
+    }
 }
 var getFileName = function( fn ) {
     let tmp = fn.split( "/" );

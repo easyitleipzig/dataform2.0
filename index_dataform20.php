@@ -118,7 +118,7 @@ let fields = [
             label: "val_varchar",
             type: "input_text",
             addClasses: "cVal_varchar",
-            valid: ["not empty", "not 0"],
+            valid: ["not empty", "is email"],
         },
         {
             field: "val_int",

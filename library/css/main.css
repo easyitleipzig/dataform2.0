@@ -145,7 +145,7 @@ select:after {
 select[multiple]::after {
     content: "";
 }
-input[type=text], input[type=password], input[type=date], input[type=datetime-local], input[type="number"], textarea {
+input[type=text], input[type=password], input[type=date], input[type=datetime-local], input[type="number"], input[type="time"], textarea {
     font-size: 16px;
     height: 38px;
     /* background:  0% 0% no-repeat padding-box; */

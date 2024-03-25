@@ -99,6 +99,7 @@ class DataForm {                    // class for DataForm2.0
         } else {
             this.dDF = new DialogDR( {dVar: this.opt.dVar + ".dDF", id: this.opt.id } );
         }
+        nj( this.opt.id ).sDs( "dvar", this.opt.dVar );
         tmpEl = nj().cEl( "div" );
         tmpEl.id = this.opt.id.substring( 1 ) + "_head";
         nj( tmpEl ).aCl( "dataformHead" );
@@ -406,12 +407,6 @@ class DataForm {                    // class for DataForm2.0
             let el;
             let l = this.opt.fieldDefinitions.length;
             let i = 0;
-            /*
-            el = nj().cEl( "div" );
-            nj( el ).sDs( "dvar", this.opt.dVar );
-            el.id = this.opt.id.substring( 1 ) + "_orderline"
-            nj( this.opt.id + "_headline" ).aCh( el );
-            */
             while ( i < l ) {
                 el = nj().cEl( "div" );
                 el.id = this.opt.addPraefix + "hl_" + this.opt.fieldDefinitions[i].field;
@@ -442,12 +437,14 @@ class DataForm {                    // class for DataForm2.0
                         nj(this).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "♦" );
                         nj( this ).gRO().opt.orderBy = nj( this ).gRO().opt.orderBy.replace( " " + nj(this).ds("field") + " DESC,", "" );
                         nj( this ).gRO().getRecords();
+                        return;
                     }
                     if( nj(this).htm().slice( - 1 ) == "♦" ) {        
                         nj(this).htm( nj(this).htm().substring( 0, nj(this).htm().length - 1 ) + "▼" );
                         console.log( " " + nj(this).ds("field") + ' ASC,' );
                         nj( this ).gRO().opt.orderBy += " " + nj(this).ds("field") + (" ASC,");
                         nj( this ).gRO().getRecords();
+                        return;
                     }
                 });
                 }                   
