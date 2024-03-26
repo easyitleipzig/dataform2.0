@@ -27,6 +27,15 @@
 .dataformHead>div {
     display: inline-block;
 }
+div[id*=_searchline] {
+    display: block;
+}
+button[id*=_recordPointer_new] {
+    background-image: url(../css/icons/cStarBlack.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;    
+}
 .dataformPagination>a {
     display: inline-block;
     text-decoration: none;

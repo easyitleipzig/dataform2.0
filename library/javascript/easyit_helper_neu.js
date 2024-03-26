@@ -42,8 +42,12 @@ Date.prototype.getGermanDateString = function( widthMinutes ) {
         return ( "0" + this.getDate() ).substr(-2) + "." + ( "0" + ( this.getMonth() + 1 ) ).substr(-2) + "." + this.getFullYear() + " " + ("0" + this.getHours()).substr( - 2 ) + ":" + ("0" + this.getMinutes() ).substr( -2 );
     }        
 }
-Date.prototype.getMySQLDateString = function() {
-    return this.getFullYear() + "-" + ( "0" + ( this.getMonth() + 1 ) ).substr(-2) + "-" + ( "0" + this.getDate() ).substr(-2);    
+Date.prototype.getMySQLDateString = function( widthMinutes = false ) {
+    if( !widthMinutes ) {
+        return this.getFullYear() + "-" + ( "0" + ( this.getMonth() + 1 ) ).substr(-2) + "-" + ( "0" + this.getDate() ).substr(-2);        
+    } else {
+        return this.getFullYear() + "-" + ( "0" + ( this.getMonth() + 1 ) ).substr(-2) + "-" + ( "0" + this.getDate() ).substr(-2) + " " + ( "0" + this.getHours() ).substr(-2) + ":" + ( "0" + this.getMinutes() ).substr(-2)
+    }
 }
 Date.prototype.getFirstDayOfWeek = function() {
     const date = new Date(this);

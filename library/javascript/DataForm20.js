@@ -2,8 +2,8 @@
 const DIV_UPLOAD_HTML = `<div id="[dVar]_tmpUploadId" class="divUploadFile">
     <div id="[dVar]_tmpDivUploadFormErrorText" class="fileUploadErrorText">Datei auswählen und "Öffnen" wählen.</div>
     <div>
-        <label id="[dVar]_tmpLabelUpload" class="fileUploadLabel">Hochladen</label>
-    </div
+        <label id="[dVar]_tmpLabelUpload" class="fileUploadLabel" for="[dVar]_tFUFile">Hochladen</label>
+    </div>
     <input type="file" id="[dVar]_tFUFile">
 </div>`;
 const optDate = '<option value="[field]>-1">alle</option><option value="[field]>=\'' + getLastWeek().from + '\' and [field]<=\'' + getLastWeek().to + '\'">letzteWoche</option><option value="[field]>=\'' + getCurrentWeek().from + '\' and [field]<=\'' + getCurrentWeek().to + '\'">aktuelle Woche</option><option value="[field]>=\'' + getNextWeek().from + '\' and [field]<=\'' + getNextWeek().to + '\'">nächste Woche</option><option value="[field]>=\'' + getLastMonth().from + '\' and [field]<=\'' + getLastMonth().to + '\'">letzter Monat</option><option value="[field]>=\'' + getCurrentMonth().from + '\' and [field]<=\'' + getCurrentMonth().to + '\'">aktueller Monat</option><option value="[field]>=\'' + getNextMonth().from + '\' and [field]<=\'' + getNextMonth().to + '\'">nächster Monat</option>';
@@ -57,6 +57,9 @@ class DataForm {                    // class for DataForm2.0
             classButtonSize:                    "",
             autoOpen:                           true,
             formType:                           "list",
+            formWidth:                          280,
+            formHeight:                         400,
+            formModal:                          true,
             divForm:                            undefined,
             divUpload:                          new DialogDR( { 
                                                     dVar: param.dVar + ".opt.divUpload", 
@@ -97,7 +100,7 @@ class DataForm {                    // class for DataForm2.0
             }
             
         } else {
-            this.dDF = new DialogDR( {dVar: this.opt.dVar + ".dDF", id: this.opt.id } );
+            this.dDF = new DialogDR( {dVar: this.opt.dVar + ".dDF", id: this.opt.id, width: this.opt.formWidth, height: this.opt.formHeight, modal: this.opt.formModal } );
         }
         nj( this.opt.id ).sDs( "dvar", this.opt.dVar );
         tmpEl = nj().cEl( "div" );
@@ -167,8 +170,8 @@ class DataForm {                    // class for DataForm2.0
                 df.opt.countRecords = jsonobject.countRecords;
                 df.prepareRecords( jsonobject );
                 if( df.opt.hasPagination ) df.initPagination();
-                console.log( df.opt.filter );
                 df.initRecordPointer();
+                console.log( "onShow" );
             break;
             case "saveRecordset":
                 if( jsonobject.success ) {
@@ -340,7 +343,8 @@ class DataForm {                    // class for DataForm2.0
         return field;
 
     }   
-    resolveFileUpload = async function( targetPath = this.opt.tFUTargetPath, targetFileName = this.opt.tFUTargetFileName, targetElementId = this.opt.tFUTargetElementId, targetElementAttr = this.opt.tFUTargetElementAttr, timeStamp = new Date().getTS(), replace = this.opt.tFUReplace, oldFileName = this.opt.tFUOldFileName, withTimeStamp = this.opt.tFUWidthTimestamp, path = "library/php/upload_dataform20.php", fileObject = nj().els( "#" + this.opt.dVar + "_tFUFile").files[0], cb = this.afterSuccessFileUpload( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp, df = this ) ) {
+    resolveFileUpload = async function( targetPath = this.opt.tFUTargetPath, targetFileName = this.opt.tFUTargetFileName, targetElementId = this.opt.tFUTargetElementId, targetElementAttr = this.opt.tFUTargetElementAttr, timeStamp = new Date().getTS(), replace = this.opt.tFUReplace, oldFileName = this.opt.tFUOldFileName, withTimeStamp = this.opt.tFUWidthTimestamp, path = "library/php/upload_dataform20.php", fileObject = nj().els( "#" + this.opt.dVar + "_tFUFile").files[0], cb = this.afterSuccessFileUpload( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp ) ) {
+        console.log( this );
         let formData = new FormData();
         console.log( timeStamp );
         formData.append("file", fileObject );
@@ -368,6 +372,7 @@ class DataForm {                    // class for DataForm2.0
     }
     afterSuccessFileUpload = function( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp, df ) {
         dMNew.show( {title: "Dateiupload", type: true, text: "Die Datei wurde erfolgreich übertragen.", variables: { dataform: df }, buttons:[{title:"Schliessen", action: function() {
+        console.log( data, targetPath, targetFileName, this );
             nj( this ).Dia().opt.variables.dataform.opt.divUpload.hide();
             let opts = nj( this ).Dia().opt.variables.dataform.opt;
             console.log( nj( this ).Dia().opt.variables.dataform.opt );
@@ -515,6 +520,7 @@ class DataForm {                    // class for DataForm2.0
             }
             if( this.opt.searchArray[i].type === "select" ) {
                 if( nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) !== ">-1" ) {
+                    
                     if( this.opt.searchArray[i].sel === "value" ) {
                         searchString += this.opt.searchArray[i].field + " = '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";
                     } else {
@@ -526,6 +532,10 @@ class DataForm {                    // class for DataForm2.0
                 }
              }
             i += 1;
+        }
+        console.log( "'" + searchString.substring( searchString.length - 6, searchString.length - 1 ) + "'" );
+        if( searchString.substring( searchString.length - 6, searchString.length - 1 ) === "  AND") {
+            searchString = searchString.substring( 0, searchString.length - 5 )
         }
         this.opt.whereClausel = searchString.substring( 0, searchString.length - 5 );
         this.opt.currentPage = 0;
@@ -599,11 +609,6 @@ class DataForm {                    // class for DataForm2.0
                 field.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
                 field.validOnSave = this.opt.validOnSave;
                 field.classButtonSize = this.opt.classButtonSize;
-                /*
-                field.onBlur = function( args ) {
-                    console.log( nj( this ).Dia() );    
-                }
-                */
                 this.opt.recordsets[i].opt.fields.push( new Field( field ) );
                 j += 1;
             }
@@ -619,7 +624,6 @@ class DataForm {                    // class for DataForm2.0
                 }
                 tmpField.tabIndex = j;
                 tmpFieldType = { type: "button" }
-                //console.log( tmpField );
                 tmpField.table = this.opt.table;
                 tmpField.target = this.opt.recordsets[i].opt.id;
                 tmpField.dVar = this.opt.dVar + ".opt.recordsets." + i + ".opt.fields." + j;
@@ -706,7 +710,7 @@ class DataForm {                    // class for DataForm2.0
                 Object.assign( tmpField, tmpFieldType );
                 this.opt.recordsets[i].opt.fields.push( new Field( tmpField ) );
             }
-            this.buildNewRecord();    
+            //this.buildNewRecord();    
         }
         if( this.opt.autoOpen ) {
             this.showRecordSets();
@@ -826,7 +830,7 @@ class DataForm {                    // class for DataForm2.0
         }
     }
     initRecordPointer = function() {
-        nj( "button[id^='" + this.opt.addPraefix + "recordPointer_']").on( "click", function( e ) {
+        nj( "button[id^='" + this.opt.addPraefix + "recordPointer_']:not(button[id*=_recordPointer_new])").on( "click", function( e ) {
             e.stopImmediatePropagation();
             nj( ".cRecordPointer" ).rCl( "cRecPointerSelected" );
             nj( this ).aCl( "cRecPointerSelected" );
@@ -840,6 +844,22 @@ class DataForm {                    // class for DataForm2.0
                 field.default = nj( "#" + df.opt.addPraefix + df.opt.boundFields[i].from + "_" + cRec ).v();
                 window[df.opt.boundForm[i]].opt.filter = df.opt.boundFields[i].to + " = " + nj( "#" + df.opt.addPraefix + df.opt.boundFields[i].from + "_" + cRec ).v();
                 window[df.opt.boundForm[i]].getSearchString();
+                if( window[df.opt.boundForm[i]].opt.formType !== "html" ) {
+                    window[df.opt.boundForm[i]].dDF.show();
+                }
+                i += 1;
+            }
+        });
+        nj( "button[id*=_recordPointer_new]").on( "click", function( e ) {
+            e.stopImmediatePropagation();
+            nj( ".cRecordPointer" ).rCl( "cRecPointerSelected" );
+            let df = nj(this).Dia("dvar", 1 );
+            let cRec = getIdAndName( this.id ).Id;
+            let l = df.opt.boundForm.length;
+            let i = 0;
+            let field;
+            while ( i < l ) {
+                nj( "#" + window[df.opt.boundForm[i]].opt.dVar + "_data" ).htm( "" );
                 i += 1;
             }
         })    

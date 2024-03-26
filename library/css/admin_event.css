@@ -1,0 +1,50 @@
+div[id=Df_head]>div:first-child {
+    width: 40px;
+}
+div[id=Df_head]>div:nth-child(2) {
+    display: none;
+}
+div[id=Df_head]>div:nth-child(3) {
+    width: 225px;
+}
+div[id=Df_head]>div:nth-child(4) {
+    width: 198px;
+}
+div[id=Df_head]>div:nth-child(5) {
+    width: 200px;
+}
+div[id=Df_head]>div:nth-child(6) {
+    width: 80px;
+}
+div[id=Df_head]>div:nth-child(7) {
+    width: 134px;
+}
+div[id=Df_part_head]>div:first-child {
+    width: 40px;
+} 
+div[id=Df_part_head]>div:nth-child(2), div[id=Df_part_head]>div:nth-child(3), div[id=Df_part_data]>div>input:nth-child(2), div[id=Df_part_data]>div>input:nth-child(3) {
+    display: none;
+}
+div[id=Df_part_head]>div:nth-child(4), div[id=Df_part_data]>select:nth-child(4) {
+    width: 300px;
+} 
+#df1_search_category {
+    left: 40px;
+    position: relative;
+}
+#df1_search_title {
+    width: 196px;
+    left: 40px;
+    position: relative;
+}
+#df1_search_start_date {
+    width: 134px;
+    left: 240px;
+    position: relative;
+}
+div[id=Df_data]>div>input[type=text]:nth-child(2) {
+    display: none;
+}
+#Df_pattern_data, #Df_pattern_head {
+    width: 2490px;
+}

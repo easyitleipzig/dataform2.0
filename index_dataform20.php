@@ -155,6 +155,21 @@ let fields = [
             addClasses: "cVal_checkbox",
         },
         {
+            field: "val_stars",
+            label: "val_stars",
+            type: "stars",
+            addClasses: "cVal_stars",
+            onClick: function( event ) {
+                console.log( nj().els(this).children[1] );
+              var rect = nj().els(this).getBoundingClientRect(); 
+              var x = event.clientX - rect.left; 
+              var y = event.clientY - rect.top; 
+               
+              console.log(parseInt(x/20) + 1);
+              nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 ) 
+            }
+        },
+        {
             field: "button_addKey",
             type: "button",
             baseClass: "cAddButton",
@@ -184,7 +199,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox",
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars",
     addPraefix: "df1_",
     formType: "html", 
     validOnSave: true, 

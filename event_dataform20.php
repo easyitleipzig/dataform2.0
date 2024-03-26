@@ -10,6 +10,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="stylesheet prefetch" href="library/css/DataForm20.css">
+    <link rel="stylesheet prefetch" href="library/css/admin_event.css">
 
 </head>
 
@@ -89,7 +90,28 @@
         $i += 1;
     }
     echo "'\n";
-    //var_dump($option);
+    echo "let optPlace = '";                        
+    $query = "SELECT id, place FROM event_place";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . str_replace("'", "\'", $result[$i]["place"]) . '</option>';
+        $i += 1;
+    }
+    echo "'\n";
+    echo "let optRole = '";                        
+    $query = "SELECT * FROM role";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["role"] . "</option>";
+        $i += 1;
+    }
+    echo "'\n";
    ?>
 /*
 let additionalFieldDefs = [
@@ -130,6 +152,12 @@ let fields = [
         {
             field: "title",
             label: "Titel",
+            type: "input_text",
+
+        },
+        {
+            field: "notice",
+            label: "Notiz",
             type: "input_text",
 
         },
@@ -243,7 +271,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "event", 
-    fields: "id,category,title,start_date,start_time,end_date,end_time",
+    fields: "id,category,title,notice,start_date,start_time,end_date,end_time",
     addPraefix: "df1_", 
     formType: "html", 
     validOnSave: true, 
@@ -259,6 +287,29 @@ var Df = new DataForm( {
     boundForm: ["Df_part"],
     boundFields: [ { from: "id", to: "event_id" } ],
     orderArray: ["title", "start_date"],
+    filter: "",
+    searchArray: [
+            {
+                field: "category",
+                type: "select",
+                value: ">-1",
+                sel: "value",
+                options: "<option value='>-1'>alle</option>" + optCategory,
+            },
+            {
+                field: "title",
+                type: "input_text",
+                value: "",
+                sel: "value",
+            },
+            {
+                field: "start_date",
+                type: "select",
+                value: ">-1",
+                sel: "area",
+                options: optDate.replaceAll( "[field]", "start_date" ),
+            },
+            ],
 /*
     searchArray: [
             {
@@ -396,9 +447,346 @@ var Df_part = new DataForm( {
         ]
     /*additionalFields: additionalFields, */
 } );
+var Df_pattern = new DataForm( { 
+    dVar: "Df_pattern", 
+    id: "#Df_pattern", 
+    table: "event_pattern", 
+    fields: "id,name,title,place,day_diff,deadline_diff,start_time,end_time,description,class,creator,inform_role",
+    formType: "list",
+    formWidth: 800, 
+    addPraefix: "df3_", 
+    validOnSave: true, 
+    //additionalFieldDefs: additionalFieldDefs,
+    classButtonSize: "cButtonMiddle",
+    fieldDefinitions:  [
+        {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
+        },
+        {
+            field: "id",
+            label: "Id",
+            type: "input_text",
+
+        },
+        {
+            field: "name",
+            label: "Name",
+            type: "input_text",
+
+        },
+        {
+            field: "title",
+            label: "Titel",
+            type: "input_text",
+
+        },
+        {
+            field: "place",
+            label: "Ort",
+            type: "select",
+            options: optPlace
+
+        },
+        {
+            field: "day_diff",
+            label: "Tagesdifferenz",
+            type: "input_number",
+
+        },
+        {
+            field: "deadline_diff",
+            label: "Anmeldeschlussdifferenz",
+            type: "input_number",
+
+        },
+        {
+            field: "start_time",
+            label: "Startzeit",
+            type: "input_time",
+
+        },
+        {
+            field: "end_time",
+            label: "Endzeit",
+            type: "input_time",
+
+        },
+        {
+            field: "description",
+            label: "Beschreibung",
+            type: "input_text",
+
+        },
+        {
+            field: "class",
+            label: "Kategorie",
+            type: "select",
+            options: optCategory
+
+        },
+        {
+            field: "creator",
+            label: "Ansprechpartner",
+            type: "select",
+            options: optUser
+
+        },
+        {
+            field: "inform_role",
+            label: "inf. Gruppe",
+            type: "select",
+            options: optRole
+
+        },
+        ],
+    //optionLists: listOptions,
+    countPerPage: 0,
+    currentPage: 0,
+    countRecords: undefined,
+    hasPagination: false,
+    //afterDelete: afterDelete,
+    filter: "",
+/*
+    orderArray: ["val_varchar", "val_int"],
+    searchArray: [
+            {
+                field: "val_varchar",
+                type: "input_text",
+                value: "",
+                sel: "value",
+            },
+            {
+                field: "val_select",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_select_multi",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                addAttr: "multiple",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_checkbox",
+                type: "select",
+                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_test",
+                type: "select",
+                options: optDate.replaceAll( "[field]", "val_test" ),
+                value: ">-1",
+                sel: "area",
+            },
+
+        ]
+    /*additionalFields: additionalFields, */
+} );
+var Df_role = new DataForm( { 
+    dVar: "Df_role", 
+    id: "#Df_role", 
+    table: "role", 
+    fields: "id,role,sender_email,sender,public",
+    formType: "list",
+    formWidth: 800, 
+    addPraefix: "df4_", 
+    validOnSave: true, 
+    boundForm: ["Df_account"],
+    boundFields: [ { from: "id", to: "role_id" } ],
+    //additionalFieldDefs: additionalFieldDefs,
+    classButtonSize: "cButtonMiddle",
+    fieldDefinitions:  [
+        {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
+        },
+        {
+            field: "id",
+            label: "Id",
+            type: "input_text",
+
+        },
+        {
+            field: "role",
+            label: "Name",
+            type: "input_text",
+            valid: ["not empty"]
+        },
+        {
+            field: "sender_email",
+            label: "E-Mail",
+            type: "input_text",
+            valid: ["not empty", "is email"]
+
+        },
+        {
+            field: "sender",
+            label: "Sender",
+            type: "input_text",
+            valid: ["not empty"]
+
+        },
+        {
+            field: "public",
+            label: "öffentlich",
+            type: "checkbox",
+
+        },
+        ],
+    //optionLists: listOptions,
+    countPerPage: 0,
+    currentPage: 0,
+    countRecords: undefined,
+    hasPagination: false,
+    //afterDelete: afterDelete,
+    filter: "",
+/*
+    orderArray: ["val_varchar", "val_int"],
+    searchArray: [
+            {
+                field: "val_varchar",
+                type: "input_text",
+                value: "",
+                sel: "value",
+            },
+            {
+                field: "val_select",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_select_multi",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                addAttr: "multiple",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_checkbox",
+                type: "select",
+                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_test",
+                type: "select",
+                options: optDate.replaceAll( "[field]", "val_test" ),
+                value: ">-1",
+                sel: "area",
+            },
+
+        ]
+    /*additionalFields: additionalFields, */
+} );
+var Df_account = new DataForm( { 
+    dVar: "Df_account", 
+    id: "#Df_account", 
+    table: "account", 
+    fields: "id,role_id,user_id",
+    formType: "list",
+    formWidth: 800, 
+    addPraefix: "df4_", 
+    validOnSave: true, 
+    //additionalFieldDefs: additionalFieldDefs,
+    classButtonSize: "cButtonMiddle",
+    fieldDefinitions:  [
+        {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
+        },
+        {
+            field: "id",
+            label: "Id",
+            type: "input_text",
+
+        },
+        {
+            field: "role_id",
+            label: "Role",
+            type: "input_text",
+        },
+        {
+            field: "user_id",
+            label: "Nutzer",
+            type: "select",
+            options: optUser
+        },
+        ],
+    //optionLists: listOptions,
+    countPerPage: 8,
+    currentPage: 0,
+    countRecords: undefined,
+    hasPagination: true,
+    //afterDelete: afterDelete,
+    filter: undefined,
+/*
+    orderArray: ["val_varchar", "val_int"],
+    searchArray: [
+            {
+                field: "val_varchar",
+                type: "input_text",
+                value: "",
+                sel: "value",
+            },
+            {
+                field: "val_select",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_select_multi",
+                type: "select",
+                options: "<option value='>-1'>alle</option>" + optRole,
+                addAttr: "multiple",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_checkbox",
+                type: "select",
+                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
+                value: ">-1",
+                sel: "value",
+            },
+            {
+                field: "val_test",
+                type: "select",
+                options: optDate.replaceAll( "[field]", "val_test" ),
+                value: ">-1",
+                sel: "area",
+            },
+
+        ]
+    /*additionalFields: additionalFields, */
+} );
 (function() {
     Df.init();
     Df_part.init();
+    Df_pattern.init();
+    Df_role.init();
+    Df_account.init();
+    nj( "#showPattern" ).on( "click", function() {
+       Df_pattern.dDF.show(); 
+    });
 })();
 </script>
 </body>

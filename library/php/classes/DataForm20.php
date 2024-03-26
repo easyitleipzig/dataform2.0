@@ -43,6 +43,7 @@ class DataForm {
     }
     public function getRecords( $fields, $whereClausel, $orderBy, $limit, $hasNew, $primaryKey = "" ) {
         $return = new \stdClass();
+        if( $whereClausel === "where " ) $whereClausel = "";
         if( $fields === "" ) {
             $q = "select * from " . $this -> table;
         } else {
