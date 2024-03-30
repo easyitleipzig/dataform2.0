@@ -1,8 +1,4 @@
 //javascript
-innerCheckValidity = function( field ) {
-    console.log( field );    
-}
-
 class Field {                    // class for DataForm2.0
       constructor( param ) {
         this.opt = {
@@ -66,8 +62,24 @@ class Field {                    // class for DataForm2.0
                                 */
             widthLabel:          false,
             widthDiv:            false,
-            onFocus:            undefined,
-            onBlur:             undefined,
+            onFocus:            function( args ) {
+                if( nj().els( "button[id^=" + nj( this ).gRO().opt.addPraefix + "recordPointer_].cRecPointerSelected" ).length === 1 ) {
+                    if( getIdAndName( this.id ).Id !== getIdAndName( nj().els( "button[id^=" + nj( this ).gRO().opt.addPraefix + "recordPointer_].cRecPointerSelected" )[0].id ).Id ) {
+                        nj( "button[id^=" + nj( this ).gRO().opt.addPraefix + "recordPointer_].cRecPointerSelected" ).rCl("cRecPointerSelected");
+                        let l = nj( this ).gRO().opt.boundForm.length;
+                        let i = 0;
+                        while ( i < l ) {
+                            console.log( nj( this ).gRO().opt.boundForm[i]);
+
+                            nj( window[nj( this ).gRO().opt.boundForm[i]].opt.id + "_data" ).htm( "" );
+                            i += 1;
+                        }
+                    }
+                }
+            },
+            onBlur:             function( args ) {
+                console.log( nj( this ).gRO().opt.validOnSave );    
+            },
             onChange:           undefined,
             onClick:            undefined,
             onDblClick:         undefined,
@@ -87,23 +99,8 @@ class Field {                    // class for DataForm2.0
         } else {
             this.opt.addClasses = this.opt.baseClass + " " + this.opt.addClasses;
         }
-/*
-        if( this.opt.type === "img"  ) {
-            nj().els( "body" )[0].appendChild( htmlToElement( DIV_UPLOAD_HTML.replaceAll( "[dVar]", this.opt.dVar ) ) );
-            nj( "#" + this.opt.dVar + "_tmpUploadId" ).atr( "id", "uploadDiv_" + this.getId() );
-            nj( "#" + this.opt.dVar + "_tmpDivUploadFormErrorText" ).atr( "id", "uploadErrorText_" + this.getId() );            
-            nj( "#" + this.opt.dVar + "_tmpFileUploadFile" ).atr( "id", "#" + this.opt.dVar + "_fileUploadFile_" + this.getId() );
-            nj( "#" + this.opt.dVar + "_fileUploadFile_" + this.getId() ).on( "change", function() {
-                const [last] = this.value.split("\\").slice(-1);
-                console.log(last);
-            })            
-            nj( "#tmpLabelUpload" ).atr( "id", "labelUpload_" + this.getId() );
-            nj( "#" + "labelUpload_" + this.getId() ).atr( "for", "fileUploadFile_" + this.getId() );
-        }
-*/
         if( this.opt.label === "" ) this.opt.label = this.opt.id;
         if( typeof this.opt.onFocus === "function" ) {
-
         }
     }
     buildFieldDefs( fieldDef ) {
@@ -125,54 +122,6 @@ class Field {                    // class for DataForm2.0
             }
         }
         return this.tmpId;   
-    }
-    innerCheckValidity = function() {
-        let tmp;
-        if( this.opt.addPraefix === "" ) {
-            if( typeof this.opt.index !== "undefined" ) {
-                tmp = '#' + this.opt.id + '_' + this.opt.index;
-            } else {
-                tmp =  '#' + this.opt.id;
-            }
-        } else {
-            if( typeof this.opt.index !== "undefined" ) {
-                tmp = '#' + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index;
-            } else {
-                tmp =  '#' + this.opt.addPraefix + "_" + this.opt.id;
-            }
-        }
-        let tmpValid = this.opt.valid;
-        let l = tmpValid.length;
-        let i = 0;
-        while ( i < l ) {
-            console.log( tmpValid[ i ] );
-            switch( tmpValid[ i ] ) {
-                case "not 0":
-                    if( nj( tmp ).tag() === "SELECT" ) {
-                        if( nj( tmp ).gSV().includes('0') && nj( tmp ).gSV().length === 1 ) {
-                            console.log( "is 0" );
-                        }            
-                    } else {
-                        if( nj( tmp ).v() == "0" ) {
-                            console.log( "is 0" );
-                        }
-                    }   
-                break;
-                case "not empty":
-                    if( nj( tmp ).tag() === "SELECT" ) {
-                        if( nj( tmp ).gSV().includes('') && nj( tmp ).gSV().length === 1 ) {
-                            console.log( "is 'empty'" );
-                        }            
-                    } else {
-                        if( nj( tmp ).v() == "" ) {
-                            console.log( "is 'empty'" );
-                        }
-                    }   
-                break;
-            }
-            i += 1;
-        }
-        
     }
     setRecordPointer = function( res ) {
         console.log( res );
@@ -199,9 +148,21 @@ class Field {                    // class for DataForm2.0
                     }
                 break;
                 case "is email":
-                    if( !validateEmail( this.getValue() ) ) {
+                    if( this.getValue() !== "" && !validateEmail( this.getValue() ) ) {
                         result.success = false;
-                        result.message = "Das Feld '" + this.opt.label + "' muss eine E-Mail-Adresse sein."    
+                        result.message = "Das Feld '" + this.opt.label + "' muss eine E-Mail-Adresse sein.";    
+                    }
+                break;
+                case "is number":
+                    if( Number( this.getValue() ) === NaN ) {
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' muss eine Zahl sein.";    
+                    }
+                case "is integer":
+                    if( Number( this.getValue() ) !== NaN && Number.isInteger( Number( this.getValue() ) ) ) {
+                    } else {
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' muss eine Ganzzahl sein.";                       
                     }
                 break;
             }
@@ -209,10 +170,12 @@ class Field {                    // class for DataForm2.0
         }
         return result;
     }
-    setActions = function( field ) {
-        if( typeof this.opt.onFocus === "function" ) {
-            nj( field ).on( "focus", this.opt.onFocus );          
+    setActions = function( field_id ) {
+        //console.log( field_id );
+/*        if( typeof this.opt.onFocus === "function" ) {
+            nj( "#" + field_id ).on( "focus", this.opt.onFocus );          
         }
+        /*
         if( typeof this.opt.onBlur === "function" ) {
             nj( field ).on( "blur", this.opt.onBlur );          
         }
@@ -224,7 +187,8 @@ class Field {                    // class for DataForm2.0
         }
         if( typeof this.opt.onDblClick === "function" ) {
             nj( field ).on( "dblclick", this.opt.onDblClick );          
-        }        
+        }
+        */        
     }
     setValue = function( value ) {
         console.log( this, value );
@@ -420,6 +384,16 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + ' maxlength="' + this.opt.maxLength + '" ';
                     }
                 }
+                if( typeof this.opt.minValue !== "undefined" ) {
+                    fieldHTML += ' min="' + this.opt.minValue + '"';
+                }
+                if( typeof this.opt.maxValue !== "undefined" ) {
+                    fieldHTML += ' max="' + this.opt.maxValue + '"';
+                }
+                if( typeof this.opt.maxLength !== "undefined" ) {
+                    fieldHTML += ' maxlength="' + this.opt.maxLength + '"';
+                }
+
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="' + this.opt.type + '" value="' + this.opt.value + '" title="' + this.opt.title + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
                 if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {

@@ -97,7 +97,9 @@ let fields = [
             field: "id",
             label: "Id",
             type: "input_text",
-
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
             field: "dummy",
@@ -125,6 +127,7 @@ let fields = [
             label: "val_int",
             type: "input_number",
             addClasses: "cVal_val_int",
+            minValue: 1,
         },
         {
             field: "val_select",

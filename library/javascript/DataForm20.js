@@ -155,7 +155,7 @@ class DataForm {                    // class for DataForm2.0
                 while( i < l ) {
                     field = nj().fOA( jsonobject.fieldDefs, "Field", df.opt.fieldDefinitions[ i ].field )[0];
                     if( typeof field !== "undefined" ) {
-                        Object.assign( df.opt.fieldDefinitions[ i ], df.buildLengthProps( field ) );
+                        Object.assign( df.opt.fieldDefinitions[ i ], df.buildLengthProps( field, df.opt.fieldDefinitions[ i ] ) );
                     }
                     options = nj().fOA( df.opt.optionLists, "field", df.opt.fieldDefinitions[ i ].field )[0];
                     if( typeof options !== "undefined" ) {
@@ -193,10 +193,9 @@ class DataForm {                    // class for DataForm2.0
             break;
         }
     }
-    buildLengthProps = function ( fieldProps ) {
+    buildLengthProps = function ( fieldProps, fieldDefs ) {
         // content
         let field = {}, decVal, strVal, i, l;
-        //console.log( fieldProps );
         field.title = fieldProps.Comment;
         field.default = fieldProps.Default;
         fieldProps.Null === "NO" ? field.canBeNull = false: field.canBeNull = true;
@@ -340,6 +339,7 @@ class DataForm {                    // class for DataForm2.0
             
             break;
         }
+        if( typeof fieldDefs.minValue !== "undefined" ) field.minValue = fieldDefs.minValue;
         return field;
 
     }   
@@ -533,7 +533,6 @@ class DataForm {                    // class for DataForm2.0
              }
             i += 1;
         }
-        console.log( "'" + searchString.substring( searchString.length - 6, searchString.length - 1 ) + "'" );
         if( searchString.substring( searchString.length - 6, searchString.length - 1 ) === "  AND") {
             searchString = searchString.substring( 0, searchString.length - 5 )
         }
