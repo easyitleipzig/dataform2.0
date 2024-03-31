@@ -130,36 +130,36 @@ class Field {                    // class for DataForm2.0
         let result = {success: true};
         //console.log( this.getValue(), this.opt.type );
         let tmpValid = this.opt.valid;
+        let v = this.getValue();
         let l = tmpValid.length;
         let i = 0;
         while ( i < l ) {
-            console.log( tmpValid[ i ] );
             switch( tmpValid[ i ] ) {
                 case "not 0":
-                    if( this.getValue() == 0 ) {
+                    if( v == 0 ) {
                         result.success = false;
                         result.message = "Das Feld '" + this.opt.label + "' darf nicht 0 sein."    
                     }
                 break;
                 case "not empty":
-                    if( this.getValue() === "" ) {
+                    if( v === "" ) {
                         result.success = false;
                         result.message = "Das Feld '" + this.opt.label + "' darf nicht leer sein."    
                     }
                 break;
                 case "is email":
-                    if( this.getValue() !== "" && !validateEmail( this.getValue() ) ) {
+                    if( v !== "" && !validateEmail( this.getValue() ) ) {
                         result.success = false;
                         result.message = "Das Feld '" + this.opt.label + "' muss eine E-Mail-Adresse sein.";    
                     }
                 break;
                 case "is number":
-                    if( Number( this.getValue() ) === NaN ) {
+                    if( Number( v ) === NaN ) {
                         result.success = false;
                         result.message = "Das Feld '" + this.opt.label + "' muss eine Zahl sein.";    
                     }
                 case "is integer":
-                    if( Number( this.getValue() ) !== NaN && Number.isInteger( Number( this.getValue() ) ) ) {
+                    if( Number( v ) !== NaN && Number.isInteger( Number( v ) ) ) {
                     } else {
                         result.success = false;
                         result.message = "Das Feld '" + this.opt.label + "' muss eine Ganzzahl sein.";                       
