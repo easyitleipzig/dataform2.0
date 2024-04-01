@@ -405,6 +405,7 @@ var Df_part = new DataForm( {
     hasPagination: false,
     filter: undefined,
     afterDelete: afterDelete,
+    afterNew: afterNew,
 /*
     orderArray: ["val_varchar", "val_int"],
     searchArray: [
@@ -455,7 +456,7 @@ var Df_pattern = new DataForm( {
     formType: "list",
     formWidth: 800, 
     addPraefix: "df3_", 
-    validOnSave: true, 
+    validOnSave: false, 
     //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
@@ -500,6 +501,9 @@ var Df_pattern = new DataForm( {
             field: "deadline_diff",
             label: "Anmeldeschlussdifferenz",
             type: "input_number",
+            minValue: -20,
+            maxValue: 0,
+            valid: ["not empty", "in range"],
 
         },
         {
@@ -700,7 +704,7 @@ var Df_account = new DataForm( {
     fields: "id,role_id,user_id",
     formType: "list",
     formWidth: 800, 
-    addPraefix: "df4_", 
+    addPraefix: "df5_", 
     validOnSave: true, 
     //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
@@ -776,7 +780,100 @@ var Df_account = new DataForm( {
             },
 
         ]
-    /*additionalFields: additionalFields, */
+    */
+    }
+ );
+var Df_place = new DataForm( { 
+    dVar: "Df_place", 
+    id: "#Df_place", 
+    table: "event_place", 
+    fields: "id,place",
+    formType: "list",
+    formWidth: 800, 
+    addPraefix: "df6_", 
+    validOnSave: true, 
+    //additionalFieldDefs: additionalFieldDefs,
+    classButtonSize: "cButtonMiddle",
+    fieldDefinitions:  [
+        {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
+        },
+        {
+            field: "id",
+            label: "Id",
+            type: "input_number",
+
+        },
+        {
+            field: "place",
+            label: "Ort",
+            type: "input_text",
+            valid: ["not empty"],
+        },
+        ],
+    //optionLists: listOptions,
+    countPerPage: 6,
+    currentPage: 0,
+    countRecords: undefined,
+    hasPagination: true,
+    //afterDelete: afterDelete,
+    filter: "",
+} );
+var Df_category = new DataForm( { 
+    dVar: "Df_category", 
+    id: "#Df_category", 
+    table: "event_format", 
+    fields: "id,name,bckg_color,font",
+    formType: "list",
+    formWidth: 800, 
+    addPraefix: "df6_", 
+    validOnSave: true, 
+    //additionalFieldDefs: additionalFieldDefs,
+    classButtonSize: "cButtonMiddle",
+    fieldDefinitions:  [
+        {
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
+        },
+/*        
+        {
+            field: "id",
+            label: "Id",
+            type: "input_number",
+
+        },
+*/
+        {
+            field: "name",
+            label: "Name",
+            type: "input_text",
+            valid: ["not empty"],
+        },
+        {
+            field: "bckg_color",
+            label: "Hintergrundf.",
+            type: "input_color",
+            valid: ["not empty"],
+        },
+        {
+            field: "font",
+            label: "Schriftf.",
+            type: "input_color",
+            valid: ["not empty"],
+        },
+        ],
+    //optionLists: listOptions,
+    countPerPage: 6,
+    currentPage: 0,
+    countRecords: undefined,
+    hasPagination: true,
+    //afterDelete: afterDelete,
+    filter: "id > 0",
 } );
 (function() {
     Df.init();
@@ -784,8 +881,19 @@ var Df_account = new DataForm( {
     Df_pattern.init();
     Df_role.init();
     Df_account.init();
+    Df_place.init();
+    Df_category.init();
     nj( "#showPattern" ).on( "click", function() {
        Df_pattern.dDF.show(); 
+    });
+    nj( "#showRoles" ).on( "click", function() {
+       Df_role.dDF.show(); 
+    });
+    nj( "#showPlace" ).on( "click", function() {
+       Df_place.dDF.show(); 
+    });
+    nj( "#showFormat" ).on( "click", function() {
+       Df_category.dDF.show(); 
     });
 })();
 </script>

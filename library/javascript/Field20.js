@@ -78,7 +78,14 @@ class Field {                    // class for DataForm2.0
                 }
             },
             onBlur:             function( args ) {
-                console.log( nj( this ).gRO().opt.validOnSave );    
+                if( !nj( this ).gRO().opt.validOnSave ) {
+                    let res = nj( this ).Dia().checkValidity();
+                    console.log( res );
+                    if( !res.success ) {
+                        dMNew.show( {title: "Fehler", type: false, text: res.message } );
+                        return;
+                    }
+                }   
             },
             onChange:           undefined,
             onClick:            undefined,
@@ -127,13 +134,14 @@ class Field {                    // class for DataForm2.0
         console.log( res );
     }    
     checkValidity = function() {
+        console.log( this );
         let result = {success: true};
-        //console.log( this.getValue(), this.opt.type );
         let tmpValid = this.opt.valid;
         let v = this.getValue();
         let l = tmpValid.length;
         let i = 0;
         while ( i < l ) {
+            console.log( v, tmpValid[ i ] );
             switch( tmpValid[ i ] ) {
                 case "not 0":
                     if( v == 0 ) {
@@ -165,33 +173,19 @@ class Field {                    // class for DataForm2.0
                         result.message = "Das Feld '" + this.opt.label + "' muss eine Ganzzahl sein.";                       
                     }
                 break;
+                case "in range":
+                    if( v < this.opt.minValue || v > this.opt.maxValue ) {
+                        nj( this.opt.id ).v( this.opt.default );
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' muss im Bereich von " + this.opt.minValue + " und " + this.opt.maxValue + " liegen.";                       
+                    }
+                break;
             }
             i += 1;
         }
         return result;
     }
-    setActions = function( field_id ) {
-        //console.log( field_id );
-/*        if( typeof this.opt.onFocus === "function" ) {
-            nj( "#" + field_id ).on( "focus", this.opt.onFocus );          
-        }
-        /*
-        if( typeof this.opt.onBlur === "function" ) {
-            nj( field ).on( "blur", this.opt.onBlur );          
-        }
-        if( typeof this.opt.onChange === "function" ) {
-            nj( field ).on( "change", this.opt.onChange );          
-        }
-        if( typeof this.opt.onClick === "function" ) {
-            nj( field ).on( "click", this.opt.onClick );          
-        }
-        if( typeof this.opt.onDblClick === "function" ) {
-            nj( field ).on( "dblclick", this.opt.onDblClick );          
-        }
-        */        
-    }
     setValue = function( value ) {
-        console.log( this, value );
         if( typeof this.opt.index !== "undefined" ) {
             if( this.opt.addPraefix === "" ) {
                 switch( this.opt.type ) {
@@ -362,7 +356,7 @@ class Field {                    // class for DataForm2.0
                         i += 1;
                     }
                 }
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             case "text":
@@ -371,6 +365,7 @@ class Field {                    // class for DataForm2.0
             case "file":
             case "number":
             case "datetime-local":
+            case "color":
                 if( typeof this.opt.index !== "undefined" ) {
                     if( this.opt.addPraefix === "" ) {
                         fieldHTML += '<input id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" maxlength="' + this.opt.maxLength + '" ';    
@@ -400,7 +395,7 @@ class Field {                    // class for DataForm2.0
                     tmpId = "list_" + this.tmpEl.id;
                     this.tmpEl.setAttribute("list", tmpId );
                 }
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  );
                 if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
                     this.opt.options = this.opt.options.replaceAll( "value=", "");
@@ -430,7 +425,7 @@ class Field {                    // class for DataForm2.0
                     tmpId = "list_" + this.tmpEl.id;
                     this.tmpEl.setAttribute("list", tmpId );
                 }
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  );
                 if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
                     el = nj().cEl( "datalist" );
@@ -460,7 +455,7 @@ class Field {                    // class for DataForm2.0
                     fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="checkbox" ' + 'title="' + this.opt.title + '">';
                 }
                 this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             case "button":
@@ -480,7 +475,7 @@ class Field {                    // class for DataForm2.0
                 if( typeof this.opt.value === "undefined" ) this.opt.value = "";
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</button>';
                 this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             case "img":
@@ -512,7 +507,7 @@ class Field {                    // class for DataForm2.0
                 fieldHTML += " " + w + " " + h + " ";
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             case "recordPointer":
@@ -531,7 +526,7 @@ class Field {                    // class for DataForm2.0
                 }
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</button>';
                 this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             case "stars":
@@ -553,7 +548,7 @@ class Field {                    // class for DataForm2.0
                 fieldHTML += '<img src="library/css/icons/background_yellow.png" width="' + parseFloat(this.opt.value) * 20 + '" height="20" style="position: relative; left: -100px; z-index: 0">';
                 fieldHTML += '</div>';
                 this.tmpEl = htmlToElement( fieldHTML );
-                this.setActions( this.tmpEl );
+                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             default:

@@ -40,7 +40,7 @@ class DataForm {                    // class for DataForm2.0
             countPerPage:                       0,          // if is 0 all records
             hasPagination:                      false,
             orderArray:                         [],
-            filter:                             "",
+            filter:                             "",         // if "undefined" no values will be required on init
             searchArray:                        [],
             hasNew:                             true,
             boundForm:                          [],
@@ -148,7 +148,6 @@ class DataForm {                    // class for DataForm2.0
         var df = window[ jsonobject.dVar ];
         switch( jsonobject.command ) {
             case "getFieldDefinitions":
-                // content
                 l = df.opt.fieldDefinitions.length;
                 i = 0;
                 let field, options;
@@ -175,17 +174,19 @@ class DataForm {                    // class for DataForm2.0
             break;
             case "saveRecordset":
                 if( jsonobject.success ) {
-                    if( jsonobject.oldId === "new" && typeof this.opt.afterNew === "function" ) {
-                        this.opt.afterNew( df, jsonobject );
+                    if( jsonobject.oldId === "new" && typeof df.opt.afterNew === "function" ) {
+                        df.opt.afterNew( df, jsonobject );
                     }
                 } else {
                     dMNew.show( {title: "Fehler", type: false, text: jsonobject.message } );
                 }
+                df.getSearchString();
             break;
             case "deleteRecordset":
                 if( typeof df.opt.afterDelete === "function" ) {
                     df.opt.afterDelete( df, jsonobject );
                 }
+                df.getSearchString();
             break;
             default:
                 // content
@@ -340,6 +341,8 @@ class DataForm {                    // class for DataForm2.0
             break;
         }
         if( typeof fieldDefs.minValue !== "undefined" ) field.minValue = fieldDefs.minValue;
+        if( typeof fieldDefs.maxValue !== "undefined" ) field.maxValue = fieldDefs.maxValue;
+        if( typeof fieldDefs.maxLength !== "undefined" ) field.maxLength = fieldDefs.maxLength;
         return field;
 
     }   
@@ -538,10 +541,8 @@ class DataForm {                    // class for DataForm2.0
         }
         this.opt.whereClausel = searchString.substring( 0, searchString.length - 5 );
         this.opt.currentPage = 0;
+        console.log( this, this.opt.whereClausel );
         this.getRecords();
-    }
-    checkValidity = function( fieldId ) {
-
     }
     getFieldDefinitions = function ( args ) {
         // content

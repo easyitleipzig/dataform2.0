@@ -85,7 +85,7 @@ switch( $_POST["command"]) {
         $l = count( $orphans );
         $i = 0;
         while( $i < $l ) {
-            $q = "delte from " . $orphans[i] -> table . " where " . $orphans[i] -> field . " = '" . $orphans[i] -> value . "'";
+            $q = "delete from " . $orphans[$i] -> table . " where " . $orphans[$i] -> field . " = '" . $orphans[$i] -> value . "'";
             $db_pdo -> query( $q );
             $i += 1;
         }

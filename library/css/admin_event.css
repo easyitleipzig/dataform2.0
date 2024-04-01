@@ -1,5 +1,8 @@
-div[id=Df_head]>div:first-child {
+div[id=Df_head]>div:first-child, div[id=childDf_pattern_head]>div:first- {
     width: 40px;
+}
+div[id=Df_head]>div:first-child {
+    width: 45px;
 }
 div[id=Df_head]>div:nth-child(2) {
     display: none;
@@ -19,15 +22,27 @@ div[id=Df_head]>div:nth-child(6) {
 div[id=Df_head]>div:nth-child(7) {
     width: 134px;
 }
-div[id=Df_part_head]>div:first-child {
+div[id=Df_part_head]>div:first-child, div[id=Df_pattern_head]>div:first-child {
     width: 40px;
 } 
-div[id=Df_part_head]>div:nth-child(2), div[id=Df_part_head]>div:nth-child(3), div[id=Df_part_data]>div>input:nth-child(2), div[id=Df_part_data]>div>input:nth-child(3) {
+div[id=Df_part_head]>div:nth-child(2), div[id=Df_part_head]>div:nth-child(3), div[id=Df_part_data]>div>input:nth-child(2), div[id=Df_part_data]>div>input:nth-child(3), div[id=Df_pattern_head]>div:nth-child(2)  {
     display: none;
 }
 div[id=Df_part_head]>div:nth-child(4), div[id=Df_part_data]>select:nth-child(4) {
     width: 300px;
-} 
+}
+div[id=Df_pattern_data]>div>input:nth-child(2) {
+    display: none;
+}
+div[id=Df_pattern_head]>div:nth-child(3), div[id=Df_pattern_head]>div:nth-child(4), div[id=Df_pattern_head]>div:nth-child(5) {
+    width: 203px;
+}
+div[id=Df_pattern_data]>div>input:nth-child(3), div[id=Df_pattern_data]>div>input:nth-child(4), div[id=Df_pattern_data]>div>select:nth-child(5) {
+    width: 197px;
+}
+div[id=Df_pattern_data]>div>input:nth-child(6), div[id=Df_pattern_head]>div:nth-child(6) {
+    width: 150px;
+}
 #df1_search_category {
     left: 40px;
     position: relative;
