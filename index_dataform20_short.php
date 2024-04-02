@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>Dataform-Test</title>
+    <title>Dataform-Test Short</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -87,6 +87,7 @@ let listOptions = [
         }
     ]
 let fields = [
+/*
         {
             type: "recordPointer",
             value: "&nbsp;",
@@ -97,9 +98,7 @@ let fields = [
             field: "id",
             label: "Id",
             type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+
         },
         {
             field: "dummy",
@@ -115,6 +114,7 @@ let fields = [
             type: "input_text",
             addClasses: "cDec",
         },
+*/
         {
             field: "val_varchar",
             label: "val_varchar",
@@ -122,6 +122,7 @@ let fields = [
             addClasses: "cVal_varchar",
             valid: ["not empty", "is email"],
         },
+/*
         {
             field: "val_int",
             label: "val_int",
@@ -149,8 +150,7 @@ let fields = [
             label: "val_img",
             type: "img",
             addClasses: "cVal_img",
-            imageSize: 200,
-            //widthDiv: true,
+            widthDiv: true,
         },
         {
             field: "val_checkbox",
@@ -197,13 +197,15 @@ let fields = [
                 console.log( nj( this ).Dia().tmpEl );
             }
         },
+*/
     ];
 // Df;
 var Df = new DataForm( { 
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars",
+//    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars",
+    fields: "val_varchar",
     addPraefix: "df1_",
     formType: "html", 
     validOnSave: true, 

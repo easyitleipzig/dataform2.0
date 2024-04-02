@@ -586,8 +586,8 @@ class DataForm {                    // class for DataForm2.0
         i = 0;
         while( i < l ) {
             this.opt.recordsets.push( new RecordSet( {
-                dVar: this.opt.dVar + ".opt.recordsets." + i, 
-                id: "#" + this.opt.addPraefix + this.opt.id.substring( 1 ) + "RS" + "_" + data.records[ i ][ this.opt.primaryKey ], 
+                dVar: this.opt.dVar + ".opt.recordsets." + i,
+                id: "#" + this.opt.addPraefix + this.opt.id.substring( 1 ) + "RS" + "_" + data.records[ i ].primaryKey, 
                 target: this.opt.id + "_data", 
                 table: this.opt.table,
                 baseClass: this.opt.baseClassRecordSet,
@@ -613,7 +613,7 @@ class DataForm {                    // class for DataForm2.0
                 j += 1;
             }
             if( this.opt.widthSave ) {
-                tmpField.id = this.opt.addPraefix + "RS_save_" + data.records[ i ][ this.opt.primaryKey ];
+                tmpField.id = this.opt.addPraefix + "RS_save_" + data.records[ i ].primaryKey;
                 tmpField.value = 0;
                 tmpField.label = "Datensatz speichern";
                 tmpField.baseClass = "";
@@ -633,7 +633,7 @@ class DataForm {                    // class for DataForm2.0
                 this.opt.recordsets[i].opt.fields.push( new Field( tmpField ) );
             }
             if( this.opt.widthDelete ) {
-                tmpField.id = this.opt.addPraefix + "RS_delete_" + data.records[ i ][ this.opt.primaryKey ];
+                tmpField.id = this.opt.addPraefix + "RS_delete_" + data.records[ i ].primaryKey;
                 tmpField.value = 0;
                 tmpField.label = "Datensatz löschen";
                 tmpField.baseClass = "";

@@ -47,6 +47,7 @@ class Field {                    // class for DataForm2.0
             baseClass:          "cField",
             addClasses:         "", // additional classes for field; e.g. "cUsusal cLabel ..."
             classButtonSize:    "", // additional classes for button size; e.g. "cButtonMin", "cButtonSmall" .. 
+            imageSize:         100,
             addAttr:            "", // additional attributes for html e.g.: 'target = "_blank" placeholder="[placeholder]"; ...' / combinitions are possible
             valid:              [], // validity ["not empty", "not 0", "not null", "not undifined", "is email", "is postalcode", "is unique", "is in range", ...]; combinitions are possible
             validOnSave:        false, // checks validity on save else validation will be done if field onblur
@@ -497,12 +498,13 @@ class Field {                    // class for DataForm2.0
                 img.onload = function( e ) {
                     let c = this.width;    
                 }
+                console.log( this.opt.imageSize );
                 if( img.width / img.height >= 1 ) {
-                    w = "width=100";
+                    w = "width=" + this.opt.imageSize;
                     h = "height=auto";
                 } else {
                     w = "width=auto";
-                    h = "height=100";
+                    h = "height=" + this.opt.imageSize;
                 }
                 fieldHTML += " " + w + " " + h + " ";
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';
