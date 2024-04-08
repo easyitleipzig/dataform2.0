@@ -332,7 +332,6 @@ class Field {                    // class for DataForm2.0
             case "text":
             case "date":
             case "time":
-            case "file":
             case "number":
             case "datetime-local":
             case "color":
@@ -413,6 +412,30 @@ class Field {                    // class for DataForm2.0
                     fieldHTML += ' target="' + tmpValueArry[1] + '" href="' + tmpValueArry[2] + '">' + tmpValueArry[0] + '</a>';                    
                 } else {
                     fieldHTML += ' target="_blank" href="' + this.opt.value + '">Link</a>';
+                }
+                this.tmpEl = htmlToElement( fieldHTML );
+                fieldElements.push( this.tmpEl  )
+            break;
+            case "file":
+                if( typeof this.opt.index !== "undefined" ) {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<a id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '"';    
+                    } else {
+                        fieldHTML += '<a id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '"';
+                    }
+                } else {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<a id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"';    
+                    } else {
+                        fieldHTML += '<a id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
+                    }
+                }
+                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" ';
+                tmpValueArry = this.opt.value.split( "|" );
+                if( tmpValueArry.length === 3 ) {
+                    fieldHTML += ' target="' + tmpValueArry[1] + '" href="' + tmpValueArry[2] + '">' + tmpValueArry[0] + '</a>';                    
+                } else {
+                    fieldHTML += ' target="_blank" href="' + this.opt.value + '">Datei</a>';
                 }
                 this.tmpEl = htmlToElement( fieldHTML );
                 fieldElements.push( this.tmpEl  )
