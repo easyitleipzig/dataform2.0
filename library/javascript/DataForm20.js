@@ -6,8 +6,17 @@ const DIV_UPLOAD_HTML = `<div id="[dVar]_tmpUploadId" class="divUploadFile">
     </div>
     <input type="file" id="[dVar]_tFUFile">
 </div>`;
+const DIV_LINK_HTML = `<input id="[dVar]_linkElId" type="text"><label>Link</label><input id="[dVar]_link" type="text">
+<label>Ziel</label><select id="[dVar]_linkTarget">
+    <option value="_blank" selected>neuer Tab</option>
+    <option value="_self">selber Tab</option>
+    <option value="_parent">Elternfenster</option>
+    <option value="_top">ganzes Fenster</option>
+</select>
+<label>Link</label><input id="[dVar]_linkText" type="text">`;
 const optDate = '<option value="[field]>-1">alle</option><option value="[field]>=\'' + getLastWeek().from + '\' and [field]<=\'' + getLastWeek().to + '\'">letzteWoche</option><option value="[field]>=\'' + getCurrentWeek().from + '\' and [field]<=\'' + getCurrentWeek().to + '\'">aktuelle Woche</option><option value="[field]>=\'' + getNextWeek().from + '\' and [field]<=\'' + getNextWeek().to + '\'">nächste Woche</option><option value="[field]>=\'' + getLastMonth().from + '\' and [field]<=\'' + getLastMonth().to + '\'">letzter Monat</option><option value="[field]>=\'' + getCurrentMonth().from + '\' and [field]<=\'' + getCurrentMonth().to + '\'">aktueller Monat</option><option value="[field]>=\'' + getNextMonth().from + '\' and [field]<=\'' + getNextMonth().to + '\'">nächster Monat</option>';
 const DIFF_PAGINATION = 2;
+const MAX_FILE_UPLOADSIZE = 10000;
 class DataForm {                    // class for DataForm2.0
       constructor( param ) {
         this.opt = {
@@ -16,6 +25,9 @@ class DataForm {                    // class for DataForm2.0
             target:                             document.body,  // id of target element; if not isset target is body
             fields:                             undefined,  // field list divided by ","; if not isset all fields
             title:                              undefined,  // title of dataform dialog
+            hasHelp:                            false,
+            hasInfo:                            false,
+            canResize:                          false,
             fieldDefinitions:                   [],         // object array of field definitions
             primaryKey:                         [],         // object array of field definitions
             recordsets:                         [],         // object array of recordsets
@@ -61,26 +73,9 @@ class DataForm {                    // class for DataForm2.0
             formHeight:                         400,
             formModal:                          true,
             divForm:                            undefined,
-            divUpload:                          new DialogDR( { 
-                                                    dVar: param.dVar + ".opt.divUpload", 
-                                                    title: "Datei laden", 
-                                                    innerHTML: DIV_UPLOAD_HTML.replaceAll( "[dVar]", param.dVar ) 
-                                                } ),
             rootPath:                           "library",
-            tFUTargetPath:                      "../documents/", // tUF means tmpFileUpload
-            tFUTargetFileName:                  "",
-            tFUTargetUpdateElementId:           false,
-            tFUTargetElementId:                 "",
-            tFUTargetElementAttr:               "value",
-            tFUTargetElementLinkText:           "Link",
-            tFUTargetElementLinkTarget:         "_blank",
-            tFURepalce:                         true,
-            tFUOldFileName:                     "",
-            tFUWidthTimestamp:                  false,
-            tFUUpdateTable:                     false,
-            tFUTable:                           "",
-            tFUField:                           "",
-            tFUFieldIndex:                      "",
+            imagePath:                          "library/df/",
+            onClose:                            undefined,
             afterDelete:                        undefined,
             afterNew:                           undefined,
         }
@@ -100,7 +95,18 @@ class DataForm {                    // class for DataForm2.0
             }
             
         } else {
-            this.dDF = new DialogDR( {dVar: this.opt.dVar + ".dDF", id: this.opt.id, width: this.opt.formWidth, height: this.opt.formHeight, modal: this.opt.formModal } );
+            this.dDF = new DialogDR( {
+                dVar: this.opt.dVar + ".dDF", 
+                id: this.opt.id, 
+                title: this.opt.title, 
+                width: this.opt.formWidth, 
+                height: this.opt.formHeight, 
+                modal: this.opt.formModal,
+                hasHelp: this.opt.hasHelp,
+                hasInfo: this.opt.hasInfo,
+                canResize: this.opt.canResize,
+                onClose: this.opt.onClose,
+            } );
         }
         nj( this.opt.id ).sDs( "dvar", this.opt.dVar );
         tmpEl = nj().cEl( "div" );
@@ -116,7 +122,6 @@ class DataForm {                    // class for DataForm2.0
             tmpEl.id = this.opt.id.substring( 1 ) + "_pag";
             nj( tmpEl ).aCl( "dataformPagination" );
             nj( tmpEl ).sDs( "dvar", this.opt.dVar );
-
             nj( this.opt.id ).aCh( tmpEl );            
         }
         this.showDfHeadline();
@@ -128,9 +133,62 @@ class DataForm {                    // class for DataForm2.0
         data.dVar = this.opt.dVar;
         data.table = this.opt.table;
         data.fields = this.opt.fields;
+        this.divUpload = new DialogDR( { 
+            dVar: param.dVar + ".divUpload", 
+            title: "Datei laden", 
+            innerHTML: DIV_UPLOAD_HTML.replaceAll( "[dVar]", this.opt.dVar ),
+            addClasses: "cDivUpload", 
+        } );
+        this.divEditLink = new DialogDR( { 
+            dVar: param.dVar + ".divEditLink", 
+            title: "Link bearbeiten", 
+            innerHTML: DIV_LINK_HTML.replaceAll( "[dVar]", this.opt.dVar ),
+            addClasses: "cDivEditLink",
+            buttons: [
+                {
+                    title: "Speichern",
+                    action: function() {
+                        console.log( nj(this).Dia().opt.variables );
+                        let tmpTargetId = nj(this).Dia().opt.variables.el.opt.id;
+                        let tmpId ="#" + nj(this).Dia().opt.variables.df.opt.dVar + "_linkText";
+                        let tmpVal = nj( tmpId ).v();
+                        let tmpTarget = nj("#" + nj(this).Dia().opt.variables.df.opt.dVar + "_linkTarget" ).v();
+                        let tmpUrl = nj("#" + nj(this).Dia().opt.variables.df.opt.dVar + "_link" ).v();
+                        console.log( tmpTargetId, tmpId );
+                        nj( tmpTargetId ).htm( tmpVal );
+                        nj( tmpTargetId ).atr( "target", tmpTarget );
+                        nj( tmpTargetId ).atr( "href", tmpUrl );
+                        //nj().els( tmpTargetId ).innerHTML = nj( tmpId ).v();
+                        //nj()
+                    }
+                }
+            ],
+            onShow: function() {
+                nj( "#" + this.dVar.split( "." )[0] + "_link" ).v("");
+                let tmp = "#" + this.dVar.split( "." )[0] + "_linkElId";
+                let vText = nj( nj( tmp ).v() ).htm();
+                let vLink = nj( nj( tmp ).v() ).atr( "href" );
+                let vTarget = nj( nj( tmp ).v() ).atr( "target" );
+                console.log( vText, vLink );
+                nj( "#" + this.dVar.split( "." )[0] + "_linkText" ).v( vText );
+                nj( "#" + this.dVar.split( "." )[0] + "_link" ).v( vLink );
+                nj( "#" + this.dVar.split( "." )[0] + "_linkTarget" ).v( vTarget );
+                nj( "#" + this.dVar.split( "." )[0] + "_link" ).on( "blur", function() {
+                    if( !validateURL( nj(this).v() ) && nj(this).v() !== "" ) {
+                        dMNew.show( {title: "Fehler", type: false, text: "Der eingegebene Wert ist kein gültiger Link."})
+                        nj(this).v("");
+                    }
+                });   
+                nj( "#" + this.dVar.split( "." )[0] + "_linkText" ).on( "blur", function() {
+                    if( nj(this).v() === "" ) {
+                        dMNew.show( {title: "Fehler", type: false, text: "Der Linktext darf nicht leer sein."})
+                        nj(this).v("Link");
+                    }
+                });   
+            } 
+        } );
         nj( "#" + this.opt.dVar + "_tFUFile" ).on( "change", function( args ) {
-            console.log( nj( this ).gRO() );
-            nj( this ).gRO().uploadFile();    
+            nj( this ).gRO().uploadFile( nj( this ).Dia() );    
         }  );
     }
     evaluateDF = function ( data ) {
@@ -343,37 +401,30 @@ class DataForm {                    // class for DataForm2.0
         if( typeof fieldDefs.minValue !== "undefined" ) field.minValue = fieldDefs.minValue;
         if( typeof fieldDefs.maxValue !== "undefined" ) field.maxValue = fieldDefs.maxValue;
         if( typeof fieldDefs.maxLength !== "undefined" ) field.maxLength = fieldDefs.maxLength;
+        if( typeof fieldDefs.default !== "undefined" ) field.default = fieldDefs.default;
         return field;
 
     }   
-    resolveFileUpload = async function( targetPath = this.opt.tFUTargetPath, targetFileName = this.opt.tFUTargetFileName, targetElementId = this.opt.tFUTargetElementId, targetElementAttr = this.opt.tFUTargetElementAttr, timeStamp = new Date().getTS(), replace = this.opt.tFUReplace, oldFileName = this.opt.tFUOldFileName, withTimeStamp = this.opt.tFUWidthTimestamp, path = "library/php/upload_dataform20.php", fileObject = nj().els( "#" + this.opt.dVar + "_tFUFile").files[0], cb = this.afterSuccessFileUpload( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp ) ) {
-        console.log( this );
+    resolveFileUpload = async function( file, id, attr, targetPath, /*cb = this.afterSuccessFileUpload(  ),*/ path = "library/php/upload_dataform20.php" ) {
+        console.log( this, file );
         let formData = new FormData();
-        console.log( timeStamp );
-        formData.append("file", fileObject );
+        formData.append("file", file[0] );
+        formData.append("idTargetElement", id );
+        formData.append("targetElementAttr", attr );
         formData.append("targetPath", targetPath );
-        formData.append("replace", replace );
-        formData.append("oldFileName", oldFileName );
-        formData.append("timestamp", timeStamp )
-        formData.append("withTimeStamp", withTimeStamp )
-        formData.append("UpdateTargetElement", this.opt.tFUTargetUpdateElementId );
-        formData.append("targetElementAttr", targetElementAttr );
-        if( targetFileName === "" ) {
-            this.opt.tFUTargetFileName = fileObject.name
-        }
         await fetch( path , {
           method: "POST", 
           body: formData
         })
       .then( data => { 
         console.log( data );
-        cb;
+        //cb;
       } )
       .catch( data => { 
         console.log(data);
       })   
     }
-    afterSuccessFileUpload = function( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp, df ) {
+    afterSuccessFileUpload = function( data, targetPath, targetFileName, df ) {
         dMNew.show( {title: "Dateiupload", type: true, text: "Die Datei wurde erfolgreich übertragen.", variables: { dataform: df }, buttons:[{title:"Schliessen", action: function() {
         console.log( data, targetPath, targetFileName, this );
             nj( this ).Dia().opt.variables.dataform.opt.divUpload.hide();
@@ -397,18 +448,11 @@ class DataForm {                    // class for DataForm2.0
                 break;
             }
         }}] } );
-        console.log( data, targetPath, targetFileName, timeStamp, targetElementId, targetElementAttr, withTimeStamp, this.opt.rootPath, df );
         nj( targetElementId ).v( null );   
     }
-    uploadFile = function() {
-        this.resolveFileUpload();
-    }
-    showUploadDiv = function( acceptFileTypes = "*.*", tFUTargetFileName = "" ) {
-        if( tFUTargetFileName !== "" ) {
-            this.opt.tFUTargetFileName = tFUTargetFileName;
-        }
-        nj( "#" + this.opt.dVar + "_tFUFile" ).atr( "accept", acceptFileTypes );
-        this.opt.divUpload.show();
+    uploadFile = function( dUpload ) {
+        console.log( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload );
+        this.resolveFileUpload( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload.opt.variables.id, dUpload.opt.variables.attr, dUpload.opt.variables.uploadPath );
     }
     showDfHeadline = function() {
         if( this.opt.dfHasLabel ) {
@@ -541,7 +585,6 @@ class DataForm {                    // class for DataForm2.0
         }
         this.opt.whereClausel = searchString.substring( 0, searchString.length - 5 );
         this.opt.currentPage = 0;
-        console.log( this, this.opt.whereClausel );
         this.getRecords();
     }
     getFieldDefinitions = function ( args ) {
@@ -864,12 +907,14 @@ class DataForm {                    // class for DataForm2.0
             }
         })    
     }
+    initBehavior = function() {
+    }
     init = function () {
         // content
         if( this.opt.filter !== "" ) {
             this.opt.whereClausel = " where " + this.opt.filter;
         }
-
+        this.initBehavior();
         this.getFieldDefinitions();
     }
 }

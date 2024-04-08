@@ -44,11 +44,14 @@ class Field {                    // class for DataForm2.0
                                                     bckg
                                                 */
             addPraefix:         "", // praefix for recordsets and fields; e.g. "Df_", "df"
+            addAttr:            "", // additional attributes for html e.g.: 'target = "_blank" placeholder="[placeholder]"; ...' / combinitions are possible
             baseClass:          "cField",
             addClasses:         "", // additional classes for field; e.g. "cUsusal cLabel ..."
             classButtonSize:    "", // additional classes for button size; e.g. "cButtonMin", "cButtonSmall" .. 
-            imageSize:         100,
-            addAttr:            "", // additional attributes for html e.g.: 'target = "_blank" placeholder="[placeholder]"; ...' / combinitions are possible
+            imageSize:          100,
+            containerImgWidth:  undefined,
+            containerImgHeight: undefined,
+            easyLink:           false, // if is true a full link will (text, href. target) be created else where only the link will be safed
             valid:              [], // validity ["not empty", "not 0", "not null", "not undifined", "is email", "is postalcode", "is unique", "is in range", ...]; combinitions are possible
             validOnSave:        false, // checks validity on save else validation will be done if field onblur
             options:            undefined, // options for select field, options for input text datalist
@@ -63,6 +66,7 @@ class Field {                    // class for DataForm2.0
                                 */
             widthLabel:          false,
             widthDiv:            false,
+            uploadPath:         "library/df/",
             onFocus:            function( args ) {
                 if( nj().els( "button[id^=" + nj( this ).gRO().opt.addPraefix + "recordPointer_].cRecPointerSelected" ).length === 1 ) {
                     if( getIdAndName( this.id ).Id !== getIdAndName( nj().els( "button[id^=" + nj( this ).gRO().opt.addPraefix + "recordPointer_].cRecPointerSelected" )[0].id ).Id ) {
@@ -70,8 +74,6 @@ class Field {                    // class for DataForm2.0
                         let l = nj( this ).gRO().opt.boundForm.length;
                         let i = 0;
                         while ( i < l ) {
-                            console.log( nj( this ).gRO().opt.boundForm[i]);
-
                             nj( window[nj( this ).gRO().opt.boundForm[i]].opt.id + "_data" ).htm( "" );
                             i += 1;
                         }
@@ -89,7 +91,29 @@ class Field {                    // class for DataForm2.0
                 }   
             },
             onChange:           undefined,
-            onClick:            undefined,
+            onClick:            function( event ) {
+                                    if( nj(this).Dia().opt.addAttr.indexOf( "undefined" === -1 ) ) {
+                                        switch( nj(this).Dia().opt.type ) {
+                                            case "stars":
+                                                var rect = nj().els(this).getBoundingClientRect(); 
+                                                var x = event.clientX - rect.left; 
+                                                var y = event.clientY - rect.top; 
+                                                nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 )
+                                            break;
+                                            case "img":
+                                                nj( "#" + nj( this ).gRO().opt.dVar + "_tFUFile" ).atr( "accept", ".png,.jpg");
+                                                nj( this ).gRO().divUpload.show({variables: {df: nj(this).gRO(), id: this.id, attr: "src", uploadPath: nj( this ).Dia().opt.uploadPath, table: nj( this ).gRO().opt.table, field: nj( this ).Dia().opt.field } });
+                                            break;
+                                            case "link":
+                                                event.preventDefault();
+                                                let elId = nj( this ).Dia().opt.id;
+                                                console.log( elId );
+                                                nj().els( "#" + nj( this ).gRO().opt.dVar + "_linkElId" ).value = elId;
+                                                nj( this ).gRO().divEditLink.show({variables: {df: nj(this).gRO(), el: nj( this ).Dia() } } );
+                                            break;
+                                        }
+                                    }
+                                },
             onDblClick:         undefined,
         }
         let showOnInit = true,
@@ -135,7 +159,6 @@ class Field {                    // class for DataForm2.0
         console.log( res );
     }    
     checkValidity = function() {
-        console.log( this );
         let result = {success: true};
         let tmpValid = this.opt.valid;
         let v = this.getValue();
@@ -186,74 +209,8 @@ class Field {                    // class for DataForm2.0
         }
         return result;
     }
-    setValue = function( value ) {
-        if( typeof this.opt.index !== "undefined" ) {
-            if( this.opt.addPraefix === "" ) {
-                switch( this.opt.type ) {
-                case "checkbox":
-                    nj( "#" + this.opt.id + '_' + this.opt.index ).chk( value);
-                    break;
-                case "select":
-                    nj( "#" + this.opt.id ).sSV( value );
-                    break;
-                case "img":
-                    nj( "#" + this.opt.id ).atr( "src", value );
-                    break;
-                default:
-                    nj( "#" + this.opt.id + '_' + this.opt.index ).v( value );
-                    break;
-                }
-             } else {
-                switch( this.opt.type ) {
-                case "checkbox":
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).chk( value );
-                    break;
-                case "select":
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).sSV( value );
-                    break;
-                case "img":
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).atr("src", value );
-                    break;
-                default:
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).v( value );
-                    break;
-                }
-            }
-        } else {
-            if( this.opt.addPraefix === "" ) {
-                switch( this.opt.type ) {
-                case "checkbox":
-                    nj( "#" + this.opt.id ).chk( value );
-                    break;
-                case "select":
-                    nj( "#" + this.opt.id ).sSV( value );
-                    break;
-                case "img":
-                    nj( "#" + this.opt.id ).atr("src", value );
-                    break;
-                default:
-                    nj( "#" + this.opt.id ).v( value );
-                    break;
-                }                
-            } else {
-                switch( this.opt.type ) {
-                case "checkbox":
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).chk( value );
-                    break;
-                case "select":
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).sSV( value );
-                    break;
-                case "img":
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).atr("src", value );
-                    break;
-                default:
-                    nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).v( value );
-                    break;
-                }                
-            }            
-        }
-    }
     getValue = function( value ) {
+        console.log( this );
         if( typeof this.opt.index !== "undefined" ) {
             if( this.opt.addPraefix === "" ) {
                 if( this.opt.type === "checkbox" ) {
@@ -269,7 +226,6 @@ class Field {                    // class for DataForm2.0
                 }
             }
         } else {
-                console.log( this.opt.id );
             if( this.opt.addPraefix === "" ) {
                 switch( this.opt.type ) {
                 case "checkbox":
@@ -282,8 +238,16 @@ class Field {                    // class for DataForm2.0
                     return nj( this.opt.id ).atr( "src" );
                     break;
                 case "stars":
-                    console.log(  );
                     return nj().els( this.opt.id ).children[1].getAttribute( "width" ) / 20;
+                    break;
+                case "link":
+                    console.log( this.opt.easyLink );
+                    //return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).atr( "href" );
+                    if( this.opt.easyLink ) {
+                        return nj( this.opt.id ).atr( "href" );
+                    } else {
+                        return nj( this.opt.id ).htm() + "|" + nj( this.opt.id ).atr( "target" ) + "|" + nj( this.opt.id ).atr( "href" );
+                    }
                     break;
                 default:
                     return nj( this.opt.id ).v();    
@@ -298,9 +262,14 @@ class Field {                    // class for DataForm2.0
                     return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).gSV().join();
                     break;
                 case "stars":
-                    console.log( nj().els( "#" + this.opt.addPraefix + "_" + this.opt.id ).children[1].getAttribute( "width" ) );
-                    return 1;
+                    return nj().els( "#" + this.opt.addPraefix + "_" + this.opt.id ).children[1].getAttribute( "width" ) / 20;
                     break;
+                case "link":
+                    console.log( this );
+                    //return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).atr( "href" );
+                    return "1";
+                    break;
+                
                 default:
                     return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).v();    
                     break;
@@ -422,19 +391,31 @@ class Field {                    // class for DataForm2.0
                 }
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="button" value="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
-                if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
-                    tmpId = "list_" + this.tmpEl.id;
-                    this.tmpEl.setAttribute("list", tmpId );
-                }
-                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  );
-                if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
-                    el = nj().cEl( "datalist" );
-                    el.id = "list_" + this.tmpEl.id;
-                    nj( el ).htm( this.opt.options );
-                    fieldElements.push( el  );
+            break;
+            case "link":
+                if( typeof this.opt.index !== "undefined" ) {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<a id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '"';    
+                    } else {
+                        fieldHTML += '<a id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '"';
+                    }
+                } else {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<a id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"';    
+                    } else {
+                        fieldHTML += '<a id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
+                    }
                 }
-
+                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" ';
+                tmpValueArry = this.opt.value.split( "|" );
+                if( tmpValueArry.length === 3 ) {
+                    fieldHTML += ' target="' + tmpValueArry[1] + '" href="' + tmpValueArry[2] + '">' + tmpValueArry[0] + '</a>';                    
+                } else {
+                    fieldHTML += ' target="_blank" href="' + this.opt.value + '">Link</a>';
+                }
+                this.tmpEl = htmlToElement( fieldHTML );
+                fieldElements.push( this.tmpEl  )
             break;
             case "checkbox":
                 if( typeof this.opt.index !== "undefined" ) {
@@ -456,7 +437,6 @@ class Field {                    // class for DataForm2.0
                     fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="checkbox" ' + 'title="' + this.opt.title + '">';
                 }
                 this.tmpEl = htmlToElement( fieldHTML );
-                //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
             break;
             case "button":
