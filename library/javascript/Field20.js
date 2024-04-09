@@ -104,6 +104,11 @@ class Field {                    // class for DataForm2.0
                                                 nj( "#" + nj( this ).gRO().opt.dVar + "_tFUFile" ).atr( "accept", ".png,.jpg");
                                                 nj( this ).gRO().divUpload.show({variables: {df: nj(this).gRO(), id: this.id, attr: "src", uploadPath: nj( this ).Dia().opt.uploadPath, table: nj( this ).gRO().opt.table, field: nj( this ).Dia().opt.field } });
                                             break;
+                                            case "file":
+                                                event.preventDefault();
+                                                nj( "#" + nj( this ).gRO().opt.dVar + "_tFUFile" ).rAt( "accept" );
+                                                nj( this ).gRO().divUpload.show({variables: {df: nj(this).gRO(), id: this.id, attr: "href", uploadPath: nj( this ).Dia().opt.uploadPath, table: nj( this ).gRO().opt.table, field: nj( this ).Dia().opt.field } });
+                                            break;
                                             case "link":
                                                 event.preventDefault();
                                                 let elId = nj( this ).Dia().opt.id;
@@ -501,7 +506,6 @@ class Field {                    // class for DataForm2.0
                 img.onload = function( e ) {
                     let c = this.width;    
                 }
-                console.log( this.opt.imageSize );
                 if( img.width / img.height >= 1 ) {
                     w = "width=" + this.opt.imageSize;
                     h = "height=auto";
@@ -550,7 +554,7 @@ class Field {                    // class for DataForm2.0
                 }
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">';
                 fieldHTML += '<img src="library/css/icons/star_bar.png" width="100" style="position: relative;z-index: 1">';
-                fieldHTML += '<img src="library/css/icons/background_yellow.png" width="' + parseFloat(this.opt.value) * 20 + '" height="20" style="position: relative; left: -100px; z-index: 0">';
+                fieldHTML += '<img src="library/css/icons/background_yellow.png" width="' + parseFloat(this.opt.value) * 20 + '" height="20" style="position: relative; top: -25px; z-index: 0">';
                 fieldHTML += '</div>';
                 this.tmpEl = htmlToElement( fieldHTML );
                 //this.setActions( this.tmpEl );

@@ -52,3 +52,10 @@ button[id*=_recordPointer_new] {
     height: 35px;
     padding-top: 1em;    
 }
+.cStars {
+    display: inline-block;
+    position: relative;
+    width: 100px;
+    top: 28px;
+    z-index: 4;
+}

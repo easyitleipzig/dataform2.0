@@ -417,7 +417,7 @@ class DataForm {                    // class for DataForm2.0
           body: formData
         })
       .then( data => { 
-        console.log( data );
+        console.log( data, id, attr, targetPath );
         //cb;
       } )
       .catch( data => { 

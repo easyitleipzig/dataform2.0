@@ -164,14 +164,23 @@ let fields = [
             type: "stars",
             addClasses: "cVal_stars",
             onClick: function( event ) {
-                console.log( nj().els(this).children[1] );
               var rect = nj().els(this).getBoundingClientRect(); 
               var x = event.clientX - rect.left; 
               var y = event.clientY - rect.top; 
-               
-              console.log(parseInt(x/20) + 1);
               nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 ) 
             }
+        },
+        {
+            field: "val_link",
+            label: "val_link",
+            type: "link",
+            addClasses: "cVal_link",
+        },
+        {
+            field: "val_file",
+            label: "val_file",
+            type: "file",
+            addClasses: "cVal_file",
         },
         {
             field: "button_addKey",
@@ -203,7 +212,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars",
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file",
     addPraefix: "df1_",
     formType: "html", 
     validOnSave: true, 
