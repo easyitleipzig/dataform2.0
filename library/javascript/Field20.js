@@ -92,6 +92,7 @@ class Field {                    // class for DataForm2.0
             },
             onChange:           undefined,
             onClick:            function( event ) {
+                console.log( this );
                                     if( nj(this).Dia().opt.addAttr.indexOf( "undefined" === -1 ) ) {
                                         switch( nj(this).Dia().opt.type ) {
                                             case "stars":

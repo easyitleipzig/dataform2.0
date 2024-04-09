@@ -163,6 +163,7 @@ let fields = [
             label: "val_stars",
             type: "stars",
             addClasses: "cVal_stars",
+            widthDiv: true,
             onClick: function( event ) {
               var rect = nj().els(this).getBoundingClientRect(); 
               var x = event.clientX - rect.left; 

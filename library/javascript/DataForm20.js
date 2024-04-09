@@ -905,6 +905,13 @@ class DataForm {                    // class for DataForm2.0
                 nj( "#" + window[df.opt.boundForm[i]].opt.dVar + "_data" ).htm( "" );
                 i += 1;
             }
+        });
+        nj( "div:has(>div.cStars)" ).on( "click", function( e ) {
+            e.stopImmediatePropagation();  
+            var rect = nj().els(this).getBoundingClientRect(); 
+            var x = event.clientX - rect.left; 
+            var y = event.clientY - rect.top; 
+            nj().els(this).children[0].children[1].setAttribute("width", (parseInt(x/20) + 1)*20 )
         })    
     }
     initBehavior = function() {
