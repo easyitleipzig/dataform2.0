@@ -404,8 +404,8 @@ var Df_part = new DataForm( {
     countRecords: undefined,
     hasPagination: false,
     filter: undefined,
-    afterDelete: afterDelete,
-    afterNew: afterNew,
+    afterDelete: informUserAfterDeleteFromEvent,
+    afterNew: informUserAfterAddToEvent,
 /*
     orderArray: ["val_varchar", "val_int"],
     searchArray: [

@@ -1,6 +1,6 @@
-const afterDelete = function( args ) {
+const informUserAfterDeleteFromEvent = function( args ) {
 	console.log( arguments );	
 }
-const afterNew = function( args ) {
+const informUserAfterAddToEvent = function( args ) {
 	console.log( arguments );	
 }

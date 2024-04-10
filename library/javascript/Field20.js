@@ -216,7 +216,6 @@ class Field {                    // class for DataForm2.0
         return result;
     }
     getValue = function( value ) {
-        console.log( this );
         if( typeof this.opt.index !== "undefined" ) {
             if( this.opt.addPraefix === "" ) {
                 if( this.opt.type === "checkbox" ) {
