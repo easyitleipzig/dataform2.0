@@ -76,6 +76,7 @@ class DataForm {                    // class for DataForm2.0
             rootPath:                           "library",
             imagePath:                          "library/df/",
             onClose:                            undefined,
+            onShow:                             undefined,
             afterDelete:                        undefined,
             afterNew:                           undefined,
         }
@@ -102,10 +103,12 @@ class DataForm {                    // class for DataForm2.0
                 width: this.opt.formWidth, 
                 height: this.opt.formHeight, 
                 modal: this.opt.formModal,
+                autoOpen: this.opt.autoOpen,
                 hasHelp: this.opt.hasHelp,
                 hasInfo: this.opt.hasInfo,
                 canResize: this.opt.canResize,
                 onClose: this.opt.onClose,
+                onShow: this.opt.onShow,
             } );
         }
         nj( this.opt.id ).sDs( "dvar", this.opt.dVar );
