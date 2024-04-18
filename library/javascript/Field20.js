@@ -99,7 +99,8 @@ class Field {                    // class for DataForm2.0
                                                 var rect = nj().els(this).getBoundingClientRect(); 
                                                 var x = event.clientX - rect.left; 
                                                 var y = event.clientY - rect.top; 
-                                                nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 )
+                                                nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 );
+                                                //nj("div[class*=_val_stars_][id*=_new]").sty( "top", "unset");
                                             break;
                                             case "img":
                                                 nj( "#" + nj( this ).gRO().opt.dVar + "_tFUFile" ).atr( "accept", ".png,.jpg");
@@ -224,6 +225,7 @@ class Field {                    // class for DataForm2.0
                     return nj( "#" + this.opt.id + '_' + this.opt.index ).v();
                 }                    
             } else {
+                console.log( this.opt.type );
                 if( this.opt.type === "checkbox" ) {
                     return nj( "#" + this.opt.addPraefix + "_" + this.opt.id + '_' + this.opt.index ).chk();
                 } else {
@@ -246,6 +248,7 @@ class Field {                    // class for DataForm2.0
                     return nj().els( this.opt.id ).children[1].getAttribute( "width" ) / 20;
                     break;
                 case "link":
+                case "file":
                     console.log( this.opt.easyLink );
                     //return nj( "#" + this.opt.addPraefix + "_" + this.opt.id ).atr( "href" );
                     if( this.opt.easyLink ) {
@@ -503,15 +506,20 @@ class Field {                    // class for DataForm2.0
                 }
                 let img = new Image(), w, h;
                 img.src = this.opt.value;
-                img.onload = function( e ) {
-                    let c = this.width;    
-                }
-                if( img.width / img.height >= 1 ) {
-                    w = "width=" + this.opt.imageSize;
-                    h = "height=auto";
+                if( this.opt.value === "" ) {
+                        w = "width=" + this.opt.imageSize;
+                        h = "height=" + this.opt.imageSize;
                 } else {
-                    w = "width=auto";
-                    h = "height=" + this.opt.imageSize;
+                    img.onload = function( e ) {
+                        let c = this.width;    
+                    }
+                    if( img.width / img.height >= 1 ) {
+                        w = "width=" + this.opt.imageSize;
+                        h = "height=auto";
+                    } else {
+                        w = "width=auto";
+                        h = "height=" + this.opt.imageSize;
+                    }                    
                 }
                 fieldHTML += " " + w + " " + h + " ";
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';

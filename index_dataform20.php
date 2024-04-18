@@ -165,10 +165,12 @@ let fields = [
             addClasses: "cVal_stars",
             widthDiv: true,
             onClick: function( event ) {
+                console.log( this );
               var rect = nj().els(this).getBoundingClientRect(); 
               var x = event.clientX - rect.left; 
               var y = event.clientY - rect.top; 
-              nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 ) 
+              nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 );
+              nj("div[class*=_val_stars_][id*=_new]").sty( "top", "unset"); 
             }
         },
         {
@@ -178,12 +180,18 @@ let fields = [
             addClasses: "cVal_link",
         },
         {
+            field: "val_date",
+            label: "val_date",
+            type: "input_date",
+            addClasses: "cVal_date",
+        },
+        {
             field: "val_file",
             label: "val_file",
             type: "file",
             addClasses: "cVal_file",
         },
-        {
+       {
             field: "button_addKey",
             type: "button",
             baseClass: "cAddButton",
@@ -213,7 +221,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file",
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file,val_date",
     addPraefix: "df1_",
     formType: "html", 
     validOnSave: true, 
@@ -256,14 +264,14 @@ var Df = new DataForm( {
                 value: ">-1",
                 sel: "value",
             },
-/*            {
-                field: "val_test",
+            {
+                field: "val_date",
                 type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
+                options: optDate.replaceAll( "[field]", "val_date" ),
                 value: ">-1",
                 sel: "area",
             },
-*/
+
         ]
     /*additionalFields: additionalFields, */
 } );

@@ -14,14 +14,25 @@ var setDialogPosOnScroll = function() {
     //console.log( dias );  
     i = 0;  
     while( i < l ) {
-        //console.log( nj( nj().els( dias[i].opt.id + "_box" ) ).gRe() );
-        //console.log( window.scrollX, window.scrollY );
+        console.log( nj( nj().els( dias[i].opt.id + "_box" ) ).gRe() );
+        console.log( window.scrollX, window.scrollY );
         i += 1;    
     }    
 }
 //registerOnResize( setDialogPosOnScroll );
 const getRootObject = function( el ) {
     return window[ getDVar( el ).split(".")[0] ];
+}
+const getDialogVar = function( dVar ) {
+    let tmp = dVar.split( "." );
+    let m = tmp.length;
+    let j = 1;
+    let tmpVar = window[ tmp[0] ];
+    while( j < m ) {
+        tmpVar = tmpVar[tmp[j]];
+        j += 1;
+    }
+    return tmpVar;
 }
 const getDVar = function( el ) {
     let x = 1;
@@ -67,7 +78,7 @@ class DialogDR {                    // dialog drag and resize
             hasIcon:            false, // optional - true/false
             hasInfo:            false, // optional - true/false
             hasHelp:            false, // optional - true/false
-            this:               undefined, // do not set
+            helpCanResize:      false, // optional - true/false
             divHelp:            undefined, // do not set
             divInfo:            undefined, // do not set
             hasMin:             false,
@@ -87,6 +98,7 @@ class DialogDR {                    // dialog drag and resize
             afterShow:          undefined,
             onHide:             undefined,
             onSticky:           undefined,
+            onClose:            undefined,
             onRefreshHTML:      undefined,
             variables:          undefined,
         }
@@ -125,6 +137,7 @@ class DialogDR {                    // dialog drag and resize
                 b = {};
                 b.title = "Okay";
                 b.action = function( el ){
+                    console.log( getDVar(  this ) );
                     nj( this ).Dia().hide();
                 };
                 this.opt.buttons.push( b ); 
@@ -133,22 +146,15 @@ class DialogDR {                    // dialog drag and resize
         el = nj().cEl( "div" );
         nj( el ).aCl( this.opt.classPraefix + "HL" );
         el.id = this.boxId + "_headline";
-        nj( el ).on( "click", function() {
-                if( getDVar( this ).indexOf(".opt." ) > 0 ) {
-                    executeCode( getDVar( this ) + ".setMaxZIndex();")                    
-                } else {
-                    if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                        executeCode( nj( this ).Dia().id + ".setMaxZIndex();")
-                    } else {
-                        nj( this ).Dia().setMaxZIndex();
-                    }
-                }
+        nj( el ).on( "click", function( el ) {
+            nj( el.target ).Dia().setMaxZIndex();
         });
         let el_add  = nj().cEl( "div" );
         nj( el_add ).aCl( this.opt.classPraefix + "HLIcon" );
         nj( el ).aCh( el_add );
         el_add = null;
         el_add = nj().cEl( "div" );
+        el_add.id = this.opt.dVar + "HLTitle";
         nj( el_add ).aCl( this.opt.classPraefix + "HLTitle" );
         nj( el_add ).txt( this.opt.title );
         nj( el ).aCh( el_add );
@@ -159,13 +165,9 @@ class DialogDR {                    // dialog drag and resize
         el_add = nj().cEl( "div" );
         if( this.opt.hasHelp ) {
             nj( el_add ).aCl( "cbHelp iconButtMin " + this.opt.classPraefix + "HLHelp");
-            nj( el_add ).on( "click", function() {
-                if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                    executeCode( nj( this ).Dia().id + ".opt.divHelp.show();")
-                } else {
-                    nj( this ).Dia().opt.divHelp.show();
-                }
-
+            nj( el_add ).on( "click", function( e ) {
+                e.stopPropagation();
+                nj( e.target ).Dia().opt.divHelp.show();
             });
             nj( el_ctrl ).aCh( el_add );
         }
@@ -174,11 +176,8 @@ class DialogDR {                    // dialog drag and resize
         if( this.opt.hasInfo ) {
             nj( el_add ).aCl( "cbInfo iconButtMin " + this.opt.classPraefix + "HLInfo");
             nj( el_add ).on( "click", function( e ) {
-                if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                    executeCode( nj( this ).Dia().id + ".opt.divInfo.show();")
-                } else {
-                    nj( this ).Dia().opt.divInfo.show();
-                }   
+                e.stopPropagation();
+                nj( e.target ).Dia().opt.divInfo.show();    
             });
             nj( el_ctrl ).aCh( el_add );
         }
@@ -186,17 +185,13 @@ class DialogDR {                    // dialog drag and resize
         el_add = nj().cEl( "div" );
         if( this.opt.hasMin ) {
             nj( el_add ).aCl( "cbMinimize iconButtMin " + this.opt.classPraefix + "HLMin" );
-            nj( el_add ).on( "click", function() {
-                let df = nj( this ).Dia();
-                if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                    executeCode( 'if( nj( "#' + nj( this ).Dia().id + '_box" ).hCl( "minimized" ) ) { ' + nj( this ).Dia().id + '.restoreMin();} else {' + nj( this ).Dia().id + '.minimize();}' );
+            nj( el_add ).on( "click", function( el ) {
+                let df = nj( el.target ).Dia();
+                if( nj( df.opt.id + "_box" ).hCl( "minimized" ) ) {
+                    df.restoreMin()
                 } else {
-                    if( nj( df.opt.id + "_box" ).hCl( "minimized" ) ) {
-                        df.restoreMin()
-                    } else {
-                        df.minimize();        
-                    }                
-                }   
+                    df.minimize();        
+                }                
             });
             nj( el_ctrl ).aCh( el_add );
         }
@@ -206,15 +201,11 @@ class DialogDR {                    // dialog drag and resize
             nj( el_add ).aCl( "cbMax iconButtMin " + this.opt.classPraefix + "HLMax" );
             nj( el_add ).on( "click", function( el ) {
                 let df = nj( el.target ).Dia();
-                if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                    executeCode( 'if( nj( "#' + nj( this ).Dia().id + '_box" ).hCl( "maximized" ) ) { ' + nj( this ).Dia().id + '.restoreMax();} else {' + nj( this ).Dia().id + '.maximize();}' );
+                if( nj( df.opt.id + "_box" ).hCl( "maximized" ) ) {
+                    df.restoreMax( el_add )
                 } else {
-                    if( nj( df.opt.id + "_box" ).hCl( "maximized" ) ) {
-                        df.restoreMax( el_add )
-                    } else {
-                        df.maximize();        
-                    }
-                }   
+                    df.maximize();        
+                }
             });
             nj( el_ctrl ).aCh( el_add );
         }
@@ -222,19 +213,13 @@ class DialogDR {                    // dialog drag and resize
         el_add = nj().cEl( "div" );
         if( this.opt.hasClose ) {
             nj( el_add ).aCl( "cbClose iconButtMin " + this.opt.classPraefix + "HLClose" );
-            nj( el_add ).on( "click", function() {
-                //console.log( getDVar( this ) );
-                if( getDVar( this ).indexOf(".opt." ) > 0 ) {
-                    executeCode( getDVar( this ) + ".hide();")                    
-                } else {
-                    if( Node.prototype.isPrototypeOf( nj( this ).Dia() ) ) {
-                        executeCode( nj( this ).Dia().id + ".hide();")
-                    } else {
-                        nj( this ).Dia().hide();
-                    }
-
-                }
-            });
+            if( typeof this.opt.onClose === "undefined") {
+                nj( el_add ).on( "click", function( el ) {
+                    nj( el.target ).Dia().hide();    
+                });                
+            } else {
+                nj( el_add ).on( "click", this.opt.onClose )
+            }
             nj( el_ctrl ).aCh( el_add );
         }
         nj( el ).aCh( el_ctrl );
@@ -331,7 +316,7 @@ class DialogDR {                    // dialog drag and resize
             el_he.id = this.boxId + "_help";
             nj( el_he ).aCl( CLASS_DIALOG_HELP );
             document.body.appendChild( el_he );
-            this.opt.divHelp = new DialogDR( { dVar: this.opt.dVar + ".opt.divHelp", id: "#" + el_he.id, title: "Hilfe", modal: true, autoOpen: false, center: false, cascade: false })
+            this.opt.divHelp = new DialogDR( { dVar: this.opt.dVar + ".opt.divHelp", id: "#" + el_he.id, title: "Hilfe", modal: true, autoOpen: false, center: false, cascade: false, canResize: this.opt.helpCanResize } );
         }
         if( this.opt.hasInfo ) {
             let el_i = nj().cEl( "div" );
@@ -342,17 +327,12 @@ class DialogDR {                    // dialog drag and resize
             this.opt.divInfo = new DialogDR( { dVar: this.opt.dVar + ".opt.divInfo", id: "#" + el_i.id, title: "Information", modal: true, autoOpen: false, center: false, cascade: false })
         }
         nj( this.opt.target ).aCh( box );
-        if( this.opt.canMove ) {
-            //dDia1_box
-            //moverClass.init( "body", this.opt.id + "_headline" );
-        }
         if( this.opt.canResize ) {
             let dummyRes = nj().cEl("div");
             dummyRes.id = this.boxId +  "_dummyRes";
             nj( dummyRes ).aCl( "dummyRes" );
             const boxEl = nj().els( box );
             nj( boxEl ).aCh( dummyRes );
-            //resizeClass.init( document.getElementById( this.opt.id.substr( 1, this.opt.id.length - 1 ) + "_dummyRes" ) );
         }
         if( this.opt.cascade ) {
             nj( "#" + this.boxId + "_box" ).aCl( "cascade" );
@@ -364,11 +344,10 @@ class DialogDR {                    // dialog drag and resize
         if( this.opt.canResize ) {
             resizeable( ( this.opt.id + "_dummyRes" ).replace("#", "") );            
         }
-        docReady(function(){
-
-        })
         if( typeof this.opt.onInit === "function" ) this.opt.onInit( this );
         if( this.opt.autoOpen ) {
+            console.log( window.innerWidth, this.opt.width );
+            console.log( window.innerHeight, this.opt.height );
             this.showOnInit = true;
             this.show();
         }
@@ -400,24 +379,21 @@ class DialogDR {                    // dialog drag and resize
      *  variables   additional arguments 
      */ 
     show = function( args ) {
-        let mZI = maxZIndex();
-        if( this.opt.modal ) {
-            nj( this.opt.id + "_wrapper" ).rCl( "wrapperHide");
-            nj( this.opt.id + "_wrapper" ).aCl( "wrapperShow dialogWrapper");
-            nj( this.opt.id + "_wrapper" ).sty( { "z-index": ++mZI } );
-        }
         nj( this.opt.id + "_box" ).rCl( "boxHide");
         nj( this.opt.id + "_box" ).aCl( "boxHidden");
 
         let x, y;
         if( this.opt.center ) {
-/*
-            x = window.innerWidth / 2 + parseInt( this.center().x ) + "px"; 
-            y = window.innerHeight / 2 + parseInt(this.center().y ) + "px";
-*/
             x = this.center().x; 
             y = this.center().y;
-        //console.log( this.opt.dVar, this.center().x, this.center().y );
+            console.log( x, window.innerWidth, this.opt.width );
+            console.log( y, window.innerHeight, this.opt.height );
+            if( parseInt( x ) < 0 ) {
+                x = window.innerWidth / 2 - this.opt.width / 2 - 3 + "px";
+            }
+            if( parseInt( y ) < 0 ) {
+                y = window.innerHeight / 2 - this.opt.height / 2 - 48 + "px";
+            }
         } else { 
                 x = "0px";
                 y = "0px";
@@ -484,6 +460,14 @@ class DialogDR {                    // dialog drag and resize
                 }
                 i += 1;
             }
+        }
+        if( parseInt( x ) < 0 ) x=parseInt( x ) *-1 + "px";
+        if( parseInt( y ) < 0 ) y=parseInt( y ) *-1 + "px";
+        let mZI = maxZIndex();
+        if( this.opt.modal ) {
+            nj( this.opt.id + "_wrapper" ).rCl( "wrapperHide");
+            nj( this.opt.id + "_wrapper" ).aCl( "wrapperShow dialogWrapper");
+            nj( this.opt.id + "_wrapper" ).sty( { "z-index": ++mZI } );
         }
         nj( this.opt.id + "_box" ).sty( { "left": x, "top": y, "z-index": ++mZI } );
         nj( this.opt.id + "_box" ).aCl( "boxShow");
@@ -617,8 +601,10 @@ class DialogDR {                    // dialog drag and resize
                 }
             break;
             case "center":
-                let res = this.center();
-                nj( this.opt.id + "_box" ).sty( { "left" : res.x, "top": res.y } );
+                if( this.opt.center ) {
+                    let res = this.center();
+                    nj( this.opt.id + "_box" ).sty( { "left" : res.x, "top": res.y } );
+                }
             break;
             case "scroll":
                 x = window.scrollX + "px";
@@ -627,11 +613,9 @@ class DialogDR {                    // dialog drag and resize
             break;
             case "title":
                 if( typeof v === "undefined" ) {
-                    console.log(  nj().els( this.opt.id + "_box>div:nth-child(1)>div:nth-child(2)" )[0].innerHTML );
-                    return nj().els( this.opt.id + "_box>div:nth-child(1)>div:nth-child(2)" )[0].innerHTML;
+                    return nj( "#" + this.opt.classPraefix + "HLTitle" ).htm();
                 } else {
-                    console.log(  nj().els( this.opt.id + "_box>div:nth-child(1)>div:nth-child(2)" )[0].innerHTML );
-                    nj().els( this.opt.id + "_box>div:nth-child(1)>div:nth-child(2)" )[0].innerHTML = v;
+                    nj( "#" + this.opt.classPraefix + "HLTitle" ).htm( v );
                 }
             case "html":
                 if( typeof v === "undefined" ) {
@@ -670,7 +654,7 @@ class DialogDR {                    // dialog drag and resize
                     el_res.id = this.boxId + "_resizer";
                     nj( el_res ).aCl( this.opt.classPraefix + "Resizer " + CLASS_DIALOG_RESIZER );
                     nj( this.opt.id + "_footer" ).aCh( el_res );
-                    resizeClass.init( el_res, this.opt.id + "_box_resizer_img" );
+                    //resizeClass.init( el_res, this.opt.id + "_box_resizer_img" );
                 }
 
             break;

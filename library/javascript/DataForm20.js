@@ -151,18 +151,15 @@ class DataForm {                    // class for DataForm2.0
                 {
                     title: "Speichern",
                     action: function() {
-                        console.log( nj(this).Dia().opt.variables );
                         let tmpTargetId = nj(this).Dia().opt.variables.el.opt.id;
                         let tmpId ="#" + nj(this).Dia().opt.variables.df.opt.dVar + "_linkText";
                         let tmpVal = nj( tmpId ).v();
                         let tmpTarget = nj("#" + nj(this).Dia().opt.variables.df.opt.dVar + "_linkTarget" ).v();
                         let tmpUrl = nj("#" + nj(this).Dia().opt.variables.df.opt.dVar + "_link" ).v();
-                        console.log( tmpTargetId, tmpId );
                         nj( tmpTargetId ).htm( tmpVal );
                         nj( tmpTargetId ).atr( "target", tmpTarget );
                         nj( tmpTargetId ).atr( "href", tmpUrl );
-                        //nj().els( tmpTargetId ).innerHTML = nj( tmpId ).v();
-                        //nj()
+                        nj( this ).Dia().hide();
                     }
                 }
             ],
@@ -172,7 +169,6 @@ class DataForm {                    // class for DataForm2.0
                 let vText = nj( nj( tmp ).v() ).htm();
                 let vLink = nj( nj( tmp ).v() ).atr( "href" );
                 let vTarget = nj( nj( tmp ).v() ).atr( "target" );
-                console.log( vText, vLink );
                 nj( "#" + this.dVar.split( "." )[0] + "_linkText" ).v( vText );
                 nj( "#" + this.dVar.split( "." )[0] + "_link" ).v( vLink );
                 nj( "#" + this.dVar.split( "." )[0] + "_linkTarget" ).v( vTarget );
@@ -409,7 +405,7 @@ class DataForm {                    // class for DataForm2.0
 
     }   
     resolveFileUpload = async function( file, id, attr, targetPath, /*cb = this.afterSuccessFileUpload(  ),*/ path = "library/php/upload_dataform20.php" ) {
-        console.log( this, file );
+        console.log( this, file, id );
         let formData = new FormData();
         formData.append("file", file[0] );
         formData.append("idTargetElement", id );
@@ -420,38 +416,40 @@ class DataForm {                    // class for DataForm2.0
           body: formData
         })
       .then( data => { 
-        console.log( data, id, attr, targetPath );
+        console.log( data, id, attr, targetPath, file[0].name );
+        this.afterSuccessFileUpload( data, targetPath, file[0].name, this, id, attr );
         //cb;
       } )
       .catch( data => { 
         console.log(data);
       })   
     }
-    afterSuccessFileUpload = function( data, targetPath, targetFileName, df ) {
+    afterSuccessFileUpload = function( data, targetPath, targetFileName, df, id, tFUTargetElementAttr ) {
         dMNew.show( {title: "Dateiupload", type: true, text: "Die Datei wurde erfolgreich übertragen.", variables: { dataform: df }, buttons:[{title:"Schliessen", action: function() {
-        console.log( data, targetPath, targetFileName, this );
-            nj( this ).Dia().opt.variables.dataform.opt.divUpload.hide();
+        console.log( /*data, targetPath, targetFileName, nj( this ).Dia(), nj( this ).Dia().opt.variables.dataform,*/ id );
+            nj( this ).Dia().opt.variables.dataform.divUpload.hide();
             let opts = nj( this ).Dia().opt.variables.dataform.opt;
-            console.log( nj( this ).Dia().opt.variables.dataform.opt );
+            console.log( tFUTargetElementAttr, targetPath, targetFileName );
+            //console.log( nj( this ).Dia().opt.variables.dataform.opt, id );
             dMNew.hide();
-            switch( opts.tFUTargetElementAttr ) {
+            switch( tFUTargetElementAttr ) {
                 case "value":
-                    nj( targetElementId ).v( targetPath.replace( "..", opts.rootPath ) + opts.tFUTargetFileName );
+                    nj( "#" + id ).v( targetPath + targetFileName );
                 break;
                 case "src":
-                    nj( targetElementId ).atr( "src", targetPath.replace( "..", opts.rootPath ) + opts.tFUTargetFileName );
+                    nj( "#" + id ).atr( "src", targetPath + targetFileName );
                 break;
             case "bckg":
-                    nj( targetElementId ).sty( "background-image", "url(" + targetPath.replace( "..", opts.rootPath ) + opts.tFUTargetFileName + ")" );
+                    nj( "#" + id ).sty( "background-image", "url(" + targetPath + targetFileName + ")" );
                 break;
             case "href":
-                    nj( targetElementId ).atr( "href", targetPath.replace( "..", opts.rootPath ) + opts.tFUTargetFileName );
-                    nj( targetElementId ).atr( "target", opts.tFUTargetElementLinkTarget );
-                    nj( targetElementId ).htm( opts.tFUTargetElementLinkText );
+                    nj( "#" + id ).atr( "href", targetPath + targetFileName );
+                    nj( "#" + id ).atr( "target", "_blank" );
+                    nj( "#" + id ).htm( targetFileName );
                 break;
             }
         }}] } );
-        nj( targetElementId ).v( null );   
+        nj( "#" + df.opt.dVar + "_tFUFile" ).v( null );   
     }
     uploadFile = function( dUpload ) {
         console.log( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload );
@@ -527,7 +525,6 @@ class DataForm {                    // class for DataForm2.0
             nj( field.opt.id ).v( this.opt.searchArray[i].value );
             if( this.opt.searchArray[i].type === "select" ) {
                 nj( field.opt.id ).on( "change", function( args ) {
-                    console.log( nj( this ).gSV() );
                     nj( this ).Dia().getSearchString();   
                 } );    
             }
@@ -575,7 +572,11 @@ class DataForm {                    // class for DataForm2.0
                         searchString += this.opt.searchArray[i].field + " = '" + nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + "' AND ";
                     } else {
                         // is area for e.g. date areas (date >= value and date <= [value])
-                        searchString += nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + " AND ";    
+                        let s = nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join(",");
+                        console.log( s, s.substring(s.length-3, s.length) );
+                        if( s.substring(s.length-3, s.length)  !== ">-1" ) {
+                            searchString += nj( "#" + this.opt.addPraefix + "search_" + this.opt.searchArray[i].field ).gSV().join( "," ) + " AND ";
+                        }
                     }
                 } else {
                     searchString += "";

@@ -62,3 +62,7 @@ div[class*=_val_stars_] {
     top: 28px;
     z-index: 4;
 }
+div[class*=_val_stars_][id*=_new] {
+    top: -24px;
+    position: relative;
+}

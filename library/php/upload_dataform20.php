@@ -10,6 +10,7 @@ try {
     $db_pdo = new \PDO( $dns, $settings['database']['username'], $settings['database']['password'], array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
     $db_pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db_pdo -> setAttribute( PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false );
+    print_r( json_encode( $return ));
 }
 catch( \PDOException $e ) {
     $return -> command = "connect_error";
@@ -30,7 +31,7 @@ $glob = glob( "../documents/cal_ev_appendix_" . $_POST["event_id"] . "*.*" );
 }
 $result = move_uploaded_file( $_FILES["file"]['tmp_name'], $_POST["targetPath"] . $_FILES["file"]["name"] );  
 */
-//$result = move_uploaded_file( $_FILES["file"]['tmp_name'], "../documents/" . $_FILES["file"]["name"] );  
+$result = move_uploaded_file( $_FILES["file"]['tmp_name'], "../../" . $_POST["targetPath"] . $_FILES["file"]["name"] );  
 //$result = rename( "../documents/" . $_FILES["file"]["name"], "../documents/$filename" ); 
 //$return -> filename = $_FILES["file"]["name"];
 //print_r( json_encode( $return ));       
