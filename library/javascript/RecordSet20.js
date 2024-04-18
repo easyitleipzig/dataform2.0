@@ -70,6 +70,7 @@ class RecordSet {                    // class for DataForm2.0
                        nj(elField[j]).on( "change", nj(elField[j]).Dia().opt.onChange ); 
                     }
                     if( typeof nj(elField[j]).Dia().opt.onClick === "function" ) {
+                        console.log( nj(elField[j]).Dia() );
                        nj(elField[j]).on( "click", nj(elField[j]).Dia().opt.onClick ); 
                     }
                     if( typeof nj(elField[j]).Dia().opt.onDblClick === "function" ) {

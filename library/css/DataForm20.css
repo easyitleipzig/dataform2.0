@@ -52,6 +52,9 @@ button[id*=_recordPointer_new] {
     height: 35px;
     padding-top: 1em;    
 }
+div[class*=_val_stars_] {
+    display: inline;
+}
 .cStars {
     display: inline-block;
     position: relative;

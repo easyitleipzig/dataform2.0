@@ -31,7 +31,7 @@
 <script src="library/javascript/DropResize.js"></script>
 <script src="library/javascript/DialogDR.js"></script>
 <script src="library/javascript/MessageDR.js"></script>
-<script src="library/javascript/Field.js"></script>
+<script src="library/javascript/Field20.js"></script>
 <script src="library/javascript/DataForm20.js"></script>
 <script>
 var df = new DataForm( { dVar: "df" } );

@@ -1,25 +1,25 @@
 //javascript
-var nj = function ( p ) {
+function nj( p ) {
     if( p == "" || typeof( p ) == "undefined" ) {
         this.e = null;
         return this;
     } else if ( Node.prototype.isPrototypeOf( p ) || NodeList.prototype.isPrototypeOf( p ) || typeof( p ) == "object" ) {
         this.e = p;
-    } else if( p.substr( 0, 1 ) === "#" && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+    } else if( p.substr( 0, 1 ) == "#" && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) === - 1) {
         this.e = document.getElementById( p.substr( 1, p.length - 1 ) );    
-    } else if( p.substr( 0, 1 ) === "." && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+    } else if( p.substr( 0, 1 ) == "." && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) == - 1) {
         this.e = document.getElementsByClassName( p.substr( 1, p.length - 1 ) );    
     } else {
         this.e = document.querySelectorAll( p );
     }
     _els = function( p ) {
-        if( p === "" || typeof( p ) === "undefined" ) {
+        if( p == "" || typeof( p ) == "undefined" ) {
             return null;
         } else if ( Node.prototype.isPrototypeOf( p ) || NodeList.prototype.isPrototypeOf( p ) ) {
             return p;
-        } else if( p.substr( 0, 1 ) === "#" && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+        } else if( p.substr( 0, 1 ) == "#" && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) == - 1) {
             return document.getElementById( p.substr( 1, p.length - 1 ) );    
-        } else if( p.substr( 0, 1 ) === "." && p.indexOf( " " ) === - 1 && p.indexOf( "," ) === - 1 && p.indexOf( "[" ) === - 1 && p.indexOf( ":" ) === - 1) {
+        } else if( p.substr( 0, 1 ) == "." && p.indexOf( " " ) == - 1 && p.indexOf( "," ) == - 1 && p.indexOf( "[" ) == - 1 && p.indexOf( ":" ) == - 1) {
             return document.getElementsByClassName( p.substr( 1, p.length - 1 ) );    
         } else {
             return document.querySelectorAll( p );
@@ -171,29 +171,10 @@ var nj = function ( p ) {
         }
     }
     _ds = function( v ) {
-        if( NodeList.prototype.isPrototypeOf( this.e ) ) {
-            let l = this.e.length;
-            let i = 0;
-            while( i < l ) {
-                    return this.e[i].dataset[v];
-                    i += 1;
-                }
-        } else {
-            return this.e.dataset[v];
-        }
+            return this.e.dataset[v];    
     }
     _sDs = function( ds, v ) {
-        if( NodeList.prototype.isPrototypeOf( this.e ) ) {
-            let l = this.e.length;
-            let i = 0;
-            while( i < l ) {
-                    this.e[i].dataset[ds] = v;
-                    i += 1;
-                }
-            return;
-        } else {
-            return this.e.dataset[ds] = v;
-        }
+            return this.e.dataset[ds] = v;    
     }
     //set selected values
     _sSV = function( v, clearField ) {
@@ -328,6 +309,7 @@ var nj = function ( p ) {
             let l = this.e.length;
             let i = 0;
             while( i < l ) {
+                //console.log( this.e[i] );
                 this.e[ i ].classList.remove( c );
                 i += 1;    
             }
@@ -342,6 +324,34 @@ var nj = function ( p ) {
             let i = 0;
             while( i < l ) {
                 this.e[ i ].classList.toggle( c );
+                i += 1;    
+            }
+        }
+        return this.e.classList;            
+    }
+    _aCN = function ( v ) {
+        if( this.e == null ) return false;
+        if( Node.prototype.isPrototypeOf( this.e ) ) {
+            this.e.classList = this.e.classList + " " + v;
+        } else {
+            let l = this.e.length;
+            let i = 0;
+            while( i < l ) {
+                this.e[ i ].classList = this.e[ i ].classList + " " + v;
+                i += 1;    
+            }
+        }
+        return this.e.classList;            
+    }
+    _rCN = function ( v ) {
+        if( this.e == null ) return false;
+        if( Node.prototype.isPrototypeOf( this.e ) ) {
+            this.e.classList = this.e.classList.replace( v, "");
+        } else {
+            let l = this.e.length;
+            let i = 0;
+            while( i < l ) {
+                this.e[ i ].classList = this.e[ i ].classList.replace( v, "");
                 i += 1;    
             }
         }
@@ -457,6 +467,13 @@ var nj = function ( p ) {
     _isE = function(){
         return !!this.e;
     }
+    _toE = function( html ) {
+        var template = document.createElement('template');
+        html = html.trim(); // Never return a text node of whitespace as the result
+        template.innerHTML = html;
+        return template.content.firstChild;
+    }
+
     _gRe = function() {
         try {
             if( this.e.length == 1 ) {
@@ -570,7 +587,7 @@ fetch(request)
         fetch( url, {
             method: 'POST',
             headers: {
-            //'Accept': 'application/json, text/plain, */*',
+            'Accept': 'application/json, text/plain, */*',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify( d )
@@ -584,14 +601,14 @@ fetch(request)
         });
     }
     _fetchPostNew = function( url, fetchData, callback ) {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify( fetchData )
-        };
-        fetch(url, requestOptions)
-            .then(response => response.json())
-            .then(data => callback( data ) );
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify( fetchData )
+    };
+    fetch(url, requestOptions)
+        .then(response => response.json())
+        .then(data => callback( data ) );
     }
     // others
     _ddS = function( k, v ) {
@@ -638,6 +655,13 @@ fetch(request)
         }
         return a;
     }
+    // filter object arra
+    _fOA = function ( arr, field, value ) {
+        // content
+        return arr.filter(fieldValue => {
+                        return fieldValue[field] === value;
+                    });
+    }
     // JSON
     _isJ = function (item) {
         item = typeof item !== "string"
@@ -678,13 +702,7 @@ fetch(request)
             cb(index, elem);
         });    
     }
-    // filter object arra
-    _fOA = function ( arr, field, value ) {
-        // content
-        return arr.filter(fieldValue => {
-                        return fieldValue[field] === value;
-                    });
-    }
+
     // elements
     // dialog
     _gDV = function( ds = "dvar" ) {
@@ -736,17 +754,6 @@ fetch(request)
         }
         return window[ dia.split(".")[0] ];
     }
-    _bDV = function( dvar ) {
-        let tmp = dvar.split( "." );
-        let m = tmp.length;
-        let j = 1;
-        let tmpVar = window[ tmp[0] ];
-        while( j < m ) {
-            tmpVar = tmpVar[tmp[j]];
-            j += 1;
-        }
-        return tmpVar;    
-    }
     this.els = _els;
     this.lEl = _lEl;
     this.fEl = _fEl;
@@ -779,6 +786,7 @@ fetch(request)
     this.hCl = _hCl;
     this.rCl = _rCl;
     this.tCl = _tCl;
+    this.aCN = _aCN;
     this.clL = _clL;
     this.sty = _sty;
     this.sRP = _sRP;
@@ -796,6 +804,7 @@ fetch(request)
     this.hAt = _hAt;
     this.rAt = _rAt;
     this.isE = _isE;
+    this.toE = _toE;
     // events
     this.on = _on;
     this.off = _off;
@@ -815,17 +824,16 @@ fetch(request)
     this.exC = _exC; 
     // objects
     this.oEx = _oEx;
+    this.fOA = _fOA;
     this.isJ = _isJ;
     // arrays
     this.rAE = _rAE;
     this.fEa = _fEa;
-    this.fOA = _fOA;
     //
     // dialog
     this.gDV = _gDV;
     this.Dia = _Dia;
     this.gRO = _gRO;
-    this.bDV = _bDV;
     return this
 }
 nj( document );
