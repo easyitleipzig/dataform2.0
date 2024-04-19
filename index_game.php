@@ -46,7 +46,29 @@
         print_r( json_encode( $return ));
         die;
     }
-   ?>
+    echo "let optUser = '";                        
+    $query = "SELECT id, concat( REPLACE(lastname, '\'', '´'), ', ', firstname  ) as userName FROM user where id > 0 order by lastname";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["userName"] . "</option>";
+        $i += 1;
+    }
+    echo "'\n";
+    echo "let optGameType = '";                        
+    $query = "SELECT * FROM game_type";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["name"] . "</option>";
+        $i += 1;
+    }
+    echo "'\n";
+?>
 let fields = [
         {
             type: "recordPointer",
@@ -60,104 +82,75 @@ let fields = [
             type: "input_text",
 
         },
-/*
         {
-            field: "dummy",
-            label: "dummy",
-            value: new Date().addHours(1).toISOString().replace("T", " ").replace("Z", "").split(" ")[0], // current date without hours
-            baseClass: "cDummy",
-            type: "input_date",
-
+            type: "recordPointer",
+            value: "&nbsp;",
+            field: "recordPointer",
+            baseClass: "cButtonMiddle",
         },
         {
-            field: "val_dec",
-            label: "Dec",
+            field: "id",
+            label: "Id",
             type: "input_text",
-            addClasses: "cDec",
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
-            field: "val_varchar",
-            label: "val_varchar",
+            field: "room_id",
+            label: "Raum",
             type: "input_text",
-            addClasses: "cVal_varchar",
-            valid: ["not empty", "is email"],
-        },
-
-        {
-            field: "val_int",
-            label: "val_int",
-            type: "input_number",
-            addClasses: "cVal_val_int",
-            minValue: 1,
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
-            field: "val_select",
-            label: "val_select",
+            field: "type",
+            label: "Spieltyp",
             type: "select",
             addClasses: "cVal_val_select",
-            options: optRole,
+            options: optGameType,
         },
         {
-            field: "val_select_multi",
-            label: "val_select_multi",
-            type: "select",
-            addClasses: "cVal_val_select_multi",
-            addAttr: "multiple",
-            options: optRole,
+            field: "player",
+            label: "Spieler",
+            type: "input_text",
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
-            field: "val_img",
-            label: "val_img",
-            type: "img",
-            addClasses: "cVal_img",
-            widthDiv: true,
+            field: "current_player",
+            label: "akt. Spieler",
+            type: "input_text",
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
-            field: "val_checkbox",
-            label: "val_checkbox",
+            field: "is_ready",
+            label: "bereit",
             type: "checkbox",
-            addClasses: "cVal_checkbox",
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
-            field: "val_stars",
-            label: "val_stars",
-            type: "stars",
-            addClasses: "cVal_stars",
-            onClick: function( event ) {
-                console.log( nj().els(this).children[1] );
-              var rect = nj().els(this).getBoundingClientRect(); 
-              var x = event.clientX - rect.left; 
-              var y = event.clientY - rect.top; 
-               
-              console.log(parseInt(x/20) + 1);
-              nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 ) 
-            }
+            field: "is_started",
+            label: "gestartet",
+            type: "checkbox",
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
         {
-            field: "button_addKey",
-            type: "button",
-            baseClass: "cAddButton",
-            addClasses: "cButtonAddKey",
-            value: "&nbsp;",
-            maxLength: "0",
-            onClick: function () {
-                // content
-                console.log( nj( this ).Dia("dvar", 5 ) );
-            }
+            field: "current_move",
+            label: "akt. Zug",
+            type: "input_text",
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
         },
-        {
-            field: "button_setValue",
-            type: "input_but",
-            baseClass: "cAddButton cButtonMiddle",
-            addClasses: "cButtonSetValuey",
-            value: "&nbsp;",
-            maxLength: "0",
-            onClick: function () {
-                // content
-                console.log( nj( this ).Dia().tmpEl );
-            }
-        },
-*/
     ];
 // Df;
 var Df = new DataForm( { 
