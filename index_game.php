@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>Game -Admin</title>
+    <title>Spieleverwaltung</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -46,39 +46,7 @@
         print_r( json_encode( $return ));
         die;
     }
-    echo "let optUser = '";                        
-    $query = "SELECT id, concat( REPLACE(lastname, '\'', '´'), ', ', firstname  ) as userName FROM user where id > 0 order by lastname";
-    $stm = $db_pdo -> query( $query );
-    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-    $l = count( $result );
-    $i = 0;
-    while( $i < $l ) {
-        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["userName"] . "</option>";
-        $i += 1;
-    }
-    echo "'\n";
-    echo "let optGameType = '";                        
-    $query = "SELECT * FROM game_type";
-    $stm = $db_pdo -> query( $query );
-    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-    $l = count( $result );
-    $i = 0;
-    while( $i < $l ) {
-        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["name"] . "</option>";
-        $i += 1;
-    }
-    echo "'\n";
-    //var_dump($option);
    ?>
-let additionalFieldDefs = [
-    {
-        label: "test",
-    },
-    {
-
-    }
-];
-
 let fields = [
         {
             type: "recordPointer",
@@ -90,64 +58,80 @@ let fields = [
             field: "id",
             label: "Id",
             type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+
+        },
+/*
+        {
+            field: "dummy",
+            label: "dummy",
+            value: new Date().addHours(1).toISOString().replace("T", " ").replace("Z", "").split(" ")[0], // current date without hours
+            baseClass: "cDummy",
+            type: "input_date",
+
         },
         {
-            field: "room_id",
-            label: "Raum",
+            field: "val_dec",
+            label: "Dec",
             type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            addClasses: "cDec",
         },
         {
-            field: "type",
-            label: "Spieltyp",
+            field: "val_varchar",
+            label: "val_varchar",
+            type: "input_text",
+            addClasses: "cVal_varchar",
+            valid: ["not empty", "is email"],
+        },
+
+        {
+            field: "val_int",
+            label: "val_int",
+            type: "input_number",
+            addClasses: "cVal_val_int",
+            minValue: 1,
+        },
+        {
+            field: "val_select",
+            label: "val_select",
             type: "select",
             addClasses: "cVal_val_select",
-            options: optGameType,
+            options: optRole,
         },
         {
-            field: "player",
-            label: "Spieler",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            field: "val_select_multi",
+            label: "val_select_multi",
+            type: "select",
+            addClasses: "cVal_val_select_multi",
+            addAttr: "multiple",
+            options: optRole,
         },
         {
-            field: "current_player",
-            label: "akt. Spieler",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            field: "val_img",
+            label: "val_img",
+            type: "img",
+            addClasses: "cVal_img",
+            widthDiv: true,
         },
         {
-            field: "is_ready",
-            label: "bereit",
+            field: "val_checkbox",
+            label: "val_checkbox",
             type: "checkbox",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            addClasses: "cVal_checkbox",
         },
         {
-            field: "is_started",
-            label: "gestartet",
-            type: "checkbox",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
-        },
-        {
-            field: "current_move",
-            label: "akt. Zug",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            field: "val_stars",
+            label: "val_stars",
+            type: "stars",
+            addClasses: "cVal_stars",
+            onClick: function( event ) {
+                console.log( nj().els(this).children[1] );
+              var rect = nj().els(this).getBoundingClientRect(); 
+              var x = event.clientX - rect.left; 
+              var y = event.clientY - rect.top; 
+               
+              console.log(parseInt(x/20) + 1);
+              nj().els(this).children[1].setAttribute("width", (parseInt(x/20) + 1)*20 ) 
+            }
         },
         {
             field: "button_addKey",
@@ -173,18 +157,17 @@ let fields = [
                 console.log( nj( this ).Dia().tmpEl );
             }
         },
+*/
     ];
 // Df;
 var Df = new DataForm( { 
     dVar: "Df", 
     id: "#Df", 
     table: "game", 
-    fields: "id,room_id,name,type,player,current_player,is_ready,is_started,current_move",
+    fields: "id,room_id,name,type,player,current_player,current_move,is_ready,is_started",
     addPraefix: "df1_",
-    formType: "list",
-    autoOpen: true, 
+    formType: "html", 
     validOnSave: true, 
-    additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
     countPerPage: 2,
@@ -192,112 +175,7 @@ var Df = new DataForm( {
     hasPagination: true,
     countRecords: undefined,
     //filter: "id = '1'",
-    boundForm: ["Df_player"],
-    boundFields: [ { from: "id", to: "game_id" } ],
     orderArray: ["val_varchar", "val_int"],
-    searchArray: [
-/*
-            {
-                field: "val_varchar",
-                type: "input_text",
-                value: "",
-                sel: "value",
-            },
-            {
-                field: "val_select",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_select_multi",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_checkbox",
-                type: "select",
-                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
-                value: ">-1",
-                sel: "value",
-            },
-/*            {
-                field: "val_test",
-                type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
-                value: ">-1",
-                sel: "area",
-            },
-*/
-        ],
-    onShow:     function( args ) {
-        console.log( nj().bDV(this.dVar) );   
-    }
-    /*additionalFields: additionalFields, */
-} );
-var Df_player = new DataForm( { 
-    dVar: "Df_player", 
-    id: "#Df_player", 
-    table: "game_player", 
-    fields: "id,game_id,player_number,player_id",
-    addPraefix: "df1_",
-    formType: "html", 
-    validOnSave: true, 
-    additionalFieldDefs: additionalFieldDefs,
-    classButtonSize: "cButtonMiddle",
-    fieldDefinitions: [
-        {
-            type: "recordPointer",
-            value: "&nbsp;",
-            field: "recordPointer",
-            baseClass: "cButtonMiddle",
-        },
-        {
-            field: "id",
-            label: "Id",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
-        },
-        {
-            field: "game_id",
-            label: "Spielnummer",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
-        },
-        {
-            field: "player_number",
-            label: "Spielernummer",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
-        },
-        {
-            field: "player_id",
-            label: "Spieler",
-            type: "select",
-            options: optUser,
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
-        },
-        ],
-/*    countPerPage: 2,
-    currentPage: 0,
-    hasPagination: true,
-*/    countRecords: undefined,
-    //filter: "id = '1'",
-    boundForm: ["Df_player"],
-    boundFields: [ { from: "id", to: "game_id" } ],
-    //orderArray: ["val_varchar", "val_int"],
     searchArray: [
 /*
             {
@@ -341,10 +219,7 @@ var Df_player = new DataForm( {
 } );
 (function() {
     Df.init();
-    Df_player.init();
-
 })();
-            
 </script>
 </body>
 </html>
