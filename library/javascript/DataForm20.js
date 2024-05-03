@@ -770,9 +770,9 @@ class DataForm {                    // class for DataForm2.0
             this.showRecordSets();
         }
 */
-        if( this.opt.formType === "list" ) {
+        //if( this.opt.formType === "list" ) {
             this.showRecordSets();
-        }
+        //}
     }
     buildNewRecord = function () {
         let l = this.opt.fieldDefinitions.length;

@@ -145,7 +145,7 @@ var Df = new DataForm( {
     table: "game", 
     fields: "id,room_id,name,type,player,current_player,current_move,is_ready,is_started",
     addPraefix: "df1_",
-    formType: "list", 
+    formType: "html", 
     validOnSave: true, 
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
