@@ -92,7 +92,8 @@ class Field {                    // class for DataForm2.0
             },
             onChange:           undefined,
             onClick:            function( event ) {
-                console.log( this );
+                                    console.log( this );
+                                    let elId, el, tmp;
                                     if( nj(this).Dia().opt.addAttr.indexOf( "undefined" === -1 ) ) {
                                         switch( nj(this).Dia().opt.type ) {
                                             case "stars":
@@ -113,10 +114,38 @@ class Field {                    // class for DataForm2.0
                                             break;
                                             case "link":
                                                 event.preventDefault();
-                                                let elId = nj( this ).Dia().opt.id;
+                                                elId = nj( this ).Dia().opt.id;
                                                 console.log( elId );
                                                 nj().els( "#" + nj( this ).gRO().opt.dVar + "_linkElId" ).value = elId;
                                                 nj( this ).gRO().divEditLink.show({variables: {df: nj(this).gRO(), el: nj( this ).Dia() } } );
+                                            break;
+                                            case "select":
+                                                if( nj( this ).hAt( "multiple" ) && nj( this ).hAt( "data-clickable" ) ) {
+                                                    event.preventDefault();
+                                                    elId = nj( this ).Dia().opt.id;
+                                                    el = nj().cEl( "select" );
+                                                    //el.id = "tmpSetSelect";
+                                                    tmp = nj().els( this ).outerHTML;
+                                                    tmp = htmlToElement( tmp )
+                                                    tmp.id = nj( this ).gRO().opt.addPraefix + "TmpSetSelect" ;
+                                                    nj( "#" + nj( this ).gRO().opt.dVar + ".divEditSelect" ).htm("");
+                                                    nj( "#" + nj( this ).gRO().opt.dVar + ".divEditSelect" ).aCh( tmp );
+                                                    nj( this ).gRO().divEditSelect.show({variables: {df: nj(this).gRO(), el: nj( this ).Dia() } } );                                                    
+                                                }
+                                            break;
+                                            case "textarea":
+                                                if( nj( this ).hAt( "data-clickable" ) ) {
+                                                    event.preventDefault();
+                                                    elId = nj( this ).Dia().opt.id;
+                                                    el = nj().cEl( "select" );
+                                                    //el.id = "tmpSetSelect";
+                                                    tmp = nj().els( this ).outerHTML;
+                                                    tmp = htmlToElement( tmp )
+                                                    tmp.id = nj( this ).gRO().opt.addPraefix + "TmpSetTextarea" ;
+                                                    nj( "#" + nj( this ).gRO().opt.dVar + ".divEditTextarea" ).htm("");
+                                                    nj( "#" + nj( this ).gRO().opt.dVar + ".divEditTextarea" ).aCh( tmp );
+                                                    nj( this ).gRO().divEditTextarea.show({variables: {df: nj(this).gRO(), el: nj( this ).Dia() } } );                                                    
+                                                }
                                             break;
                                         }
                                     }

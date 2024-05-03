@@ -464,7 +464,7 @@ var nj = function ( p ) {
         }
     }
     _hAt = function( a ){
-        if( els(this.e).getAttribute( a ) ) {
+        if( this.e.hasAttribute( a ) ) {
             return true;
         } else {
             return false;

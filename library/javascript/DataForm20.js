@@ -14,6 +14,8 @@ const DIV_LINK_HTML = `<input id="[dVar]_linkElId" type="text"><label>Link</labe
     <option value="_top">ganzes Fenster</option>
 </select>
 <label>Link</label><input id="[dVar]_linkText" type="text">`;
+const DIV_EDIT_SELECT = ``;
+const DIV_EDIT_TEXTAREA = ``;
 const optDate = '<option value="[field]>-1">alle</option><option value="[field]>=\'' + getLastWeek().from + '\' and [field]<=\'' + getLastWeek().to + '\'">letzteWoche</option><option value="[field]>=\'' + getCurrentWeek().from + '\' and [field]<=\'' + getCurrentWeek().to + '\'">aktuelle Woche</option><option value="[field]>=\'' + getNextWeek().from + '\' and [field]<=\'' + getNextWeek().to + '\'">nächste Woche</option><option value="[field]>=\'' + getLastMonth().from + '\' and [field]<=\'' + getLastMonth().to + '\'">letzter Monat</option><option value="[field]>=\'' + getCurrentMonth().from + '\' and [field]<=\'' + getCurrentMonth().to + '\'">aktueller Monat</option><option value="[field]>=\'' + getNextMonth().from + '\' and [field]<=\'' + getNextMonth().to + '\'">nächster Monat</option>';
 const DIFF_PAGINATION = 2;
 const MAX_FILE_UPLOADSIZE = 10000;
@@ -188,6 +190,54 @@ class DataForm {                    // class for DataForm2.0
                 });   
             } 
         } );
+        this.divEditSelect = new DialogDR( {
+                dVar: param.dVar + ".divEditSelect", 
+                title: "Auswahl", 
+                innerHTML: DIV_EDIT_SELECT.replaceAll( "[dVar]", this.opt.dVar ),
+                addClasses: "cDivEditSelect",
+                buttons: [
+                        {
+                            title: "Übernehmen",
+                            action: function( args ) {
+                                let v = nj( "#" + nj(this).gRO().opt.addPraefix + "TmpSetSelect" ).gSV().join(",");
+                                nj( nj(this).Dia().opt.variables.el.opt.id ).sSV( v );
+                                nj(this).Dia().hide();
+                                nj( nj(this).Dia().opt.variables.el.opt.id ).tri( "change" );
+                            }
+                        },
+                        {
+                            title: "Abbrechen",
+                            action: function( args ) {
+                                nj(this).Dia().hide();
+                            }
+                        },
+                    ]            
+            }   
+        );
+        this.divEditTextarea = new DialogDR( {
+                dVar: param.dVar + ".divEditTextarea", 
+                title: "Texteingabe", 
+                innerHTML: DIV_EDIT_TEXTAREA.replaceAll( "[dVar]", this.opt.dVar ),
+                addClasses: "cDivEditTextarea",
+                buttons: [
+                        {
+                            title: "Übernehmen",
+                            action: function( args ) {
+                                let v = nj( "#" + nj(this).gRO().opt.addPraefix + "TmpSetTextarea" ).v();
+                                nj( nj(this).Dia().opt.variables.el.opt.id ).v( v );
+                                nj(this).Dia().hide();
+                                nj( nj(this).Dia().opt.variables.el.opt.id ).tri( "change" );
+                            }
+                        },
+                        {
+                            title: "Abbrechen",
+                            action: function( args ) {
+                                nj(this).Dia().hide();
+                            }
+                        },
+                    ]            
+            }   
+        );
         nj( "#" + this.opt.dVar + "_tFUFile" ).on( "change", function( args ) {
             nj( this ).gRO().uploadFile( nj( this ).Dia() );    
         }  );
@@ -229,7 +279,6 @@ class DataForm {                    // class for DataForm2.0
                 df.prepareRecords( jsonobject );
                 if( df.opt.hasPagination ) df.initPagination();
                 df.initRecordPointer();
-                console.log( "onShow" );
             break;
             case "saveRecordset":
                 if( jsonobject.success ) {
@@ -425,7 +474,8 @@ class DataForm {                    // class for DataForm2.0
         this.afterSuccessFileUpload( data, targetPath, file[0].name, this, id, attr );
         //cb;
       } )
-      .catch( data => { 
+      .catch( data => {
+        dMNew.hide(); 
         console.log(data);
       })   
     }
@@ -457,6 +507,7 @@ class DataForm {                    // class for DataForm2.0
         nj( "#" + df.opt.dVar + "_tFUFile" ).v( null );   
     }
     uploadFile = function( dUpload ) {
+            dMNew.show( { title: "Dateiupload", type: "wait", text: "Datei wird geladen" } );
         console.log( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload );
         this.resolveFileUpload( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload.opt.variables.id, dUpload.opt.variables.attr, dUpload.opt.variables.uploadPath );
     }

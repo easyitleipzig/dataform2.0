@@ -33,8 +33,8 @@ $result = move_uploaded_file( $_FILES["file"]['tmp_name'], $_POST["targetPath"] 
 */
 $result = move_uploaded_file( $_FILES["file"]['tmp_name'], "../../" . $_POST["targetPath"] . $_FILES["file"]["name"] );  
 //$result = rename( "../documents/" . $_FILES["file"]["name"], "../documents/$filename" ); 
-//$return -> filename = $_FILES["file"]["name"];
-//print_r( json_encode( $return ));       
+$return -> filename = "test";
+print_r( json_encode( $return ));       
    
 //header("Location: ../../s_and_a.php");
 ?>

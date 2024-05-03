@@ -141,7 +141,7 @@ let fields = [
             label: "val_select_multi",
             type: "select",
             addClasses: "cVal_val_select_multi",
-            addAttr: "multiple",
+            addAttr: "multiple data-clickable", // clickable opens the select dialog
             options: optRole,
         },
         {
@@ -180,16 +180,23 @@ let fields = [
             addClasses: "cVal_link",
         },
         {
+            field: "val_file",
+            label: "val_file",
+            type: "file",
+            addClasses: "cVal_file",
+        },
+        {
             field: "val_date",
             label: "val_date",
             type: "input_date",
             addClasses: "cVal_date",
         },
         {
-            field: "val_file",
-            label: "val_file",
-            type: "file",
-            addClasses: "cVal_file",
+            field: "val_textarea",
+            label: "val_textarea",
+            type: "textarea",
+            addAttr: "data-clickable", // clickable opens the textarea dialog
+            addClasses: "cVal_Textarea",
         },
        {
             field: "button_addKey",
@@ -221,14 +228,14 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file,val_date",
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file,val_date,val_textarea",
     addPraefix: "df1_",
     formType: "html", 
     validOnSave: true, 
-    additionalFieldDefs: additionalFieldDefs,
+    //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
-    optionLists: listOptions,
+    //optionLists: listOptions,
     countPerPage: 2,
     currentPage: 0,
     hasPagination: true,
@@ -240,7 +247,7 @@ var Df = new DataForm( {
                 field: "val_varchar",
                 type: "input_text",
                 value: "",
-                sel: "value",
+                sel: "value", // value means exact calue, area means area of select field
             },
             {
                 field: "val_select",
@@ -253,7 +260,7 @@ var Df = new DataForm( {
                 field: "val_select_multi",
                 type: "select",
                 options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
+                addAttr: "multiple data-clickable",
                 value: ">-1",
                 sel: "value",
             },
