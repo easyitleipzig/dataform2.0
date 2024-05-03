@@ -79,6 +79,7 @@ class DataForm {                    // class for DataForm2.0
             onShow:                             undefined,
             afterDelete:                        undefined,
             afterNew:                           undefined,
+            afterSuccessSave:                   undefined,
         }
         let tmpId = "",
             tmpClasses = "",
@@ -136,6 +137,7 @@ class DataForm {                    // class for DataForm2.0
         data.dVar = this.opt.dVar;
         data.table = this.opt.table;
         data.fields = this.opt.fields;
+        //nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF);
         this.divUpload = new DialogDR( { 
             dVar: param.dVar + ".divUpload", 
             title: "Datei laden", 
@@ -233,6 +235,9 @@ class DataForm {                    // class for DataForm2.0
                 if( jsonobject.success ) {
                     if( jsonobject.oldId === "new" && typeof df.opt.afterNew === "function" ) {
                         df.opt.afterNew( df, jsonobject );
+                    }
+                    if( jsonobject.oldId !== "new" && typeof df.opt.afterSuccessSave === "function" ) {
+                        df.opt.afterSuccessSave( df, jsonobject );
                     }
                 } else {
                     dMNew.show( {title: "Fehler", type: false, text: jsonobject.message } );
@@ -759,7 +764,13 @@ class DataForm {                    // class for DataForm2.0
             }
             //this.buildNewRecord();    
         }
+        console.log( this.opt.formType );
+/*
         if( this.opt.autoOpen ) {
+            this.showRecordSets();
+        }
+*/
+        if( this.opt.formType === "list" ) {
             this.showRecordSets();
         }
     }

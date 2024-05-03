@@ -1,10 +1,14 @@
+<?php
+session_start();
+if( !isset( $_SESSION["user_id"] ) ) $_SESSION["user_id"] = 1;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>Spieleverwaltung</title>
+    <title>Dataform-Test</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -28,6 +32,9 @@
 <script src="library/javascript/RecordSet20.js"></script>
 <script src="library/javascript/Dataform20.js"></script>
 <script src="library/javascript/MessageDR.js"></script>
+<!--
+<script src="library/javascript/init_video.js"></script>
+-->
 <script>
     <?php
     $settings = parse_ini_file('ini/settings.ini', TRUE);
@@ -46,29 +53,44 @@
         print_r( json_encode( $return ));
         die;
     }
+
+    $q = "SELECT id as value, salutation as text from salutation order by id asc";
+    $s = $db_pdo -> query( $q );
+    $r = $s -> fetchAll( PDO::FETCH_CLASS );
+    $l = count( $r );
+    $i = 0;
+    $option = "";
+    while ($i < $l ) {
+        // code...
+        $option .= '<option value="' . $r[$i]->value . '">' . $r[$i]->text . '</option>';
+        $i += 1;
+    }
+    print_r( "var list_salutation = '" . $option . "';\n" );
+    echo "let optRole = '";                        
+    $query = "SELECT * FROM role";
+    $stm = $db_pdo -> query( $query );
+    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+    $l = count( $result );
+    $i = 0;
+    while( $i < $l ) {
+        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["role"] . "</option>";
+        $i += 1;
+    }
+    echo "'\n";
     echo "let optUser = '";                        
-    $query = "SELECT id, concat( REPLACE(lastname, '\'', '´'), ', ', firstname  ) as userName FROM user where id > 0 order by lastname";
+    $query = "SELECT id, concat( lastname, ', ', firstname ) as name FROM user ORDER BY lastname";
     $stm = $db_pdo -> query( $query );
     $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
     $l = count( $result );
     $i = 0;
     while( $i < $l ) {
-        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["userName"] . "</option>";
+        echo '<option value="' . $result[$i]["id"] . '">' . str_replace("'", "\'", $result[$i]["name"]) . '</option>';
         $i += 1;
     }
     echo "'\n";
-    echo "let optGameType = '";                        
-    $query = "SELECT * FROM game_type";
-    $stm = $db_pdo -> query( $query );
-    $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-    $l = count( $result );
-    $i = 0;
-    while( $i < $l ) {
-        echo '<option value="' . $result[$i]["id"] . '">' . $result[$i]["name"] . "</option>";
-        $i += 1;
-    }
-    echo "'\n";
-?>
+    echo "const currentUser = " . $_SESSION['user_id'] . "\n";
+    //var_dump($option);
+   ?>
 let fields = [
         {
             type: "recordPointer",
@@ -80,70 +102,70 @@ let fields = [
             field: "id",
             label: "Id",
             type: "input_text",
-
-        },
-        {
-            field: "room_id",
-            label: "Raum",
-            type: "input_text",
             /*onFocus:             function( args ) {
                 console.log( this );
             },*/
         },
         {
-            field: "type",
-            label: "Spieltyp",
+            field: "curr_date",
+            label: "aktuelles Datum",
+            type: "input_date",
+            default: new Date().addHours(1).toISOString().replace("T", " ").replace("Z", "").split(" ")[0], // current date without hours
+            addClasses: "cDate",
+            widthLabel: true,
+            /*onFocus:             function( args ) {
+                console.log( this );
+            },*/
+        },
+        {
+            field: "user_id",
+            label: "Name",
             type: "select",
             addClasses: "cVal_val_select",
-            options: optGameType,
+            options: optUser,
+            default: currentUser, // current user
         },
         {
-            field: "player",
-            label: "Spieler",
+            field: "link",
+            label: "Link",
             type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            addAttr: "placeholder='Link einfügen'",
+            widthLabel: true,
         },
         {
-            field: "current_player",
-            label: "akt. Spieler",
+            field: "title",
+            label: "Titel",
             type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            widthLabel: true,
         },
         {
-            field: "is_ready",
-            label: "bereit",
-            type: "checkbox",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            field: "description",
+            label: "Beschreibung",
+            type: "textarea",
+            widthLabel: true,
         },
+/*
+
         {
-            field: "is_started",
-            label: "gestartet",
-            type: "checkbox",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
+            field: "button_setValue",
+            type: "input_but",
+            baseClass: "cAddButton cButtonMiddle",
+            addClasses: "cButtonSetValuey",
+            value: "&nbsp;",
+            maxLength: "0",
+            onClick: function () {
+                // content
+                console.log( nj( this ).Dia().tmpEl );
+            }
         },
-        {
-            field: "current_move",
-            label: "akt. Zug",
-            type: "input_text",
-            /*onFocus:             function( args ) {
-                console.log( this );
-            },*/
-        },
+*/
     ];
 // Df;
 var Df = new DataForm( { 
     dVar: "Df", 
     id: "#Df", 
-    table: "game", 
-    fields: "id,room_id,name,type,player,current_player,current_move,is_ready,is_started",
+    table: "video_recommended", 
+    fields: "id,curr_date,user_id,link,title,description",
     addPraefix: "df1_",
     formType: "list", 
     validOnSave: true, 
@@ -151,13 +173,13 @@ var Df = new DataForm( {
     fieldDefinitions: fields,
     countPerPage: 2,
     currentPage: 0,
-    hasPagination: true,
+    hasPagination: false,
     countRecords: undefined,
-    //filter: "id = '1'",
-    autoOpen: true,
+    filter: "id = '0'",
+    autoOpen: false,
+/*
     orderArray: ["val_varchar", "val_int"],
     searchArray: [
-/*
             {
                 field: "val_varchar",
                 type: "input_text",
@@ -186,20 +208,22 @@ var Df = new DataForm( {
                 value: ">-1",
                 sel: "value",
             },
-/*            {
-                field: "val_test",
+            {
+                field: "val_date",
                 type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
+                options: optDate.replaceAll( "[field]", "val_date" ),
                 value: ">-1",
                 sel: "area",
             },
-*/
+
         ]
+*/
     /*additionalFields: additionalFields, */
+
 } );
+
 (function() {
     Df.init();
-    Df.dDF.hide();
 })();
 </script>
 </body>

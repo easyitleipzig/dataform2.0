@@ -192,6 +192,12 @@ class Field {                    // class for DataForm2.0
                         result.message = "Das Feld '" + this.opt.label + "' muss eine E-Mail-Adresse sein.";    
                     }
                 break;
+                case "is url":
+                    if( v !== "" && !validateURL( this.getValue() ) ) {
+                        result.success = false;
+                        result.message = "Das Feld '" + this.opt.label + "' muss ein gültiger Link sein.";    
+                    }
+                break;
                 case "is number":
                     if( Number( v ) === NaN ) {
                         result.success = false;
@@ -292,17 +298,19 @@ class Field {                    // class for DataForm2.0
         }
         if( this.opt.widthLabel ) {
             if( this.opt.addPraefix !== "" ) {
-                el = this.opt.addPraefix + "_" + this.opt.id;
+                el = this.opt.addPraefix + "_" + this.opt.id.substring( 1 );
             } else {
-                el = this.opt.id;
+                el = this.opt.id.substring( 1 );
             }
+            /*
             if( this.opt.index !== "" ) {
                 el += "_" + this.opt.index;
             }
+            */
             if( this.opt.addPraefix === "" ) {
-                fieldElements.push( htmlToElement( "<label for='" + el + "'>" + this.opt.label + "</label>" ) );
+                fieldElements.push( htmlToElement( "<label id='lab_" + el + "' for='" + el + "'>" + this.opt.label + "</label>" ) );
             } else {
-                fieldElements.push( htmlToElement( '<label class="lab_' + this.opt.dVar + '" for="' + el + '">' + this.opt.label + "</label>" ) );
+                fieldElements.push( htmlToElement( "<label id='lab_" + el + "'  class='lab_" + this.opt.dVar + "' for='" + el + "'>" + this.opt.label + "</label>" ) );
             }
         }
         switch ( this.opt.type) {
@@ -365,7 +373,7 @@ class Field {                    // class for DataForm2.0
                 if( typeof this.opt.maxLength !== "undefined" ) {
                     fieldHTML += ' maxlength="' + this.opt.maxLength + '"';
                 }
-
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="' + this.opt.type + '" value="' + this.opt.value + '" title="' + this.opt.title + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
                 if( typeof this.opt.options !== "undefined" && this.opt.type === "text" ) {
@@ -396,6 +404,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="button" value="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
                 fieldElements.push( this.tmpEl  );
@@ -414,6 +423,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<a id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" ';
                 tmpValueArry = this.opt.value.split( "|" );
                 if( tmpValueArry.length === 3 ) {
@@ -438,6 +448,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<a id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" ';
                 tmpValueArry = this.opt.value.split( "|" );
                 if( tmpValueArry.length === 3 ) {
@@ -462,6 +473,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<input id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                fieldHTML += this.opt.addAttr;
                 if( this.opt.value == true ) {
                     fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" type="checkbox" checked ' + 'title="' + this.opt.title + '">';
                 } else {
@@ -485,7 +497,32 @@ class Field {                    // class for DataForm2.0
                     }
                 }
                 if( typeof this.opt.value === "undefined" ) this.opt.value = "";
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</button>';
+                this.tmpEl = htmlToElement( fieldHTML );
+                //this.setActions( this.tmpEl );
+                fieldElements.push( this.tmpEl  )
+            break;
+            case "textarea":
+                if( typeof this.opt.index !== "undefined" ) {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<textarea id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';    
+                    } else {
+                        fieldHTML += '<textarea id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';
+                    }                    
+                } else {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<textarea id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';    
+                    } else {
+                        fieldHTML += '<textarea id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';
+                    }
+                }
+                if( typeof this.opt.value === "undefined" ) this.opt.value = "";
+                if( typeof this.opt.maxLength !== "undefined" ) {
+                    fieldHTML += ' maxlength="' + this.opt.maxLength + '"';
+                }
+                fieldHTML += this.opt.addAttr;
+                fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</textarea>';
                 this.tmpEl = htmlToElement( fieldHTML );
                 //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
@@ -522,6 +559,7 @@ class Field {                    // class for DataForm2.0
                     }                    
                 }
                 fieldHTML += " " + w + " " + h + " ";
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
                 //this.setActions( this.tmpEl );
@@ -541,6 +579,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<button id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</button>';
                 this.tmpEl = htmlToElement( fieldHTML );
                 //this.setActions( this.tmpEl );
@@ -560,6 +599,7 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<div id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
+                fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">';
                 fieldHTML += '<img src="library/css/icons/star_bar.png" width="100" style="position: relative;z-index: 1">';
                 fieldHTML += '<img src="library/css/icons/background_yellow.png" width="' + parseFloat(this.opt.value) * 20 + '" height="20" style="position: relative; top: -25px; z-index: 0">';

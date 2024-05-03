@@ -94,6 +94,7 @@ class DataForm {
             $return -> newId = $primaryKeyValue;
         } catch (Exception $e ) {
             $return -> success = false;
+            $return -> newId = false;
             $return -> message = "Beim Speichern des Datensatzes ist folgender Fehler aufgetreten: " . $e -> getMessage();            
         }
         return $return;
@@ -129,7 +130,9 @@ class DataForm {
             
         } catch (Exception $e ) {
             $return -> success = false;
-            if( $e -> code === 23000 ) {
+            $return -> newId = false;
+            $a = $e -> getCode();
+            if( $e -> getCode() === "23000" ) {
                 $return -> message = "Der Datensatzes kann so nicht angelegt werden, da eine Schlüsselverletzung vorliegt.";
             } else {
                 $return -> message = "Beim Anlegen des Datensatzes ist folgender Fehler aufgetreten: " . $e -> getMessage();                
