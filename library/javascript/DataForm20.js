@@ -60,6 +60,7 @@ class DataForm {                    // class for DataForm2.0
             boundForm:                          [],
             boundFields:                        [],
             addPraefix:                         "",
+            addClassFiles:                      "DataForm20.css", // optional - additional class files divide by " "
             widthSave:                          true,
             widthDelete:                        true,
             dfHasLabel:                         true,
@@ -85,11 +86,21 @@ class DataForm {                    // class for DataForm2.0
         }
         let tmpId = "",
             tmpClasses = "",
+            tmp,
             tmpEl, 
             tmpEls,
             tmpSearchString = "",
             searchWasGreaterThanTwo;
+        if( param.addClassFiles !== "" ) param.addClassFiles = this.opt.addClassFiles + " " + param.addClassFiles;
         Object.assign( this.opt, param );
+        tmp = this.opt.addClassFiles.split(" ");
+        console.log( tmp );
+        let l = tmp.length;
+        let i = 0;
+        while ( i < l ) {
+            if( tmp[i] !== "undefined" ) loadCSS( PATH_TO_CSS + tmp[i] );
+            i += 1;
+        } 
         //this.opt.id = "#" + this.opt.addPraefix + this.opt.id.substring( 1 );
         if( this.opt.formType === "html") {            
             if( !nj( this.opt.id ).isE() ) {
@@ -195,11 +206,14 @@ class DataForm {                    // class for DataForm2.0
                 title: "Auswahl", 
                 innerHTML: DIV_EDIT_SELECT.replaceAll( "[dVar]", this.opt.dVar ),
                 addClasses: "cDivEditSelect",
+                width: 280,
+                height: 300,
                 buttons: [
                         {
                             title: "Übernehmen",
                             action: function( args ) {
                                 let v = nj( "#" + nj(this).gRO().opt.addPraefix + "TmpSetSelect" ).gSV().join(",");
+                                console.log( nj(this).Dia().opt.variables );
                                 nj( nj(this).Dia().opt.variables.el.opt.id ).sSV( v );
                                 nj(this).Dia().hide();
                                 nj( nj(this).Dia().opt.variables.el.opt.id ).tri( "change" );
@@ -219,6 +233,8 @@ class DataForm {                    // class for DataForm2.0
                 title: "Texteingabe", 
                 innerHTML: DIV_EDIT_TEXTAREA.replaceAll( "[dVar]", this.opt.dVar ),
                 addClasses: "cDivEditTextarea",
+                width: 280,
+                height: 300,
                 buttons: [
                         {
                             title: "Übernehmen",
@@ -599,6 +615,27 @@ class DataForm {                    // class for DataForm2.0
 
                 } );    
             }
+            
+            if( this.opt.searchArray[i].type === "select"&& typeof this.opt.searchArray[i].addAttr !== "undefined" && this.opt.searchArray[i].addAttr.indexOf("multiple") > -1  && this.opt.searchArray[i].addAttr.indexOf("data-clickable") > -1 ) {
+                nj( field.opt.id ).on( "click", function() {
+                    let elId, el, tmp;
+                                                    event.preventDefault();
+                                                    elId = nj( this ).Dia().opt.id;
+                                                    el = nj().cEl( "select" );
+                                                    //el.id = "tmpSetSelect";
+                                                    tmp = nj().els( this ).outerHTML;
+                                                    tmp = htmlToElement( tmp )
+                                                    tmp.id = nj( this ).gRO().opt.addPraefix + "TmpSetSelect" ;
+                                                    nj( "#" + nj( this ).gRO().opt.dVar + ".divEditSelect" ).htm("");
+                                                    nj( "#" + nj( this ).gRO().opt.dVar + ".divEditSelect" ).aCh( tmp );
+                                                    tmp = {opt:{
+                                                        id: "#" + this.id
+                                                    }}
+                                                    nj( this ).gRO().divEditSelect.show({variables: {df: nj(this).gRO(), el: tmp } } );                                                    
+                    return;
+                } );    
+            }
+            
             i += 1;
         }
     }

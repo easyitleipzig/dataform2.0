@@ -113,22 +113,6 @@
     }
     echo "'\n";
    ?>
-/*
-let additionalFieldDefs = [
-    {
-        label: "test",
-    },
-    {
-
-    }
-];
-let listOptions = [
-        {
-            field: "val_varchar",
-            options: list_salutation,
-        }
-    ]
-*/
 let fields = [
         {
             type: "recordPointer",
@@ -185,88 +169,7 @@ let fields = [
             type: "input_time",
 
         },
-/*
-        {
-            field: "dummy",
-            label: "dummy",
-            value: new Date().addHours(1).toISOString().replace("T", " ").replace("Z", "").split(" ")[0], // current date without hours
-            baseClass: "cDummy",
-            type: "input_date",
-
-        },
-        {
-            field: "val_dec",
-            label: "Dec",
-            type: "input_text",
-            addClasses: "cDec",
-        },
-        {
-            field: "val_varchar",
-            label: "val_varchar",
-            type: "input_text",
-            addClasses: "cVal_varchar",
-        },
-        {
-            field: "val_int",
-            label: "val_int",
-            type: "input_number",
-            addClasses: "cVal_val_int",
-        },
-        {
-            field: "val_select",
-            label: "val_select",
-            type: "select",
-            addClasses: "cVal_val_select",
-            options: optRole,
-        },
-        {
-            field: "val_select_multi",
-            label: "val_select_multi",
-            type: "select",
-            addClasses: "cVal_val_select_multi",
-            addAttr: "multiple",
-            options: optRole,
-        },
-        {
-            field: "val_img",
-            label: "val_img",
-            type: "img",
-            addClasses: "cVal_img",
-            widthDiv: true,
-        },
-        {
-            field: "val_checkbox",
-            label: "val_checkbox",
-            type: "checkbox",
-            addClasses: "cVal_checkbox",
-        },
-        {
-            field: "button_addKey",
-            type: "button",
-            baseClass: "cAddButton",
-            addClasses: "cButtonAddKey",
-            value: "&nbsp;",
-            maxLength: "0",
-            onClick: function () {
-                // content
-                console.log( nj( this ).Dia("dvar", 5 ) );
-            }
-        },
-        {
-            field: "button_setValue",
-            type: "input_but",
-            baseClass: "cAddButton cButtonMiddle",
-            addClasses: "cButtonSetValuey",
-            value: "&nbsp;",
-            maxLength: "0",
-            onClick: function () {
-                // content
-                console.log( nj( this ).Dia().tmpEl );
-            }
-        },
-        */
     ];
-// Df;
 var Df = new DataForm( { 
     dVar: "Df", 
     id: "#Df", 
@@ -275,10 +178,8 @@ var Df = new DataForm( {
     addPraefix: "df1_", 
     formType: "html", 
     validOnSave: true, 
-    //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions: fields,
-    //optionLists: listOptions,
     countPerPage: 5,
     currentPage: 0,
     countRecords: undefined,
@@ -310,46 +211,6 @@ var Df = new DataForm( {
                 options: optDate.replaceAll( "[field]", "start_date" ),
             },
             ],
-/*
-    searchArray: [
-            {
-                field: "val_varchar",
-                type: "input_text",
-                value: "",
-                sel: "value",
-            },
-            {
-                field: "val_select",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_select_multi",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_checkbox",
-                type: "select",
-                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_test",
-                type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
-                value: ">-1",
-                sel: "area",
-            },
-
-        ]
-    /*additionalFields: additionalFields, */
 } );
 var Df_part = new DataForm( { 
     dVar: "Df_part", 
@@ -359,7 +220,6 @@ var Df_part = new DataForm( {
     formType: "html", 
     addPraefix: "df2_", 
     validOnSave: true, 
-    //additionalFieldDefs: additionalFieldDefs,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
         {
@@ -398,7 +258,6 @@ var Df_part = new DataForm( {
             type: "input_number",
         },
         ],
-    //optionLists: listOptions,
     countPerPage: 0,
     currentPage: 0,
     countRecords: undefined,
@@ -406,47 +265,6 @@ var Df_part = new DataForm( {
     filter: undefined,
     afterDelete: informUserAfterDeleteFromEvent,
     afterNew: informUserAfterAddToEvent,
-/*
-    orderArray: ["val_varchar", "val_int"],
-    searchArray: [
-            {
-                field: "val_varchar",
-                type: "input_text",
-                value: "",
-                sel: "value",
-            },
-            {
-                field: "val_select",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_select_multi",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_checkbox",
-                type: "select",
-                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_test",
-                type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
-                value: ">-1",
-                sel: "area",
-            },
-
-        ]
-    /*additionalFields: additionalFields, */
 } );
 var Df_pattern = new DataForm( { 
     dVar: "Df_pattern", 
@@ -457,7 +275,7 @@ var Df_pattern = new DataForm( {
     formWidth: 800, 
     addPraefix: "df3_", 
     validOnSave: false, 
-    //additionalFieldDefs: additionalFieldDefs,
+    autoOpen: false,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
         {
@@ -546,54 +364,12 @@ var Df_pattern = new DataForm( {
 
         },
         ],
-    //optionLists: listOptions,
     countPerPage: 0,
     currentPage: 0,
     countRecords: undefined,
     hasPagination: false,
     //afterDelete: afterDelete,
     filter: "",
-/*
-    orderArray: ["val_varchar", "val_int"],
-    searchArray: [
-            {
-                field: "val_varchar",
-                type: "input_text",
-                value: "",
-                sel: "value",
-            },
-            {
-                field: "val_select",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_select_multi",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_checkbox",
-                type: "select",
-                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_test",
-                type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
-                value: ">-1",
-                sel: "area",
-            },
-
-        ]
-    /*additionalFields: additionalFields, */
 } );
 var Df_role = new DataForm( { 
     dVar: "Df_role", 
@@ -606,7 +382,7 @@ var Df_role = new DataForm( {
     validOnSave: true, 
     boundForm: ["Df_account"],
     boundFields: [ { from: "id", to: "role_id" } ],
-    //additionalFieldDefs: additionalFieldDefs,
+    autoOpen: false,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
         {
@@ -648,54 +424,12 @@ var Df_role = new DataForm( {
 
         },
         ],
-    //optionLists: listOptions,
     countPerPage: 0,
     currentPage: 0,
     countRecords: undefined,
     hasPagination: false,
     //afterDelete: afterDelete,
     filter: "",
-/*
-    orderArray: ["val_varchar", "val_int"],
-    searchArray: [
-            {
-                field: "val_varchar",
-                type: "input_text",
-                value: "",
-                sel: "value",
-            },
-            {
-                field: "val_select",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_select_multi",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_checkbox",
-                type: "select",
-                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_test",
-                type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
-                value: ">-1",
-                sel: "area",
-            },
-
-        ]
-    /*additionalFields: additionalFields, */
 } );
 var Df_account = new DataForm( { 
     dVar: "Df_account", 
@@ -706,7 +440,7 @@ var Df_account = new DataForm( {
     formWidth: 800, 
     addPraefix: "df5_", 
     validOnSave: true, 
-    //additionalFieldDefs: additionalFieldDefs,
+    autoOpen: false,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
         {
@@ -733,54 +467,12 @@ var Df_account = new DataForm( {
             options: optUser
         },
         ],
-    //optionLists: listOptions,
     countPerPage: 8,
     currentPage: 0,
     countRecords: undefined,
     hasPagination: true,
     //afterDelete: afterDelete,
     filter: undefined,
-/*
-    orderArray: ["val_varchar", "val_int"],
-    searchArray: [
-            {
-                field: "val_varchar",
-                type: "input_text",
-                value: "",
-                sel: "value",
-            },
-            {
-                field: "val_select",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_select_multi",
-                type: "select",
-                options: "<option value='>-1'>alle</option>" + optRole,
-                addAttr: "multiple",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_checkbox",
-                type: "select",
-                options: "<option value='>-1'>alle</option><option value=0>aus</option><option value='1'>an</option>",
-                value: ">-1",
-                sel: "value",
-            },
-            {
-                field: "val_test",
-                type: "select",
-                options: optDate.replaceAll( "[field]", "val_test" ),
-                value: ">-1",
-                sel: "area",
-            },
-
-        ]
-    */
     }
  );
 var Df_place = new DataForm( { 
@@ -792,7 +484,7 @@ var Df_place = new DataForm( {
     formWidth: 800, 
     addPraefix: "df6_", 
     validOnSave: true, 
-    //additionalFieldDefs: additionalFieldDefs,
+    autoOpen: false,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
         {
@@ -814,7 +506,6 @@ var Df_place = new DataForm( {
             valid: ["not empty"],
         },
         ],
-    //optionLists: listOptions,
     countPerPage: 6,
     currentPage: 0,
     countRecords: undefined,
@@ -831,7 +522,7 @@ var Df_category = new DataForm( {
     formWidth: 800, 
     addPraefix: "df6_", 
     validOnSave: true, 
-    //additionalFieldDefs: additionalFieldDefs,
+    autoOpen: false,
     classButtonSize: "cButtonMiddle",
     fieldDefinitions:  [
         {
@@ -840,14 +531,6 @@ var Df_category = new DataForm( {
             field: "recordPointer",
             baseClass: "cButtonMiddle",
         },
-/*        
-        {
-            field: "id",
-            label: "Id",
-            type: "input_number",
-
-        },
-*/
         {
             field: "name",
             label: "Name",
@@ -867,7 +550,6 @@ var Df_category = new DataForm( {
             valid: ["not empty"],
         },
         ],
-    //optionLists: listOptions,
     countPerPage: 6,
     currentPage: 0,
     countRecords: undefined,

@@ -24,11 +24,17 @@ class CalendarEvent {
         $s = $pdo -> query( $q );
         $r_partUser = $s -> fetchAll( PDO::FETCH_ASSOC );
         $r_partUser = assocArrToFlat( $r_partUser, "user_id", ",", false );
-        $userForRole = array_diff( $userForRole, $r_partUser );
+        if( count( $userForRole ) !== 0 ) {
+            $userForRole = array_diff( $userForRole, $r_partUser );    
+        }
         $return -> userForRole = implode( ",", $userForRole );
         $return -> userForPart = implode( ",", $r_partUser );
-        $return -> userAll = implode( ",", $userForRole ) . "," . $return -> userForPart;
-        if( $return -> userAll = "," ) $return -> userAll = "";       
+        if( count( $userForRole ) > 0 ) {
+            $return -> userAll = implode( ",", $userForRole ) . "," . $return -> userForPart;
+        } else {
+            $return -> userAll = $return -> userForPart;
+        }
+        if( $return -> userAll == "," ) $return -> userAll = "";       
         return $return;
     }    
     public function getEventForId( $pdo, $id ) {
@@ -73,7 +79,7 @@ class CalendarEvent {
 
     }
     public function getEventsForView( $pdo, $startDate, $endDate, $userId ) {
-        $query = "SELECT * FROM event where start_date >= '$startDate' and end_date < '$endDate'";
+        $query = "SELECT * FROM event where start_date >= '$startDate' and end_date <= '$endDate'";
         $stm = $pdo -> query( $query );
         $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
         $events = [];
@@ -122,6 +128,7 @@ class CalendarEvent {
                 $exPro -> participateAs = 0;
                 
             }
+            $exPro -> appendixNames = $result[$i]["appendix_names"];
             $exPro -> appendix = $this -> getAppendixForEvent( $exPro -> id );
             $ev -> extendedProps = $exPro;
             $events[] = $ev;
@@ -192,7 +199,7 @@ class CalendarEvent {
         $result -> title = $r[0]["title"];
         return $result;
     }  
-    public function setParticipate( $pdo, $id, $userId, $participate, $participateAs, $remindMe, $countPart ) {
+    public function setParticipate( $pdo, $id, $userId, $participate, $participateAs, $remindMe, $countPart, $elId ) {
         $return = new \stdClass();
         $return -> success = true;
         try {
@@ -231,7 +238,7 @@ class CalendarEvent {
                 $content = "Der Nutzer " . $r_user[0]["fullname"] . " hat für Termin ´" . $r_event[0]["title"] . "´ vom " . getGermanDateFromMysql( $r_event[0]["start_date"], false ) . " um " . $r_event[0]["start_time"] . " Uhr abgesagt.";
             }
             $pdo -> query( $q );
-            $iu -> sendUserInfo( $title, $title, $content, $content );
+            if( $elId === "participate" ) $iu -> sendUserInfo( $title, $title, $content, $content );
         } catch ( Exception $e ) {
                 $return -> success = false;    
                 $return -> message = "Beim Löschen der Teilnahme ist folgender Fehler aufgetreten:" . $e -> getMessage();
@@ -316,433 +323,28 @@ class CalendarEvent {
         }
         return $return;
     }
-    /* end CalEv */
-    public function getMaxGroupId( $pdo ) {
-        $query = "SELECT MAX(group_id) AS max_group_id FROM event";
-        $stm = $pdo -> query( $query );
-        $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        return intval( $result[0]["max_group_id"] );        
-    }
-    public function getCountEvents( $pdo, $start, $end ) {
-    
-    }
-    public function requestEvent( $pdo, $evId, $content ) {
-        $return = new \stdClass();
-        $return -> success = true;
-        try {
-            $q = "select title, start_date, creator from event where id = $evId";
-            $s = $pdo -> query( $q );
-            $r = $s -> fetchAll( PDO::FETCH_ASSOC );
-            $title = $_SESSION["firstname"] . " " . $_SESSION["lastname"] . " hat eine Anfrage zum Termin „" . $r[0]["title"] . "” am " . getGermanDateFromMysql( $r[0]["start_date"] );
-            require_once( "classes/InformUser.php" );
-            $iu = new \InformUser( $pdo, "email", 27, 0, 0, $r[0]["creator"]);
-            $message = $_SESSION["firstname"] . " " . $_SESSION["lastname"] . " <a href='mailto:" . $_SESSION["email"] . "'>" . $_SESSION["email"] . "</a> hat eine Anfrage zum Termin „" . $r[0]["title"] . "” " . getGermanDateFromMysql( $r[0]["start_date"] ) . " <a href='" . $_SESSION["email"] . "'>" . $_SESSION["email"] . "</a><br>";
-            $content = $message . $content;
-            $iu -> sendUserInfo( $title, $title, $content, $content );
-            $return -> success = true;  
-            $return -> message = "Die Teminanfrage wurde erfolglreich übemittelt.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Löschen des Termins ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;
-    
-    }
-    public function deleteEvent( $pdo, $event_id, $message_behavior ) {
-        require_once( "functions.php" );
-        $return = new \stdClass();
-        $return -> success = true;
-        try {
-            $query = "SELECT * FROM event WHERE id = " . $event_id;
-            $stm = $pdo -> query( $query );
-            $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            $evTitle = "„" . $result[0]["title"] . "”";
-            $dateTime = $result[0]["start_date"] . " " . $result[0]["start_time"];
-            $innerUrl = $result[0]["inner_url"];
-            if( $result[0]["inner_url"] != "" && file_exists( "../../" . $innerUrl ) ) {
-                unlink( "../../" . $innerUrl );
-            }
-            $query = "SELECT * FROM event_participate WHERE event_id = " . $event_id;
-            $stm = $pdo -> query( $query );
-            $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            for( $i = 0; $i < count( $result ); $i++ ) {
-                $query_user = "SELECT firstname, lastname, email, opt_in FROM user WHERE id = " . $result[$i]["user_id"];
-                $stm = $pdo -> query( $query_user );
-                $result_user = $stm -> fetchAll(PDO::FETCH_ASSOC);
-                informUserDeleteEvent( $pdo, $evTitle,  $dateTime, $result[0]["user_id"], $result_user[0]["firstname"], $result_user[0]["lastname"], $result_user[0]["email"], $result_user[0]["opt_in"], $message_behavior );
-            }
-            $query = "DELETE FROM event WHERE id = $event_id";
-            $pdo -> query( $query );
-            $return -> message = "Der Termin wurde erfolgreich gelöscht. ";
-            $query = "DELETE FROM event_participate WHERE event_id = $event_id";
-            $pdo -> query( $query );
-            $return -> message .= "Die Teilnehmer des Termins wurden erfolgreich benachrichtigt.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Löschen des Termins ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;
-    }
-    public function deleteSerieEvent( $pdo, $event_id, $group_id, $message_behavior ) {
-        $return = new \stdClass();
-        $return -> success = true;
-        try {
-            $query_event = "SELECT * FROM event WHERE group_id = $group_id and id >=$event_id";
-            $stm = $pdo -> query( $query_event );
-            $result_event = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            for( $i = 0; $i < count( $result_event ) ; $i++ ) {
-                $evTitle = "„" . $result_event[$i]["title"] . "”";
-                $dateTime = $result_event[$i]["start_date"] . " " . $result_event[$i]["start_time"]; 
-                $query_user = "SELECT user.id, firstname, lastname, email, opt_in FROM user, event_participate WHERE event_participate.user_id = user.id AND  event_participate.event_id = " . $result_event[$i]["id"];
-                $stm = $pdo -> query( $query_user );
-                $result_user = $stm -> fetchAll(PDO::FETCH_ASSOC);
-                for( $j = 0; $j < count( $result_user ); $j++ ) {
-                    require_once( "functions.php" );
-                    informUserDeleteEvent( $pdo, $evTitle,  $dateTime, $result_user[$j]["id"], $result_user[$j]["firstname"], $result_user[$j]["lastname"], $result_user[$j]["email"], $result_user[$j]["opt_in"], $message_behavior );                    
-                }
-            }
-            $query = "DELETE FROM event WHERE group_id = $group_id";
-            $pdo -> query( $query );
-            $return -> message = "Der Termins wurde erfolgreich gelöscht. ";
-            $query = "DELETE FROM event_participate WHERE event_id = $event_id";
-            $pdo -> query( $query );
-            $return -> message .= "Die Teilnehmer des Termins wurden erfolgreich gelöscht.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Löschen des Termins ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;
-    }
-    
-    public function getStartEnd( $pdo, $date, $initialView = "" ) {
-        $return = new \stdClass();
-        $tmpDate = explode( "-", $date );
-        switch( $initialView ) {
-            case "timeGridWeek":
-                $query_from = "SELECT DATE_ADD('" . $date . "', INTERVAL - 7 DAY) as from_date";
-                $query_to = "SELECT DATE_ADD('" . $date . "', INTERVAL + 7 DAY) as to_date";
-            break;
-            case "timeGridDay":
-                $query_from = "SELECT DATE_ADD('" . $date . "', INTERVAL - 1 DAY) as from_date";
-                $query_to = "SELECT DATE_ADD('" . $date . "', INTERVAL + 1 DAY) as to_date";
-            break;
-            default:
-                $query_from = "SELECT DATE_ADD('" . $date . "', INTERVAL - 50 DAY) as from_date";
-                $query_to = "SELECT DATE_ADD('" . $date . "', INTERVAL + 50 DAY) as to_date";            
-            break;
-        }
-        $stm = $pdo -> query( $query_from );
-        $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        $return -> from_date = $result[0]["from_date"];    
-        $stm = $pdo -> query( $query_to );
-        $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        $return -> to_date = $result[0]["to_date"];
-        return $return;
-    }
-    public function saveFormat( $pdo, $id, $name, $background, $font ){
-        $return = new \stdClass();
-        $query = "UPDATE `event_format` SET `name` = '$name',`bckg_color` = '$background', 
-                    `font` = '$font' WHERE `event_format`.`id` = $id";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;    
-            $return -> message = "Das Format wurde erfolgreich gespeichert.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Speichern des Formates ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;    
-    }
-    public function newFormat( $pdo, $name, $background, $font ){
-        $return = new \stdClass();
-        $query = "INSERT INTO `event_format` (`name`, `bckg_color`, `font`) VALUES ('$name', '$background', '$font')";
-        try {
-            $pdo->query( $query );      
-            $return -> newId = $pdo->lastInsertId();    
-            $return -> success = true;    
-            $return -> message = "Das Format wurde erfolgreich angelegt.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Anlegen des Formates ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;    
-    }
-    public function deleteFormat( $pdo, $id ){
-        $return = new \stdClass();
-        $query = "DELETE FROM `event_format` WHERE id = $id";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;    
-            $return -> message = "Das Format wurde erfolgreich gelöscht.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Löschen des Formates ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;    
-    }
-    public function getPlaces( $pdo ) {
-        $return = new \stdClass();
-        try {
-            $query = "SELECT * FROM `event_place`";
-            $stm = $pdo -> query( $query );
-            $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            $return -> data = $result;
-            $return -> success = true;    
-            $return -> message = "Die Orte wurden erfolgreich gelesen.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Lesen der Orte ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;
-    }
-    public function savePlace( $pdo, $id, $place ){
-        $return = new \stdClass();
-        $query = "UPDATE event_place SET place = '$place' WHERE id = $id ";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;    
-            $return -> message = "Der Ort wurde erfolgreich gespeichert.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Speichern des Ortes ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;    
-    }
-    public function newPlace( $pdo, $place ){
-        $return = new \stdClass();
-        $query = "INSERT INTO `event_place` (`place`) VALUES ('$place')";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;
-            $return -> newId = $pdo->lastInsertId();    
-            $return -> message = "Der Ort wurde erfolgreich angelegt.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Anlegen des Ortes ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;    
-    }
-    public function deletePlace( $pdo, $id ){
-        $return = new \stdClass();
-        $query = "DELETE FROM `event_place` WHERE id = $id";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;    
-            $return -> message = "Der Ort wurde erfolgreich gelöscht.";
-        } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Löschen des Ortes ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;    
-    }
-    public function getEvents( $pdo, $dates, $whereClausel = "" ) {
-        $return = new \stdClass();
-        try {
-            if( !isset( $dates  -> to_date ) ) {
-                $query = "SELECT * FROM event WHERE start_date >= '" . $dates -> from_date . "' $whereClausel";
-            } else {
-                $query = "SELECT * FROM event WHERE start_date >= '" . $dates -> from_date . "' AND start_date <'" . $dates -> to_date . "' AND end_date <'" . $dates -> to_date . "' $whereClausel";
-            }
-            $stm = $pdo -> query( $query );
-            $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            $return -> data = $result;
-            $return -> success = true;    
-            $return -> message = "Die Termine wurden erfolgreich gelesen.";
-        } catch ( Exception $e ) {
-            $return -> success = false;    
-            $return -> message = "Beim Lesen der Termine ist folgender Fehler aufgetreten:" . $e -> getMessage();
-        }
-        return $return;
-    }
-    public function buildEvent( $dbo, $data ) {
-        $return = new \stdClass();
-        $query = "SELECT remind_me, role_id, count_part FROM event_participate WHERE event_id = " . $data["id"] . " AND user_id = " . $_SESSION["user_id"];
-        $stm = $dbo -> query( $query );
-        $result_participate = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        if( count( $result_participate ) == 0 ) {
-            $participate = 0;
-            $remind_me = 0;
-            $participateAs = 0;
-            $count_part = 1;
-        } else {
-            $participate = 1;
-            $remind_me = $result_participate[0]["remind_me"];
-            $participateAs = $result_participate[0]["role_id"];
-            $count_part = $result_participate[0]["count_part"];
-        }
-        $return -> string = "{\n";
-        $return -> string .= "id: " . $data["id"] . ",\n";
-        $return -> string .= "eventId: " . $data["id"] . ",\n";
-        if( $data["group_id"] != 0 ) {
-            $return -> string .= "group_id: " . $data["group_id"] . ",\n";
-        }
-        if( $data["group_id"] != 0 ) {
-            $return -> string .= "groupId: " . $data["group_id"] . ",\n";
-        }
-        $return -> string .= "title: '" . $data["title"] . "',\n";
-        $return -> string .= "start: '" . $data["start_date"];
-        if( $data["start_time"] != "00:00:00" ) {
-            $return -> string .= "T" . $data["start_time"] . "',\n"; 
-        } else {
-            $return -> string .= "',\n"; 
-        }
-        if( $data["end_date"] != "0000-00-00" ) {
-            $return -> string .= "end: '"  .   $data["end_date"];
-        } else {
-            $return -> string .= "end: '"  .   $data["start_date"];
-        }
-        if( $data["end_time"] != "00:00:00" ) {
-            $return -> string .= "T" . $data["end_time"] . "',\n"; 
-        } else {
-            $return -> string .= "',\n"; 
-        }           
-        //}
-        if( $data["url"] != "" ) {
-            $return -> string .=  "url: '" . $data["url"] . "',\n";
-        }
-        if( $data["inner_url"] != "" ) {
-            $return -> string .=  "innerUrl: '" . $data["inner_url"] . "',\n";
-        }
-        if( $data["inner_url_text"] != "" ) {
-            $return -> string .=  "innerUrlText: '" . $data["inner_url_text"] . "',\n";
-        }
-        if( $data["description"] != "" ) {
-            $return -> string .=  "description: '" . $data["description"] . "',\n";
-        }
-        if( $data["notice"] != "" ) {
-            $return -> string .=  "notice: '" . $data["notice"] . "',\n";
-        } else {
-            $return -> string .=  "notice: '',\n";
-        }
-        if( $data["place"] != "" ) {
-            $return -> string .=  "place: '" . $data["place"] . "',\n";
-        }
-        /*
-        if( $data["format"] != "" ) {
-            $return -> string .=  "format: '" . $data["format"] . "',\n";
-        }
-        */
-        if( $data["class"] != "" ) {
-            $return -> string .=  "className: '" . $data["class"] . "',\n";
-        }
-        if( $data["creator"] != "" ) {
-            $return -> string .=  "creator: '" . $data["creator"] . "',\n";
-        }
-        $return -> string .=  "deadline: '" . $data["registration_deadline"] . "',\n";
-        $return -> string .=  "participate: '$participate',\n"; 
-        $return -> string .=  "participateAs: '$participateAs',\n"; 
-        $return -> string .=  "remindMe: '$remind_me',\n"; 
-        $return -> string .=  "durationEditable: true,\n";
-        $query = "SELECT CONCAT( lastname, ', ', firstname, '<br>' ) AS part FROM event_participate, user WHERE event_id = " . $data["id"] . " and event_participate.user_id = user.id ORDER BY lastname";
-        $stm = $dbo -> query( $query );
-        $result_participants = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        $l = count( $result_participants );
-        $i = 0;
-        $part = "";
-        while ( $i < $l ){
-            $part .= $result_participants[$i]["part"];
-            $i += 1;
-        }
-        $part = substr( $part, 0, -4 );
-        $return -> string .=  "participants: '$part',\n";
-        $return -> string .=  "countPart: '$count_part',\n";
-        
-        $return -> string = substr( $return -> string, 0, -2 );
-        $return -> string .= "},\n";
-        $return -> string = substr( $return -> string, 0, -1 );
-        
-        return $return;
-    }
-    public function saveSerieEvent( $pdo, $id, $group_id, $title, $start_date, $end_date, $start_time, 
-                    $end_time, $url, $description, $notice, $place, $format, $deadline, $inner_url = "", $inner_url_text = "" ){
-        $return = new \stdClass();
-        // get old event dates and times for inform participants if event changed
-        $query = "SELECT title, start_date, end_date, start_time, end_time, registration_deadline, description FROM event WHERE id = $id";
-        $stm = $pdo -> query( $query );
-        $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        $return -> diffStartDate = ( strtotime( $start_date ) - strtotime( $result[0]["start_date"] ) ) / (24*3600);
-        $return -> diffEndDate = ( strtotime( $end_date ) - strtotime( $result[0]["end_date"] ) ) / (24*3600);
-        $return -> diffDeadlineDate = ( strtotime( $deadline ) - strtotime( $result[0]["start_date"] ) ) / (24*3600);
-        $tmp = strtotime( $result[0]["start_time"] );
-        $tmpOldHS = explode( ":", $result[0]["start_time"] );
-        $tmpOldHS = intval( $tmpOldHS[0] );
-        $tmpNewHS = explode( ":", $start_time );
-        $tmpNewHS = intval( $tmpNewHS[0] );
-        $return -> diffStartTimeHours = $tmpOldHS - $tmpNewHS;
-        $tmpOldHS = explode( ":", $result[0]["start_time"] );
-        $tmpOldHS = intval( $tmpOldHS[1] );
-        $tmpNewHS = explode( ":", $start_time );
-        $tmpNewHS = intval( $tmpNewHS[1] );
-        $return -> diffStartTimeMinutes = $tmpOldHS - $tmpNewHS;
-        $tmpOldHS = explode( ":", $result[0]["end_time"] );
-        $tmpOldHS = intval( $tmpOldHS[0] );
-        $tmpNewHS = explode( ":", $end_time );
-        $tmpNewHS = intval( $tmpNewHS[0] );
-        $return -> diffEndTimeHours = $tmpOldHS - $tmpNewHS;
-        $tmpOldHS = explode( ":", $result[0]["end_time"] );
-        $tmpOldHS = intval( $tmpOldHS[1] );
-        $tmpNewHS = explode( ":", $end_time );
-        $tmpNewHS = intval( $tmpNewHS[1] );
-        $return -> diffEndTimeMinutes = $tmpOldHS - $tmpNewHS;
-        $oldTitle = $result[0]["title"];
-        $oldDescription = $result[0]["description"];
-        $this -> saveEvent( $pdo, $id, $group_id, $title, $start_date, $end_date, $start_time, 
-                    $end_time, $url, $description, $place, $format, $deadline, $inner_url = "", $inner_url_text = "" );
-        $query = "SELECT * FROM event WHERE start_date > now() and start_date > '$start_date' and group_id = $group_id and id <> $id";
-        $stm = $pdo -> query( $query );
-        $result_serie = $stm -> fetchAll(PDO::FETCH_ASSOC);
-        $l = count( $result_serie );
-        $i = 0;
-        while ( $i < $l ){
-            $date = new DateTime($result_serie[$i]["start_date"]);
-            if( $return -> diffStartDate < 0 ) {
-                $date->modify( "-" . ( $return -> diffStartDate * -1 ) . " day");    
-            } else {
-                $date->modify( "+" . $return -> diffStartDate . " day");    
-            }
-            $result_serie[$i]["start_date"] = $date->format('Y-m-d');
-            $date = new DateTime($result_serie[$i]["end_date"]);
-            if( $return -> diffEndDate < 0 ) {
-                $date->modify( "-" . ( $return -> diffEndDate * -1 ) . " day");    
-            } else {
-                $date->modify( "+" . $return -> diffEndDate . " day");    
-            }
-            $result_serie[$i]["end_date"] = $date->format('Y-m-d');
-            $date = new DateTime($result_serie[$i]["start_date"]);
-            if( $deadline != "" ) {
-                if( $return -> diffDeadlineDate < 0 ) {
-                    $date->modify( "-" . ( $return -> diffDeadlineDate * -1 ) . " day");    
-                } else {
-                    $date->modify( "+" . $return -> diffDeadlineDate . " day");    
-                }
-                $result_serie[$i]["registration_deadline"] = $date->format('Y-m-d');                
-            } else {
-                $result_serie[$i]["registration_deadline"] = "";
-            }
-            try {
-                $this -> saveEvent( $pdo, $result_serie[$i]["id"], $group_id, $title, $result_serie[$i]["start_date"], $result_serie[$i]["end_date"], $start_time, $end_time, $url, $description, $notice, $place, $format, $result_serie[$i]["registration_deadline"], $inner_url = "", $inner_url_text = "" );
-            } catch ( Exception $e ) {
-                $return -> success = false;    
-                $return -> message = "Beim Speichern des Termins ist folgender Fehler aufgetreten:" . $e -> getMessage();
-                return $return;
-            }
-            $i += 1;
-        } 
-        $return -> success = true;    
-        $return -> message = "Das Speichern der Terminserie war erfolgreich. Die Teilnehmer wurden erfolgreich informiert.";       
-        return $return; 
-    }    
-    public function newEvent( $pdo, $group_id, $title, $start_date, $end_date, $start_time, $end_time, $url, $description, $notice, $repeat, $repeat_to, $place, $format, $deadline, $inner_url = "", $inner_url_text = "", $creator = 0 ){
+    public function newEvent( $pdo, $group_id, $title, $start_date, $end_date, $start_time, $end_time, $url, $description, $notice, $repeat, $repeat_to, $place, $format, $deadline, $inner_url, $inner_url_text, $creator, $appendixNames ){
         $return = new \stdClass();
         if( $repeat != "" && $repeat != "0" ) {
             $group_id = $this -> getMaxGroupId( $pdo ) + 1;
         }
         $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-        `end_date`, `end_time`, `url`, `description`, `notice`, `place`, `class`, `registration_deadline`, `inner_url`, `inner_url_text`, `creator` ) VALUES ($group_id, '$title', 
-        '$start_date', '$start_time', '$end_date', '$end_time', '$url', '$description', '$notice', '$place', '$format', '$deadline', '$inner_url', '$inner_url_text', $creator );";
+        `end_date`, `end_time`, `url`, `description`, `notice`, `place`, `category`, `registration_deadline`, `inner_url`, `inner_url_text`, `creator`, `appendix_names` ) VALUES ($group_id, '$title', 
+        '$start_date', '$start_time', '$end_date', '$end_time', '$url', '$description', '$notice', '$place', '$format', '$deadline', '$inner_url', '$inner_url_text', $creator, '$appendixNames' );";
         try {
             $pdo->query( $query );
             $return -> lastEventId = $pdo -> lastInsertId();
+            $files = glob( "../cal/cal_new_" . $_SESSION["user_id"] . "*.*" );
+            $l = count( $files );
+            $i = 0;
+            $appendixNames = "";
+            while( $i < $l ) {
+                rename( $files[$i], "../cal/cal_ev_" . $return -> lastEventId . "_$i." . getFileExt( $files[$i] ) );
+                $i += 1;
+            }
+            $files = glob( "../cal/cal_ev_" . $return -> lastEventId . "*.*" );
+            
+/*
             if( $inner_url != "" ) {
                 $tmp = explode( "/", $inner_url );
                 $fname = $tmp[ count( $tmp ) - 1 ];
@@ -751,10 +353,10 @@ class CalendarEvent {
                     $ext = $tmpExt[ count( $tmpExt) - 1 ];
                     $newFileName = "cal_ev_appendix_edit_" . $return -> lastEventId . "_" . time() . "." . $ext;
                     rename( "../documents/$fname", "../documents/$newFileName" );
-                    $query = "UPDATE event set inner_url = 'library/documents/$newFileName' WHERE id = " . $return -> lastEventId;
+                    $query = "UPDATE event set appendix_names = 'library/documents/$newFileName' WHERE id = " . $return -> lastEventId;
                     $pdo->query( $query );
                 }                
-            }
+*/
             $return -> success = true;    
             $return -> message = "Der Termin wurde erfolgreich gespeichert.";
         } catch ( Exception $e ) {
@@ -782,10 +384,17 @@ class CalendarEvent {
                             $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
                             $repeat_date = $result[0]["repeat_date"];
                             $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                            `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title',
-                            DATE_ADD( '" . $start_date . "', INTERVAL " . $i . " DAY ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . $i . " DAY ), '$end_time', '$url', '$description', 
-                            '$place', '$format');";
+                            `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, '$title',
+                            DATE_ADD( '" . $start_date . "', INTERVAL " . $i . " DAY ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . $i . " DAY ), '$end_time', '$url', '$description', '$place', '$format');";
                             $pdo->query( $query );
+                            $eventId = $pdo -> lastInsertId();
+                            $m = count( $files );
+                            $j = 0;
+                            while( $j < $m ) {
+                                copy( $files[$j], "../cal/cal_ev_" . $eventId . "_$j." . getFileExt( $files[$j] ) );
+                                $i += 1;
+                            }
+                            
                         }
             break;
             case "5":
@@ -802,8 +411,7 @@ class CalendarEvent {
                             } else {
                             $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
                             `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title',
-                            DATE_ADD( '" . $start_date . "', INTERVAL " . $i . " DAY ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . $i . " DAY ), '$end_time', '$url', '$description', 
-                            '$place', '$format');";
+                            DATE_ADD( '" . $start_date . "', INTERVAL " . $i . " DAY ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . $i . " DAY ), '$end_time', '$url', '$description', '$place', '$format');";
                                 $pdo->query( $query );                                
                             }
                             
@@ -817,7 +425,7 @@ class CalendarEvent {
                         $date_diff++;
                         for( $i = 1; $i < $date_diff; $i++ ) {
                                 $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                                `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, 
+                                `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, 
                                 '$title', DATE_ADD( '" . $start_date . "', INTERVAL " . $i . " WEEK ), 
                                 '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . $i . " WEEK ), 
                                 '$end_time', '$url', '$description', '$place', '$format');";
@@ -832,7 +440,7 @@ class CalendarEvent {
                         $date_diff++;
                         for( $i = 1; $i < $date_diff; $i++ ) {
                                 $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                                `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title',
+                                `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, '$title',
                                 DATE_ADD( '" . $start_date . "', INTERVAL " . ( $i * 2 ) . " WEEK ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . ( $i * 2 ) . " WEEK ), '$end_time', '$url', '$description', '$place', '$format');";
                                 $pdo->query( $query );
                         }                                
@@ -845,7 +453,7 @@ class CalendarEvent {
                         $date_diff++;
                         for( $i = 1; $i < $date_diff; $i++ ) {
                                 $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                                `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title',
+                                `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, '$title',
                                 DATE_ADD( '" . $start_date . "', INTERVAL " . ( $i * 4 ) . " WEEK ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . ( $i * 4 ) . " WEEK ), '$end_time', '$url', '$description', '$place', '$format');";
                                 $pdo->query( $query );
                         }                                
@@ -858,7 +466,7 @@ class CalendarEvent {
                         $date_diff++;
                         for( $i = 1; $i < $date_diff; $i++ ) {
                                 $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                                `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title',
+                                `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, '$title',
                                 DATE_ADD( '" . $start_date . "', INTERVAL " . $i . " MONTH ), '$start_time', DATE_ADD( '" . $end_date . "', INTERVAL " . $i . " MONTH ), '$end_time', '$url', '$description', '$place', '$format');";
                                 $pdo->query( $query );
                         }                                
@@ -873,14 +481,13 @@ class CalendarEvent {
                         $i = 0;
                         while( $i - $l ) {
                             $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                                `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title', '" . $dA[$i] . "'
-                                , '$start_time', '" . date("Y-m-d", strtotime( $dA[$i] ) + $dataDiff ) . "', '$end_time', '$url', '$description', 
-                                '$place', '$format');";
+                                `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, '$title', '" . $dA[$i] . "'
+                                , '$start_time', '" . date("Y-m-d", strtotime( $dA[$i] ) + $dataDiff ) . "', '$end_time', '$url', '$description', '$place', '$format');";
                             $pdo->query( $query );
                             $i++;
                         }
             break;
-            case "3":   // 1./3./5. Wochentag des Monats
+            case "3":   // 2./4. Wochentag des Monats
                         $date_array_1 = getNthOfMonth( $start_date, $repeat_to, intval( date("w", strtotime( $start_date ) ) ), 2 );
                         $date_array_2 = getNthOfMonth( $start_date, $repeat_to, intval( date("w", strtotime( $start_date ) ) ), 4 );
                         $dA = array_merge( $date_array_1, $date_array_2 );
@@ -889,100 +496,12 @@ class CalendarEvent {
                         $i = 0;
                         while( $i - $l ) {
                             $query = "INSERT INTO `event` (`group_id`, `title`, `start_date`, `start_time`,
-                                `end_date`, `end_time`, `url`, `description`, `place`, `class`) VALUES ($group_id, '$title', '" . $dA[$i] . "'
-                                , '$start_time', '" . date("Y-m-d", strtotime( $dA[$i] ) + $dataDiff ) . "', '$end_time', '$url', '$description', 
-                                '$place', '$format');";
+                                `end_date`, `end_time`, `url`, `description`, `place`, `category`) VALUES ($group_id, '$title', '" . $dA[$i] . "'
+                                , '$start_time', '" . date("Y-m-d", strtotime( $dA[$i] ) + $dataDiff ) . "', '$end_time', '$url', '$description', '$place', '$format');";
                             $pdo->query( $query );
                             $i++;
                         }
             break;
-    }
-        return $return;
-    }
-    public function participate( $pdo, $user_id, $event_id, $message_behavior, $remindMe = "true", $informSelf = true, $participateAs = 0, $count_part = 1 ) {
-        $return = new \stdClass();
-        $settings = parse_ini_file('../../ini/settings.ini', TRUE);
-        $query = "INSERT INTO `event_participate` (`user_id`, `event_id`, `remind_me`, `role_id`, count_part) VALUES ( $user_id, $event_id, $remindMe, $participateAs, $count_part );";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;    
-            $return -> message = "Die Teilnahme wurde erfolgreich gespeichert.";
-    $q = "select * from event WHERE id = $event_id";
-    $stm = $pdo -> query( $q );
-    $result_event = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            require_once( "classes/InformUser.php" );
-            $iu = new \InformUser( $pdo, $settings["calendar"]["message_behavior"], 27, 0, 0, $result_event[0]["creator"], true );
-    $q = "SELECT CONCAT( firstname, ' ', lastname ) AS name FROM user WHERE id = " . $_SESSION["user_id"];
-    $stm = $pdo -> query( $q );
-    $result_participator = $stm -> fetchAll(PDO::FETCH_ASSOC);
-    $query = "SELECT CONCAT( firstname, ' ', lastname ) AS name FROM user, event_participate WHERE user.id = event_participate.user_id AND event_id = $event_id";
-    $stm = $pdo -> query( $query );
-    $result_otherParticipators = $stm -> fetchAll(PDO::FETCH_ASSOC);
-    if( $result_event[0]["start_time"] === "00:00:00" ) {
-        $tmpTime = strtotime( $result_event[0]["start_date"] );
-        $tmpTime = date( "d.m.Y", strtotime( $result_event[0]["start_date"] ) );
-    } else {
-        $tmpTime = strtotime( $result_event[0]["start_date"] . " " . $result_event[0]["start_time"] );
-        $tmpTime = date( "d.m.Y G:i", $tmpTime ) . " Uhr";
-    }
-    $content = "<p>Der Nutzer „" . $result_participator[0]["name"] . "” hat dem Termin „" . $result_event[0]["title"] . "” für den $tmpTime am " . date( "d.m.Y", time() ) . " zugesagt.</p>";
-    $content .= "<p>Es nehmen nun teil:</p>";
-    $content .= "<ul>";
-    for( $i = 0; $i < count( $result_otherParticipators ); $i++ ) {
-        $content .= "<li>" . $result_otherParticipators[$i]["name"] . "</li>";                        
-    }
-    $content .= "</ul>";
-    $iu -> sendUserInfo( "Terminteilnahme", "Terminteilnahme", $content, $content );
-    /*
-            if( $informSelf ) {
-                $result = informEventCreatorParticipate( $pdo, $result_creator[0]["id"], $event_id, $result_creator[0]["firstname"], $result_creator[0]["lastname"], $result_creator[0]["email"], $result_creator[0]["opt_in"], $message_behavior, $informSelf);    
-            }
-    */
-        } catch ( Exception $e ) {
-                $return -> success = false;
-                $return -> errorCode = $e -> getCode();
-                if( $e -> getCode() == "23000" ) {
-                    $return -> message = "Sie können nur einmal an einem Termin teilnehmen";
-                } else {
-                    $return -> message = "Beim Speichern der Teilnahme ist folgender Fehler aufgetreten:" . $e -> getMessage();                    
-                }   
-        }
-        return $return;
-    }
-    public function deleteParticipation( $pdo, $user_id, $event_id, $message_behavior ) {
-        $return = new \stdClass();
-        $settings = parse_ini_file('../../ini/settings.ini', TRUE);
-        $query = "DELETE FROM `event_participate` WHERE user_id = $user_id AND event_id = $event_id";
-        try {
-            $pdo->query( $query );      
-            $return -> success = true;    
-            $return -> message = "Die Teilnahme wurde erfolgreich gelöscht.";
-            require_once( "classes/InformUser.php" );
-    $q = "select * from event WHERE id = $event_id";
-    $stm = $pdo -> query( $q );
-    $result_event = $stm -> fetchAll(PDO::FETCH_ASSOC);
-            $iu = new \InformUser( $pdo, $settings["calendar"]["message_behavior"], 27, 0, 0, $result_event[0]["creator"], true );
-    $query = "SELECT CONCAT( firstname, ' ', lastname ) AS name FROM user WHERE id = " . $_SESSION["user_id"];
-    $stm = $pdo -> query( $query );
-    $result_participator = $stm -> fetchAll(PDO::FETCH_ASSOC);
-    if( $result_event[0]["start_time"] === "00:00:00" ) {
-        $tmpTime = strtotime( $result_event[0]["start_date"] );
-        $tmpTime = date( "d.m.Y", strtotime( $result_event[0]["start_date"] ) );
-    } else {
-        $tmpTime = strtotime( $result_event[0]["start_date"] . " " . $result_event[0]["start_time"] );
-        $tmpTime = date( "d.m.Y G:i", $tmpTime ) . " Uhr";
-    }
-    $content = "<p>Der Nutzer „" . $result_participator[0]["name"] . "” hat dem Termin „" . $result_event[0]["title"] . "” für den $tmpTime am " . date( "d.m.Y", time() ) . " abgesagt.</p>";
-    $content .= "<p>Es nehmen nun teil:</p>";
-    $iu -> sendUserInfo( "Terminabsage", "Terminabsage", $content, $content );
-/*
-            require_once( "functions.php" );
-            $result = informEventCreatorDeteteParticipate( $pdo, $result_creator[0]["id"], $event_id, $result_creator[0]["firstname"], $result_creator[0]["lastname"], $result_creator[0]["email"], $result_creator[0]["opt_in"], $message_behavior);
-*/
-        } catch ( Exception $e ) {
-                $return -> success = false;
-                $return -> message = "Beim Löschen der Teilnahme ist folgender Fehler aufgetreten:" . $e -> getMessage();                    
-                   
         }
         return $return;
     }
@@ -1014,37 +533,68 @@ class CalendarEvent {
         }
         return $return;
     }
-    public function buildInformUser( $pdo, $toRole, $toUser, $participants ) {
-        if( $toRole == "" ) $toRole = 0;
-        $q = "SELECT user.id FROM user, account WHERE user.id = account.user_id AND account.role_id = " . $toRole;
-        $s = $pdo -> query( $q );
-        $tmpUserForRole = $s -> fetchAll( PDO::FETCH_ASSOC );
-        $userForRole = [];
-        $l = count( $tmpUserForRole );
-        $i = 0;
-        while( $i < $l ) {
-            array_push( $userForRole, $tmpUserForRole[ $i ]["id"] );
-            $i += 1;
-        }
-        $tmpUser = explode( ",", $toUser );
-        $userForRole = array_unique( array_merge( $userForRole, $tmpUser ) );
-        $informUsers = array_values( array_diff( $userForRole, $participants ) );
-        $a = 0;
-        return $informUsers;
+    public function getMaxGroupId( $pdo ) {
+        $query = "SELECT MAX(group_id) AS max_group_id FROM event";
+        $stm = $pdo -> query( $query );
+        $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+        return intval( $result[0]["max_group_id"] );        
     }
-    public function setCountParticipants( $pdo, $user_id, $event_id, $count ) {
+    public function changeDateTime( $pdo, $eventId, $startDate, $startTime, $endDate, $endTime ) {
         $return = new \stdClass();
-        try{
-            $query = "UPDATE `event_participate` SET `count_part` = $count WHERE event_id = $event_id AND user_id = $user_id";
-            $pdo -> query( $query );
-            $return -> success = true;    
-            $return -> message = "Die Anzahl der Teilnahmer wurden erfolgreich gespeichert.";
-            
-        } catch (Exception $e ) {
-            $return -> success = false;    
-            $return -> message = "Beim Löschen der Anzahl der Teilnahmer ist folgender Fehler aufgetreten: " . $e -> getMessage();            
+        try {
+            $query = "UPDATE `event` SET `start_date` = '$startDate', `start_time` = '$startTime', `end_date` = '$endDate', `end_time` = '$endTime' WHERE `event`.`id` = $eventId";
+            $stm = $pdo -> query( $query );
+            $result = $stm -> fetchAll(PDO::FETCH_ASSOC);
+            $return -> success = true;
+            $return -> message = "Der Termin wurde erfolgreich verschoben";
+        } catch ( Exception $e ) {
+                $return -> success = false;
+                $return -> message = "Bei der Änderung von Termindatum/Terminzeit ist folgender Fehler aufgetreten:" . $e -> getMessage();   
         }
         return $return;
     }
+    public function removeUserFromEvent( $pdo, $eventId, $userId ) {
+        $return = new \stdClass();
+        try {
+            $q = "select title, start_date from event where id = $eventId";
+            $s = $pdo -> query( $q );
+            $r_event = $s -> fetchAll( PDO::FETCH_ASSOC );
+            $q = "select concat( firstname, ' ', lastname ) as name from user where id = " . $_SESSION["user_id"];
+            $s = $pdo -> query( $q );
+            $r_user = $s -> fetchAll( PDO::FETCH_ASSOC );
+            $content = "Deine Teilnahme am Termin `" . $r_event[0]["title"] . "` am " . getGermanDateFromMysql( $r_event[0]["start_date"] ) . " wurde durch " . $r_user[0]["name"] . " gelöscht. Bitte Aktualisiere Deine Termin-App.";
+            require_once( "classes/InformUser.php" );
+            $iu = new \InformUser( $pdo, "both", 27, 0, 0, $userId );
+            $iu -> sendUserInfo( "Teilnahmelöschung", "Teilnahmelöschung", $content, $content );
+            $return -> success = true;
+            $return -> message = "Der Nutzer wurde erfolgreich gelösch.";
+        } catch ( Exception $e ) {
+                $return -> success = false;
+                $return -> message = "Beim Löschen des Nutzers ist folgender Fehler aufgetreten:" . $e -> getMessage();   
+        }
+        return $return;
+    }
+    public function addUserToEvent( $pdo, $partId ) {
+        $return = new \stdClass();
+        try {
+            $q = "select title, start_date, event_participate.user_id from event, event_participate where event_participate.event_id =  event.id and event_participate.id = $partId";
+            $s = $pdo -> query( $q );
+            $r_event = $s -> fetchAll( PDO::FETCH_ASSOC );
+            $q = "select concat( firstname, ' ', lastname ) as name from user where id = " . $_SESSION["user_id"];
+            $s = $pdo -> query( $q );
+            $r_user = $s -> fetchAll( PDO::FETCH_ASSOC );
+            $content = "Du wurdest von " . $r_user[0]["name"] . " zum Termin `" . $r_event[0]["title"] . "` am " . getGermanDateFromMysql( $r_event[0]["start_date"] ) . " als Teilnehmer hinzugefügt. Bitte Aktualisiere Deine Termin-App.";
+            require_once( "classes/InformUser.php" );
+            $iu = new \InformUser( $pdo, "both", 27, 0, 0, $r_event[0]["user_id"] );
+            $iu -> sendUserInfo( "Teilnahmehinzufügung", "Teilnahmehinzufügung", $content, $content );
+            $return -> success = true;
+            $return -> message = "Der Nutzer wurde erfolgreich hinzugefügt.";
+        } catch ( Exception $e ) {
+                $return -> success = false;
+                $return -> message = "Beim Hinzufügen des Nutzers ist folgender Fehler aufgetreten:" . $e -> getMessage();   
+        }
+        return $return;
+    }
+    /* end CalEv */
 }  
 ?>

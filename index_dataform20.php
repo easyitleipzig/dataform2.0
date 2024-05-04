@@ -9,8 +9,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="stylesheet prefetch" href="library/css/DataForm20.css">
-
 </head>
 
 <body>
@@ -198,6 +196,13 @@ let fields = [
             addAttr: "data-clickable", // clickable opens the textarea dialog
             addClasses: "cVal_Textarea",
         },
+        {
+            field: "val_div",
+            label: "val_div",
+            type: "div",
+            addAttr: "contenteditable", // clickable opens the textarea dialog
+            addClasses: "cVal_Div",
+        },
        {
             field: "button_addKey",
             type: "button",
@@ -228,7 +233,7 @@ var Df = new DataForm( {
     dVar: "Df", 
     id: "#Df", 
     table: "test_table", 
-    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file,val_date,val_textarea",
+    fields: "id,val_varchar,val_dec,val_int,val_select,val_select_multi,val_img,val_checkbox,val_stars,val_link,val_file,val_date,val_textarea,val_div",
     addPraefix: "df1_",
     formType: "html", 
     validOnSave: true, 

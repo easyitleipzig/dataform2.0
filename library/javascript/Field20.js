@@ -292,6 +292,9 @@ class Field {                    // class for DataForm2.0
                         return nj( this.opt.id ).htm() + "|" + nj( this.opt.id ).atr( "target" ) + "|" + nj( this.opt.id ).atr( "href" );
                     }
                     break;
+                case "div":
+                    return nj( this.opt.id ).htm();
+                    break;
                 default:
                     return nj( this.opt.id ).v();    
                     break;
@@ -528,6 +531,27 @@ class Field {                    // class for DataForm2.0
                 if( typeof this.opt.value === "undefined" ) this.opt.value = "";
                 fieldHTML += this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</button>';
+                this.tmpEl = htmlToElement( fieldHTML );
+                //this.setActions( this.tmpEl );
+                fieldElements.push( this.tmpEl  )
+            break;
+            case "div":
+                if( typeof this.opt.index !== "undefined" ) {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<div id="' + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';    
+                    } else {
+                        fieldHTML += '<div id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '_' + this.opt.index + '" data-dvar="' + this.opt.dVar + '" title="' + this.opt.title + '"';
+                    }                    
+                } else {
+                    if( this.opt.addPraefix === "" ) {
+                        fieldHTML += '<div id="' + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';    
+                    } else {
+                        fieldHTML += '<div id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '"  title="' + this.opt.title + '"';
+                    }
+                }
+                if( typeof this.opt.value === "undefined" ) this.opt.value = "";
+                fieldHTML += this.opt.addAttr;
+                fieldHTML += ' tabindex=0 class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '">' + this.opt.value + '</div>';
                 this.tmpEl = htmlToElement( fieldHTML );
                 //this.setActions( this.tmpEl );
                 fieldElements.push( this.tmpEl  )
