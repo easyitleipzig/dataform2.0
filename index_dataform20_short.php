@@ -150,7 +150,7 @@ let fields = [
             label: "val_img",
             type: "img",
             addClasses: "cVal_img",
-            widthDiv: true,
+            withDiv: true,
         },
         {
             field: "val_checkbox",

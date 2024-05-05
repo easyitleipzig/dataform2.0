@@ -145,12 +145,14 @@ class DataForm {                    // class for DataForm2.0
         if( this.opt.searchArray.length > 0 ) {
             this.showSearchHeadline();
         }
+/*
         data = {};
         data.command = "getFielddefinitions";
         data.dVar = this.opt.dVar;
         data.table = this.opt.table;
         data.fields = this.opt.fields;
         //nj().fetchPostNew("library/php/ajax_dataform20.php", data, this.evaluateDF);
+*/
         this.divUpload = new DialogDR( { 
             dVar: param.dVar + ".divUpload", 
             title: "Datei laden", 
@@ -257,6 +259,7 @@ class DataForm {                    // class for DataForm2.0
         nj( "#" + this.opt.dVar + "_tFUFile" ).on( "change", function( args ) {
             nj( this ).gRO().uploadFile( nj( this ).Dia() );    
         }  );
+        this.getFieldDefinitions()
     }
     evaluateDF = function ( data ) {
         // content
@@ -508,7 +511,23 @@ class DataForm {                    // class for DataForm2.0
                     nj( "#" + id ).v( targetPath + targetFileName );
                 break;
                 case "src":
+                    let img = new Image(), imSize, w, h;
+                    img.src = targetPath + targetFileName;
+                    img.onload = function( e ) {
+                        let c = this.width;    
+                    }
+                    imSize = nj().bDV( nj( "#" + id ).ds( "dvar" ) ).opt.imageSize;
+                    if( img.width / img.height >= 1 ) {
+                        w = imSize;
+                        h = "auto";
+                    } else {
+                        w = "auto";
+                        h = imSize;
+                    }                    
                     nj( "#" + id ).atr( "src", targetPath + targetFileName );
+                    nj( "#" + id ).atr( "height", h );
+                    nj( "#" + id ).atr( "width", w );
+
                 break;
             case "bckg":
                     nj( "#" + id ).sty( "background-image", "url(" + targetPath + targetFileName + ")" );
@@ -523,8 +542,7 @@ class DataForm {                    // class for DataForm2.0
         nj( "#" + df.opt.dVar + "_tFUFile" ).v( null );   
     }
     uploadFile = function( dUpload ) {
-            dMNew.show( { title: "Dateiupload", type: "wait", text: "Datei wird geladen" } );
-        console.log( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload );
+        dMNew.show( { title: "Dateiupload", type: "wait", text: "Datei wird geladen" } );
         this.resolveFileUpload( nj().els( "#" + this.opt.dVar + "_tFUFile").files, dUpload.opt.variables.id, dUpload.opt.variables.attr, dUpload.opt.variables.uploadPath );
     }
     showDfHeadline = function() {

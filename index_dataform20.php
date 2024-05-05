@@ -56,7 +56,7 @@
         $option .= '<option value="' . $r[$i]->value . '">' . $r[$i]->text . '</option>';
         $i += 1;
     }
-    print_r( "var list_salutation = '" . $option . "';\n" );
+    print_r( "var optSalutation = '" . $option . "';\n" );
     echo "let optRole = '";                        
     $query = "SELECT * FROM role";
     $stm = $db_pdo -> query( $query );
@@ -70,20 +70,6 @@
     echo "'\n";
     //var_dump($option);
    ?>
-let additionalFieldDefs = [
-    {
-        label: "test",
-    },
-    {
-
-    }
-];
-let listOptions = [
-        {
-            field: "val_varchar",
-            options: list_salutation,
-        }
-    ]
 let fields = [
         {
             type: "recordPointer",
@@ -119,6 +105,7 @@ let fields = [
             type: "input_text",
             addClasses: "cVal_varchar",
             valid: ["not empty", "is email"],
+            options: optSalutation,
         },
         {
             field: "val_int",
@@ -148,7 +135,7 @@ let fields = [
             type: "img",
             addClasses: "cVal_img",
             imageSize: 200,
-            //widthDiv: true,
+            //withDiv: true,
         },
         {
             field: "val_checkbox",
@@ -161,7 +148,7 @@ let fields = [
             label: "val_stars",
             type: "stars",
             addClasses: "cVal_stars",
-            widthDiv: true,
+            withDiv: true,
             onClick: function( event ) {
                 console.log( this );
               var rect = nj().els(this).getBoundingClientRect(); 

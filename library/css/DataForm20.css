@@ -66,3 +66,15 @@ div[class*=_val_stars_][id*=_new] {
     top: -24px;
     position: relative;
 }
+div[id*='.divEditSelect'] select {
+    width: 260px;
+    height: 290px;
+}
+div[id*='.divEditTextarea'] textarea {
+    width: 260px;
+    height: 290px;
+    resize: none;
+}
+div[contenteditable] {
+    background-color: whitesmoke;
+}

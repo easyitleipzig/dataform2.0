@@ -65,7 +65,7 @@ class Field {                    // class for DataForm2.0
                                         </datalist>
                                 */
             widthLabel:          false,
-            widthDiv:            false,
+            withDiv:            false,
             uploadPath:         "library/df/",
             onFocus:            function( args ) {
                 if( nj().els( "button[id^=" + nj( this ).gRO().opt.addPraefix + "recordPointer_].cRecPointerSelected" ).length === 1 ) {
@@ -665,7 +665,7 @@ class Field {                    // class for DataForm2.0
                 // statements_def
                 break;
         }        
-        if( this.opt.widthDiv ) {
+        if( this.opt.withDiv ) {
             el = nj().cEl( "div" );
             if( this.opt.addPraefix === "" ) {
                 el.id = 'div_' + this.opt.id.substring( 1 );    
