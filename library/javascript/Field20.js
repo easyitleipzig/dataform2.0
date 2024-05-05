@@ -594,14 +594,33 @@ class Field {                    // class for DataForm2.0
                         fieldHTML += '<img id="' + this.opt.addPraefix + "_" + this.opt.id.substring( 1 ) + '" data-dvar="' + this.opt.dVar + '" ';
                     }
                 }
-                let img = new Image(), w, h;
+                let img = new Image(), w, h, res = this.opt.id, f;
                 img.src = this.opt.value;
                 if( this.opt.value === "" ) {
                         w = "width=" + this.opt.imageSize;
                         h = "height=" + this.opt.imageSize;
                 } else {
                     img.onload = function( e ) {
-                        let c = this.width;    
+                        let c = this.width, imSize, diff;
+
+                        f = htmlToElement( fieldHTML );
+                        console.log( f.id );
+                        console.log( nj().bDV( nj( "#" + f.id ).ds( "dvar" ) ).opt.imageSize );
+                        
+                        imSize = nj().bDV( nj( "#" + f.id ).ds( "dvar" ) ).opt.imageSize
+                        if( img.width / img.height >= 1 ) {
+                            diff = ( imSize - img.height / img.width * imSize ) / 2;
+                            console.log( diff );
+                            nj( "#" + f.id ).sty("margin-left","unset");
+                            nj( "#" + f.id ).sty("margin-right","unset");
+                            nj( "#" + f.id ).sty({"margin-top":diff+"px","margin-bottom":diff+"px"})
+                        } else {
+                            diff = ( imSize - img.width / img.height * imSize ) / 2;
+                            console.log( diff );
+                            nj( "#" + f.id ).sty("margin-top","unset");
+                            nj( "#" + f.id ).sty("margin-bottom","unset");
+                            nj( "#" + f.id ).sty({"margin-left":diff+"px","margin-right":diff+"px"})
+                        }                    
                     }
                     if( img.width / img.height >= 1 ) {
                         w = "width=" + this.opt.imageSize;
@@ -609,10 +628,10 @@ class Field {                    // class for DataForm2.0
                     } else {
                         w = "width=auto";
                         h = "height=" + this.opt.imageSize;
-                    }                    
+                    }
                 }
                 fieldHTML += " " + w + " " + h + " ";
-                fieldHTML += this.opt.addAttr;
+                fieldHTML += " " + this.opt.addAttr;
                 fieldHTML += ' class="c' + uppercaseWords( this.opt.type ) + ' ' + this.opt.addClasses + '" src="' + this.opt.value + '">';
                 this.tmpEl = htmlToElement( fieldHTML );
                 //this.setActions( this.tmpEl );
@@ -673,6 +692,7 @@ class Field {                    // class for DataForm2.0
                 el.id = this.opt.addPraefix + '_div_' + this.opt.id.substring( 1 );    
             }
             nj( el ).aCl( "divField_" + this.opt.id.substring( 1 ) );
+            nj( el ).aCl( "div" + uppercaseWords( this.opt.type ) );
             l = fieldElements.length;
             i = 0;
             while ( i < l ) {

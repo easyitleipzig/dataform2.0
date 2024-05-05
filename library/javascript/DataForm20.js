@@ -503,31 +503,43 @@ class DataForm {                    // class for DataForm2.0
         console.log( /*data, targetPath, targetFileName, nj( this ).Dia(), nj( this ).Dia().opt.variables.dataform,*/ id );
             nj( this ).Dia().opt.variables.dataform.divUpload.hide();
             let opts = nj( this ).Dia().opt.variables.dataform.opt;
-            console.log( tFUTargetElementAttr, targetPath, targetFileName );
-            //console.log( nj( this ).Dia().opt.variables.dataform.opt, id );
+            console.log( targetPath + targetFileName );
             dMNew.hide();
             switch( tFUTargetElementAttr ) {
                 case "value":
                     nj( "#" + id ).v( targetPath + targetFileName );
                 break;
                 case "src":
-                    let img = new Image(), imSize, w, h;
+                    let img = new Image(), imSize, w, h, diff, el, res = "#" + id;
                     img.src = targetPath + targetFileName;
+                    el = nj().bDV( nj( "#" + id ).ds( "dvar" ) ).opt.imageSize;
                     img.onload = function( e ) {
-                        let c = this.width;    
+                        let c = this.width;
+                        console.log( nj().bDV( nj( res ).ds( "dvar" ) ).opt.imageSize );
+                        imSize = nj().bDV( nj( res ).ds( "dvar" ) ).opt.imageSize
+                        if( img.width / img.height >= 1 ) {
+                            w = imSize;
+                            h = "auto";
+                            diff = ( imSize - img.height / img.width * imSize ) / 2;
+                            console.log( diff );
+                            nj( res ).sty("margin-left","unset");
+                            nj( res ).sty("margin-right","unset");
+                            nj( res ).sty("margin-top",diff+"px");
+                            nj( res ).sty("margin-bottom",diff+"px");
+                        } else {
+                            w = "auto";
+                            h = imSize;
+                            diff = ( imSize - img.width / img.height * imSize ) / 2;
+                            console.log( diff, nj().els( res ) );
+                            nj( res ).sty("margin-top","unset");
+                            nj( res ).sty("margin-bottom","unset");
+                            nj( res ).sty("margin-left",diff+"px");
+                            nj( res ).sty("margin-right",diff+"px");
+                        }                    
+                        nj( res ).atr( "height", h );
+                        nj( res ).atr( "width", w );
                     }
-                    imSize = nj().bDV( nj( "#" + id ).ds( "dvar" ) ).opt.imageSize;
-                    if( img.width / img.height >= 1 ) {
-                        w = imSize;
-                        h = "auto";
-                    } else {
-                        w = "auto";
-                        h = imSize;
-                    }                    
                     nj( "#" + id ).atr( "src", targetPath + targetFileName );
-                    nj( "#" + id ).atr( "height", h );
-                    nj( "#" + id ).atr( "width", w );
-
                 break;
             case "bckg":
                     nj( "#" + id ).sty( "background-image", "url(" + targetPath + targetFileName + ")" );
@@ -1028,7 +1040,8 @@ class DataForm {                    // class for DataForm2.0
             }
         });
         nj( "div:has(>div.cStars)" ).on( "click", function( e ) {
-            e.stopImmediatePropagation();  
+            e.stopImmediatePropagation(); 
+            if( nj().els(this).children[0].children.length === 0 ) return; 
             var rect = nj().els(this).getBoundingClientRect(); 
             var x = event.clientX - rect.left; 
             var y = event.clientY - rect.top; 

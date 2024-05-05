@@ -80,6 +80,13 @@ class RecordSet {                    // class for DataForm2.0
                 i += 1;
             }
         }
+        nj( ".divImg" ).on( "click", function( e ) {
+            e.stopImmediatePropagation();
+            let id = this.children[0].id;
+            nj( "#" + nj( "#" + id ).gRO().opt.dVar + "_tFUFile" ).atr( "accept", ".png,.jpg");
+            nj( "#" + id ).gRO().divUpload.show({variables: {df: nj("#" + id).gRO(), id: id, attr: "src", uploadPath: nj( "#" + id ).Dia().opt.uploadPath, table: nj( "#" + id ).gRO().opt.table, field: nj( "#" + id ).Dia().opt.field } });
+
+        })
     }
     getRecordValues = function ( args ) {
         let els = nj().els( "div[id=" + this.opt.id.substring( 1 ) + "] .cField" );
